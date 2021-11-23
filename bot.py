@@ -107,6 +107,8 @@ GIFs:
 /logz
 /f
 /jabs
+/facepalm
+/hummus
 ```
 """)
 
@@ -165,7 +167,17 @@ async def SendMessage(ctx):
     
 @bot.command(name="jabs")
 async def SendMessage(ctx):
-    await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837712196173824/jabs.gif')  
+    await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837712196173824/jabs.gif')
+
+@bot.command(name="facepalm")
+async def SendMessage(ctx):
+    await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/912569604973404160/Facepalm.gif')
+
+@bot.command(name="hummus")
+async def SendMessage(ctx):
+    await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
+
+
     
     
     
@@ -185,6 +197,12 @@ async def SendMessage(ctx):
     trial = getTrial()
     await ctx.send("Veteran " + trial + " HM")
     
+
+@bot.command(name="setstat")
+async def change_playing(ctx):
+    await bot.change_presence(activity=nextcord.Game(name="Several Godslayer Progs"))
+
+
 #Non-Commmands
 
 @bot.event
