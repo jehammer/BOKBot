@@ -22,8 +22,6 @@ async def change_playing(ctx):
 
 @bot.event
 async def on_ready():
-    bot.change_presence(activity=nextcord.Game(name="Several Godslayer Progs"))
-    print("End of start")
     print(f"Logged in as: {bot.user.name}")
 
 if __name__ == '__main__':
