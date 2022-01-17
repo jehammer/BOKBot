@@ -87,5 +87,20 @@ class Things(commands.Cog, name="Fun Things"):
         """Be wary, very lewd option"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911776421473550346/interlocking.gif')
 
+    @commands.command()
+    async def bokemon(self, ctx: commands.Context):
+        """A link to a perfect song"""
+        await ctx.send('https://youtu.be/OZrs7Blmank')
+
+    @commands.command()
+    async def thepull(self, ctx: commands.Context):
+        """Drak got the thing"""
+        await ctx.send('https://youtu.be/Cnf9lRtLSYk')
+
+    @commands.command()
+    async def fisted(self, ctx: commands.Context):
+        """It happens to all of us"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
+
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))

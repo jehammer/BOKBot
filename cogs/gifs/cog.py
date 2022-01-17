@@ -84,5 +84,15 @@ class Gif(commands.Cog, name="Gifs"):
         """It's what Drak likes"""
         await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
 
+    @commands.command()
+    async def gabe(self, ctx: commands.Context):
+        """Gabe did a thing"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932432680178569276/Gabe.gif')
+
+    @commands.command()
+    async def creed(self, ctx: commands.Context):
+        """Creed did a thing"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
+
 def setup(bot: commands.Bot):
     bot.add_cog(Gif(bot))
