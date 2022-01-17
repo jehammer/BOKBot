@@ -102,5 +102,10 @@ class Things(commands.Cog, name="Fun Things"):
         """It happens to all of us"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
 
+    @commands.command()
+    async def chains(self, ctx: commands.Context):
+        """He always loses it"""
+        await ctx.send('New phone who dis?')
+        
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))
