@@ -127,12 +127,14 @@ class Trial(commands.Cog, name="Trials"):
     #    await ctx.send("Here is a gif")
 
     @commands.command()
-    async def trial(self, ctx: commands.Context,leader,trial,date,time):
+    async def trial(self, ctx: commands.Context,leader,trial,date,day,time):
         """Creates a new trial for BOK"""
         leader = leader.replace(',','')
         trial = trial.replace(',','')
         date = date.replace(',','')
+        date += " " + day.replace(',','')
         time = time.replace(',','')
+        
 
         #create random number id for the trial and verify it is not in use
         #loop = True
