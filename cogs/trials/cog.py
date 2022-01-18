@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
 import pickle
-import json
 
 #TODO: Actually comment through this stuff. 
 
