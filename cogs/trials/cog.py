@@ -145,8 +145,8 @@ class Trial(commands.Cog, name="Trials"):
 
         ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
         embed = nextcord.Embed(
-            title = trial,
-            description = date + " " + time,
+            title = trial + " " + date,
+            description = time,
             color = nextcord.Color.blue()
         )
         embed.set_footer(text="Remember to spay or neuter your support!")
@@ -346,8 +346,8 @@ class Trial(commands.Cog, name="Trials"):
         trial = storage.get(num)
 
         embed = nextcord.Embed(
-            title = trial.trial + " " + trial.date + " " + trial.time,
-            #description = trial.date + " " + trial.time,
+            title = trial.trial + " " + trial.date,
+            description = trial.time,
             color = nextcord.Color.blue()
         )
         embed.set_footer(text="Remember to spay or neuter your support!")
