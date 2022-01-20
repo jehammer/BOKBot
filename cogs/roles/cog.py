@@ -31,9 +31,7 @@ class Roles(commands.Cog, name="Roles"):
             msg = ctx.message.content
             msg = msg.split(" ",1) #Split into 2 parts of a list
             req = msg[1].lower()
-            print(req)
             user = ctx.message.author
-            print("user")
             #code reuse is just beautiful. Though I am user there are better ways to do this. I will look into it.
 
             if req == "tank":
@@ -44,7 +42,6 @@ class Roles(commands.Cog, name="Roles"):
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    print("here2")
                     await ctx.message.delete()
                     await user.send(req + " role granted")
 
