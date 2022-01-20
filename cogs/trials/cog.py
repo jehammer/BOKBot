@@ -514,16 +514,18 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def save(self, ctx: commands.Context):
         """Saves roster data to storage"""
-        if ctx.message.author == "Drakador#0001":
+        if ctx.message.author.id == 212634819190849536:
             try:
                 saveToDoc()
             except Exception as e:
                 await ctx.send("Error, issue saving. Have Drak try to fix.")
+        else:
+            await ctx.send("You do not have permission to do that.")
 
     @commands.command()
     async def load(self, ctx: commands.Context):
         """Loads the trials from storage into the bot"""
-        if ctx.message.author == "Drakador#0001":
+        if ctx.message.author.id == 212634819190849536:
             try:
                 global storage
                 dbfile = open('trialStorage.pkl', 'rb')
@@ -538,6 +540,8 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Loaded!")
             except Exception as e:
                 await ctx.send("Error, data not loaded. Have Drak check code.")
+        else:
+            await ctx.send("You do not have permission to do that.")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Trial(bot))
