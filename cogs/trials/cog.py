@@ -127,36 +127,35 @@ class Trial(commands.Cog, name="Trials"):
     #    await ctx.send("Here is a gif")
 
     @commands.command()
-    async def trial(self, ctx: commands.Context,leader,trial,date,day,time):
-        """Creates a new trial for BOK"""
-        """format: !trial [leader],[trial],[date],[month day],[time]""" #does this work?
+    async def trial(self, ctx: commands.Context):
+        """Creates a new trial for BOK | format: !trial [leader],[trial],[date info],[time]"""
 
-        #TODO: try/catch block here
-        leader = leader.replace(',','')
-        trial = trial.replace(',','')
-        date = date.replace(',','')
-        date += " " + day.replace(',','') #TODO: fix inputs so this is not how it is made
-        time = time.replace(',','')
+        try:
+            msg = ctx.message.content
+            msg = msg.split(" ",1) #Split into 2 parts of a list, the first space then the rest
+            msg = msg[1] #drop the !trial part
+            leader,trial,date,time = msg.split(",")
 
-        ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
-        embed = nextcord.Embed(
-            title = trial + " " + date,
-            description = time,
-            color = nextcord.Color.blue()
-        )
-        embed.set_footer(text="Remember to spay or neuter your support!")
-        embed.set_author(name=leader)
-        embed.add_field(name="Healers", value='To Heal Us', inline='False')
-        embed.add_field(name="Tanks", value='To Be Stronk', inline='False')
-        embed.add_field(name="DPS", value='To Stand In Stupid', inline='False')
-        #sent_embed = ctx.send(embed=embed)
-        await ctx.send(embed=embed)
+            ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
+            embed = nextcord.Embed(
+                title = trial + " " + date,
+                description = time,
+                color = nextcord.Color.blue()
+            )
+            embed.set_footer(text="Remember to spay or neuter your support!")
+            embed.set_author(name=leader)
+            embed.add_field(name="Healers", value='To Heal Us', inline='False')
+            embed.add_field(name="Tanks", value='To Be Stronk', inline='False')
+            embed.add_field(name="DPS", value='To Stand In Stupid', inline='False')
+            await ctx.send(embed=embed)
 
-        #create new trial and put it in storage for later use
-        newTrial = EsoTrial(trial, date, time, leader, tDps = {}, tHealers = {}, tTanks = {}, oDps = {}, oHealers = {}, oTanks = {})
-        storage[ran] = newTrial
-        saveToDoc()
-        
+            #create new trial and put it in storage for later use
+            newTrial = EsoTrial(trial, date, time, leader, tDps = {}, tHealers = {}, tTanks = {}, oDps = {}, oHealers = {}, oTanks = {})
+            storage[ran] = newTrial
+            saveToDoc()
+        except Exception as e:
+            await ctx.send(e)#"Errror, please use !help trial if you are having problems or notify Drak")
+            
 
 #    @commands.command()
 #    async def displayembed(self, ctx: commands.Context):
