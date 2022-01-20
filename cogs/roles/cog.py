@@ -47,7 +47,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "healer":
                 role = nextcord.utils.get(ctx.guild.roles, name="Healer")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.sende(req + " role removed")
@@ -58,7 +58,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "dps":
                 role = nextcord.utils.get(ctx.guild.roles, name="DPS")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")
@@ -69,7 +69,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "ebonheart":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ebonheart")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")
@@ -80,7 +80,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "daggerfall":
                 role = nextcord.utils.get(ctx.guild.roles, name="Daggerfall")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")
@@ -91,7 +91,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "aldmeri":
                 role = nextcord.utils.get(ctx.guild.roles, name="Aldmeri")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")
@@ -102,7 +102,7 @@ class Roles(commands.Cog, name="Roles"):
 
             elif req == "crafter":
                 role = nextcord.utils.get(ctx.guild.roles, name="Crafter")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")
@@ -113,7 +113,7 @@ class Roles(commands.Cog, name="Roles"):
                 
             elif req == "ex-cons":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ex-Cons")
-                if role in role.members:
+                if user in role.members:
                     await user.remove_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role removed")

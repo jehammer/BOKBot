@@ -530,7 +530,6 @@ class Trial(commands.Cog, name="Trials"):
                 global storage
                 dbfile = open('trialStorage.pkl', 'rb')
                 allData = pickle.load(dbfile)
-                print(allData)
                 for i in range(len(allData)):
                     # 0: trial, 1: date, 2: time, 3: leader, 4: tDps = {}, 
                     # 5: tHealers = {}, 6: tTanks = {}, 7: oDps = {}, 8: oHealers = {}, 9: oTanks = {}
@@ -539,6 +538,21 @@ class Trial(commands.Cog, name="Trials"):
 
                 dbfile.close()
                 await ctx.send("Loaded!")
+            except Exception as e:
+                await ctx.send("Error, data not loaded. Have Drak check code.")
+        else:
+            await ctx.send("You do not have permission to do that.")
+
+    @commands.command()
+    async def check(self, ctx: commands.Context):
+        """Check the status of the pickle"""
+        if ctx.message.author.id == 212634819190849536:
+            try:
+                global storage
+                dbfile = open('trialStorage.pkl', 'rb')
+                allData = pickle.load(dbfile)
+                print(allData)
+                dbfile.close()
             except Exception as e:
                 await ctx.send("Error, data not loaded. Have Drak check code.")
         else:
