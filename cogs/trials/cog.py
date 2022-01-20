@@ -460,7 +460,7 @@ class Trial(commands.Cog, name="Trials"):
     async def end(self, ctx: commands.Context):
         """For raid leads, ends the trial."""
         try:
-            role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
                 num = ctx.message.channel.id
@@ -475,7 +475,7 @@ class Trial(commands.Cog, name="Trials"):
     async def gather(self, ctx: commands.Context):
         """for raid leads, closes the roster and notifies everyone to come."""
         try:
-            role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
                 num = ctx.message.channel.id
