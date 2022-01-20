@@ -355,7 +355,7 @@ class Trial(commands.Cog, name="Trials"):
 
         for i in trial.tHealers:
             names += i + " " + trial.tHealers[i]
-            names += "\n"
+            names += "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
@@ -363,7 +363,7 @@ class Trial(commands.Cog, name="Trials"):
         names = ""
         for i in trial.tTanks:
             names += i + " " + trial.tTanks[i]
-            names += "\n"
+            names += "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
@@ -371,12 +371,12 @@ class Trial(commands.Cog, name="Trials"):
         names = ""
         for i in trial.tDps:
             names += i + " " + trial.tDps[i]
-            names += "\n"
+            names += "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="DPS", value = names, inline='False')
-        names = "Healers: " + str(hCount) + "\nTanks: " + str(tCount) + "\nDPS: " + str(dCount)
+        names = "Healers: " + str(hCount) + " \nTanks: " + str(tCount) + " \nDPS: " + str(dCount)
         embed.add_field(name="Total", value = names, inline='False')
         await ctx.send(embed=embed)        
 
@@ -394,21 +394,21 @@ class Trial(commands.Cog, name="Trials"):
         names = ""
 
         for i in trial.oHealers:
-            names += i + " " + trial.oHealers[i] + "\n\n"
+            names += i + " " + trial.oHealers[i] + "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Healers", value = names, inline='False')
         names = ""
         for i in trial.oTanks:
-            names += i + " " + trial.oTanks[i] + "\n\n"
+            names += i + " " + trial.oTanks[i] + "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Tanks", value = names, inline='False')
         names = "" 
         for i in trial.oDps:
-            names += i + " " + trial.oDps[i] + "\n\n"
+            names += i + " " + trial.oDps[i] + "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
