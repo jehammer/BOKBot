@@ -461,7 +461,8 @@ class Trial(commands.Cog, name="Trials"):
         """For raid leads, ends the trial."""
         try:
             role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
-            if role in ctx.message.author.roles():
+            user = ctx.message.author
+            if user in role.members:
                 num = ctx.message.channel.id
                 del storage[num]
                 await ctx.send("Trial Closed!")
@@ -475,7 +476,8 @@ class Trial(commands.Cog, name="Trials"):
         """for raid leads, closes the roster and notifies everyone to come."""
         try:
             role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
-            if role in ctx.message.author.roles():
+            user = ctx.message.author
+            if user in role.members:
                 num = ctx.message.channel.id
                 trial = storage.get(num)
                 names = "\nHealers \n"
