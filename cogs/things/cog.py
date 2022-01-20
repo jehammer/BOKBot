@@ -129,7 +129,7 @@ class Things(commands.Cog, name="Fun Things"):
         await ctx.send('https://www.youtube.com/watch?v=atdsXPYqD7U')
 
     @commands.command()
-    async def philosphy(self, ctx: commands.Context):
+    async def philosophy(self, ctx: commands.Context):
         """The philosophy of Drak"""
         await ctx.send("All Healers are soft mommy doms \n all Tanks are masochists \n all DPS are sadistic \n - Drak the Wise, who ponders his orb.")
 

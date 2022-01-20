@@ -29,19 +29,19 @@ class EsoTrial():
             self.oDps, self.oHealers, self.oTanks]
         return allData
     #Add people into the right spots
-    def addDPS(self, nDps, pClass = " "):
+    def addDPS(self, nDps, pClass = "will be sadistic"):
         if len(self.tDps) < 8:
             self.tDps[nDps] = pClass
         else:
             self.oDps[nDps] = pClass
 
-    def addHealer(self, nHealer, pClass = " "):
+    def addHealer(self, nHealer, pClass = "will be soft mommy dom"):
         if len(self.tHealers) < 2:
             self.tHealers[nHealer] = pClass
         else:
             self.oHealers[nHealer] = pClass
 
-    def addTank(self, nTank, pClass = " "):
+    def addTank(self, nTank, pClass = "will be masochistic"):
         if len(self.tTanks) < 2:
             self.tTanks[nTank] = pClass
         else:
@@ -354,27 +354,28 @@ class Trial(commands.Cog, name="Trials"):
         names = ""
 
         for i in trial.tHealers:
-            names += i + " " + trial.tHealers[i]
-            names += "\r\n"
+            names += i + " " + trial.tHealers[i]  + " " + "\r\n"
+            #names += "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Healers", value = names, inline='False')
         names = ""
         for i in trial.tTanks:
-            names += i + " " + trial.tTanks[i]
-            names += "\r\n"
+            names += i + " " + trial.tTanks[i]  + " " + "\r\n"
+            #names += "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Tanks", value = names, inline='False')
         names = ""
         for i in trial.tDps:
-            names += i + " " + trial.tDps[i]
-            names += "\r\n"
+            names += i + " " + trial.tDps[i] + " " + "\r\n"
+            #names += "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
+        print(names)
         embed.add_field(name="DPS", value = names, inline='False')
         names = "Healers: " + str(hCount) + " \nTanks: " + str(tCount) + " \nDPS: " + str(dCount)
         embed.add_field(name="Total", value = names, inline='False')
@@ -518,6 +519,7 @@ class Trial(commands.Cog, name="Trials"):
         if ctx.message.author.id == 212634819190849536:
             try:
                 saveToDoc()
+                await ctx.send("Saved!")
             except Exception as e:
                 await ctx.send("Error, issue saving. Have Drak try to fix.")
         else:
