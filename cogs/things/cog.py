@@ -1,9 +1,15 @@
+import nextcord
 from nextcord.ext import commands
 import random
 
 #Singular function to get random trials depending on what is currently doable by the guild.
 def getTrial(cap):
-    ran = random.randint(1, cap)
+    loop = True
+    last4 = []
+    while (loop):
+        ran = random.randint(1, cap)
+        if ran not in last4:
+            loop = False
     trial = ""
     match ran:
         case 1:
@@ -26,6 +32,11 @@ def getTrial(cap):
             trial = "Kyne's Aegis"
         case 10:
             trial = "Rockgrove"
+    if len(last4) < 4:
+        last4.append(ran)
+    else:
+        last4.pop()
+        last4.append(ran)
     return trial
 
 class Things(commands.Cog, name="Fun Things"):
@@ -103,9 +114,30 @@ class Things(commands.Cog, name="Fun Things"):
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
 
     @commands.command()
-    async def chains(self, ctx: commands.Context):
+    async def chainz(self, ctx: commands.Context):
         """He always loses it"""
         await ctx.send('New phone who dis?')
-        
+
+    @commands.command()
+    async def pizza(self, ctx: commands.Context):
+        """Pizza Pizza"""
+        await ctx.send('https://youtu.be/0YgW-05_y3A')
+
+    @commands.command()
+    async def drakrez(self, ctx: commands.Context):
+        """When he gets the highest rezzes instead of someone else"""
+        await ctx.send('https://www.youtube.com/watch?v=atdsXPYqD7U')
+
+    @commands.command()
+    async def philosphy(self, ctx: commands.Context):
+        """The philosophy of Drak"""
+        await ctx.send("All Healers are soft mommy doms \n all Tanks are masochists \n all DPS are sadistic \n - Drak the Wise, who ponders his orb.")
+
+    @commands.command()
+    async def translate(self, ctx: commands.Context):
+        """For the Boomers to understand Drak"""
+        msg = """Pog/Poggers: A triumphant cry of celebration. \n Based: The opposite of cringe. \n Redpilled: To have seen reality for what it is. \n Baller: Very nice"""
+        await ctx.send(msg)
+
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))

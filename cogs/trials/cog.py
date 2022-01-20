@@ -129,21 +129,14 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def trial(self, ctx: commands.Context,leader,trial,date,day,time):
         """Creates a new trial for BOK"""
+        """format: !trial [leader],[trial],[date],[month day],[time]""" #does this work?
+
+        #TODO: try/catch block here
         leader = leader.replace(',','')
         trial = trial.replace(',','')
         date = date.replace(',','')
-        date += " " + day.replace(',','')
+        date += " " + day.replace(',','') #TODO: fix inputs so this is not how it is made
         time = time.replace(',','')
-        
-
-        #create random number id for the trial and verify it is not in use
-        #loop = True
-        #while(loop):
-        #    ran = random.randint(1000, 9999)
-        #    if ran in storage:
-        #        pass
-        #    else:
-        #        loop = False
 
         ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
         embed = nextcord.Embed(
@@ -160,7 +153,7 @@ class Trial(commands.Cog, name="Trials"):
         await ctx.send(embed=embed)
 
         #create new trial and put it in storage for later use
-        newTrial = EsoTrial(trial, date, time, leader)
+        newTrial = EsoTrial(trial, date, time, leader, tDps = {}, tHealers = {}, tTanks = {}, oDps = {}, oHealers = {}, oTanks = {})
         storage[ran] = newTrial
         saveToDoc()
         
@@ -183,6 +176,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def su(self, ctx: commands.Context):
+        """Use !su [role] [optional message]"""
         worked = True
         global storage
         try:
@@ -245,6 +239,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def bu(self, ctx: commands.Context):
+        """Use !bu [role] [optional message]"""
         worked = True        
         try:
             try:
@@ -304,6 +299,7 @@ class Trial(commands.Cog, name="Trials"):
     
     @commands.command()
     async def wd(self, ctx: commands.Context):
+        """Use !wd to remove yourself from the roster. If you are in several spots use several times"""
         try:
             worked = True
             num = ctx.message.channel.id
@@ -328,6 +324,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def fill(self, ctx: commands.Context):
+        """For trial leaders to fill the roster from the backup roster"""
         try:
             num = ctx.message.channel.id
             trial = storage.get(num)
@@ -341,6 +338,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def status(self, ctx: commands.Context):
+        """Prints out a list of all who are signed up as main and backups"""
         num = ctx.message.channel.id
         dCount = 0
         hCount = 0
@@ -357,21 +355,24 @@ class Trial(commands.Cog, name="Trials"):
         names = ""
 
         for i in trial.tHealers:
-            names += i + " " + trial.tHealers[i] + "\n\n"
+            names += i + " " + trial.tHealers[i]
+            names += "\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Healers", value = names, inline='False')
         names = ""
         for i in trial.tTanks:
-            names += i + " " + trial.tTanks[i] + "\n\n"
+            names += i + " " + trial.tTanks[i]
+            names += "\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Tanks", value = names, inline='False')
         names = ""
         for i in trial.tDps:
-            names += i + " " + trial.tDps[i] + "\n\n"
+            names += i + " " + trial.tDps[i]
+            names += "\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
@@ -420,6 +421,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def msg(self, ctx: commands.Context):
+        """!msg [message] to modify your message in the embed"""
         trial = storage.get(ctx.message.channel.id)
         found = True
         msg = ctx.message.content
@@ -445,6 +447,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def listTrials(self, ctx: commands.Context):
+        """For debugging purposes, prints out IDs of trials"""
         msg = ""
         if len(storage) > 0:
             for i in storage:
@@ -455,68 +458,76 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def end(self, ctx: commands.Context):
+        """For raid leads, ends the trial."""
         try:
-            num = ctx.message.channel.id
-            del storage[num]
-            await ctx.send("Trial Closed!")
+            role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
+            if role in ctx.message.author.roles():
+                num = ctx.message.channel.id
+                del storage[num]
+                await ctx.send("Trial Closed!")
+            else:
+                await ctx.send("You do not have permission for that.")
         except:
             await ctx.send("Error! Trial not deleted!")
 
     @commands.command()
     async def gather(self, ctx: commands.Context):
+        """for raid leads, closes the roster and notifies everyone to come."""
         try:
-            num = ctx.message.channel.id
-            trial = storage.get(num)
-            names = "\nHealers \n"
-            for i in trial.tHealers:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n" 
-            if len(trial.tHealers) == 0:
-                names += "None " + "\n"
+            role = nextcord.utils.get(ctx.message.author.server.roles, name="Storm Bringers")
+            if role in ctx.message.author.roles():
+                num = ctx.message.channel.id
+                trial = storage.get(num)
+                names = "\nHealers \n"
+                for i in trial.tHealers:
+                    for j in ctx.guild.members:
+                        if i == j.name:
+                            names += j.mention + "\n" 
+                if len(trial.tHealers) == 0:
+                    names += "None " + "\n"
 
-            names += "\nTanks \n"
-            for i in trial.tTanks:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n" 
-            if len(trial.tTanks) == 0:
-                names += "None" + "\n"
-            
-            names += "\nDPS \n"
-            for i in trial.tDps:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n"   
-            if len(trial.tDps) == 0:
-                names += "None" + "\n"
+                names += "\nTanks \n"
+                for i in trial.tTanks:
+                    for j in ctx.guild.members:
+                        if i == j.name:
+                            names += j.mention + "\n" 
+                if len(trial.tTanks) == 0:
+                    names += "None" + "\n"
+                
+                names += "\nDPS \n"
+                for i in trial.tDps:
+                    for j in ctx.guild.members:
+                        if i == j.name:
+                            names += j.mention + "\n"   
+                if len(trial.tDps) == 0:
+                    names += "None" + "\n"
 
-            await ctx.send(names)
-            await ctx.send("It is go time!")
-            del storage[num]
-            saveToDoc()
+                await ctx.send(names)
+                await ctx.send("It is go time!")
+                del storage[num]
+                saveToDoc()
+            else:
+                await ctx.send("You do not have permission for that.")
         except:
             await ctx.send("Error! Idk something went wrong!")
 
     @commands.command()
     async def save(self, ctx: commands.Context):
-        if ctx.message.author.name == "Drakador":
+        """Saves roster data to storage"""
+        if ctx.message.author == "Drakador#0001":
             try:
                 saveToDoc()
-                #with open('outputfile', 'w') as fout:
-                #    json.dump(toDump, fout)
             except Exception as e:
                 await ctx.send("Error, issue saving. Have Drak try to fix.")
 
     @commands.command()
     async def load(self, ctx: commands.Context):
-        if ctx.message.author.name == "Drakador":
+        """Loads the trials from storage into the bot"""
+        if ctx.message.author == "Drakador#0001":
             try:
                 global storage
                 dbfile = open('trialStorage.pkl', 'rb')
                 allData = pickle.load(dbfile)
-                #with open('outputfile', 'r') as fin:
-                #    allData = json.load(fin)
                 for i in range(len(allData)):
                     # 0: trial, 1: date, 2: time, 3: leader, 4: tDps = {}, 
                     # 5: tHealers = {}, 6: tTanks = {}, 7: oDps = {}, 8: oHealers = {}, 9: oTanks = {}
@@ -528,17 +539,5 @@ class Trial(commands.Cog, name="Trials"):
             except Exception as e:
                 await ctx.send("Error, data not loaded. Have Drak check code.")
 
-    #This verifies my idea will work, which is an incredibly stupid idea being done because I would rather see how complicated
-    # I can make this section on a dare from a friend saying I wont do it. Please never do this. There are better ways out there.
-    #@commands.command()
-    #async def findUser(self, ctx: commands.Context):
-    #    name = "Drakador"
-    #    for i in ctx.guild.members:
-    #        if i.name == name:
-    #            await ctx.send(i.mention + " Found")
-
-
-
 def setup(bot: commands.Bot):
     bot.add_cog(Trial(bot))
-    

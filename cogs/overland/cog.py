@@ -3,7 +3,12 @@ import random
 
 #Singular function to get random zones
 def getZone():
-    ran = random.randint(1, 10)
+    loop = True
+    last4 = []
+    while (loop):
+        ran = random.randint(1, 10)
+        if ran not in last4:
+            loop = False
     zone = ""
     match ran:
         case 1:
@@ -26,6 +31,11 @@ def getZone():
             zone = "Gates Of Oblivion - Blackwood, Fargrave, Deadlands"
         case 10:
             zone = "Gold Coast, Hew's Bane, Murkmire"
+    if len(last4) < 4:
+        last4.append(ran)
+    else:
+        last4.pop()
+        last4.append(ran)
     return zone
 
 #Function to get a random event to do

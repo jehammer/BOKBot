@@ -11,9 +11,14 @@ bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 #Events
 @bot.event
 async def on_member_join(member):
+    #Apply Recruits role on server entry
     guild = member.guild
+    user = member
+    role = nextcord.utils.get(user.server.roles, name="Recruits")
+    await user.add_roles(user, role)
     await guild.system_channel.send(f'''Welcome {member.mention} to Breath Of Kynareth!
-Winds of Kyne be with you, please react in <#847968244949844008> to join the rest of the server.
+Winds of Kyne be with you, please read the rules in <#847968244949844008> and type !agree to join the rest of the server.
+Use !roles in <#933185172063535144> to check out the assignable roles using !role [role]
 If the bot does not work just ping the Storm Bringers.''')
 
 #Commands
