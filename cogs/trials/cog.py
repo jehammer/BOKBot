@@ -407,9 +407,9 @@ class Trial(commands.Cog, name="Trials"):
         #embed.set_author(name=trial.leader)
         #BACKUP HEALERS
         names = ""
-        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
         for i in trial.oHealers:
-            names += "{emoji}"+ i + " " + trial.oHealers[i] + "\r\n"
+            names += "<:Healer:933835785352904864>"+ i + " " + trial.oHealers[i] + "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
@@ -417,9 +417,9 @@ class Trial(commands.Cog, name="Trials"):
         
         #BACKUP TANKS
         names = ""
-        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
         for i in trial.oTanks:
-            names += "{emoji}"+ i + " " + trial.oTanks[i] + "\r\n"
+            names += "<:Tank:933835838951948339>"+ i + " " + trial.oTanks[i] + "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
@@ -427,9 +427,9 @@ class Trial(commands.Cog, name="Trials"):
 
         #BACKUP DPS
         names = "" 
-        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
         for i in trial.oDps:
-            names += "{emoji}"+ i + " " + trial.oDps[i] + "\r\n"
+            names += "<:DPS:933835811684757514>"+ i + " " + trial.oDps[i] + "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
