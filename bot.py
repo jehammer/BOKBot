@@ -18,8 +18,16 @@ async def on_member_join(member):
     await user.add_roles(role)
     await guild.system_channel.send(f'''Welcome {member.mention} to Breath Of Kynareth!
 Winds of Kyne be with you, please read the rules in <#847968244949844008> and type !agree to join the rest of the server.
-Use !roles in <#933185172063535144> to check out the assignable roles using !role [role]
+Use !roles in <#933596721630548059> to check out the assignable roles using !role [role]
 If the bot does not work just ping the Storm Bringers.''')
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("Error, Unknown Command.")
+    else:
+        await ctx.send("Error, unknown command. If this is a signup for a trial, is the trial started and loaded?")
 
 #Commands
 @bot.command(name="setstat")

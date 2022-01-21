@@ -47,13 +47,13 @@ class EsoTrial():
         else:
             self.oTanks[nTank] = pClass
     
-    def bDPS(self, nDps, pClass = " "):
+    def bDPS(self, nDps, pClass = "could be sadistic"):
         self.oDps[nDps] = pClass
 
-    def bHealer(self, nHealer, pClass = " "):
+    def bHealer(self, nHealer, pClass = "could be soft mommy dom"):
         self.oHealers[nHealer] = pClass
     
-    def bTank(self, nTank, pClass = " "):
+    def bTank(self, nTank, pClass = "could be masochistic"):
         self.oTanks[nTank] = pClass
 
     #remove people from right spots
@@ -234,7 +234,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send(ctx.message.author.mention + " Added!")
                 saveToDoc()
         except:
-            await ctx.send("Error, Incorrect Trial? Please Consult Posting Guide or notify Drak.")
+            await ctx.send("Error, please type it as !su [type], [optional message]. If you did this please notify Drak")
 
     @commands.command()
     async def bu(self, ctx: commands.Context):
@@ -294,7 +294,7 @@ class Trial(commands.Cog, name="Trials"):
                 saveToDoc()
                 await ctx.send(ctx.author.mention + " Added for Backup!")
         except:
-            await ctx.send("Error, Incorrect Trial? Please Consult Posting Guide or notify Drak.")
+            await ctx.send("Error, please type it as !bu [type], [optional message]. If you did this please notify Drak")
     
     @commands.command()
     async def wd(self, ctx: commands.Context):
@@ -324,15 +324,20 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def fill(self, ctx: commands.Context):
         """For trial leaders to fill the roster from the backup roster"""
-        try:
-            num = ctx.message.channel.id
-            trial = storage.get(num)
-            trial.fillSpots()
-            storage[num] = trial
-            saveToDoc()
-            await ctx.send("Spots filled!")
-        except:
-            await ctx.send("Something has gone wrong! Consult Drak!")
+        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        user = ctx.message.author
+        if user in role.members:
+            try:
+                num = ctx.message.channel.id
+                trial = storage.get(num)
+                trial.fillSpots()
+                storage[num] = trial
+                saveToDoc()
+                await ctx.send("Spots filled!")
+            except:
+                await ctx.send("Something has gone wrong! Consult Drak!")
+        else:
+            await ctx.send("You must be a Storm Bringer to fill a roster.")
                  
 
     @commands.command()
@@ -347,35 +352,43 @@ class Trial(commands.Cog, name="Trials"):
         embed = nextcord.Embed(
             title = trial.trial + " " + trial.date,
             description = trial.time,
-            color = nextcord.Color.blue()
+            color = nextcord.Color.green()
         )
         embed.set_footer(text="Remember to spay or neuter your support!")
         embed.set_author(name=trial.leader)
+        
+        # HEALERS
         names = ""
-
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
         for i in trial.tHealers:
-            names += i + " " + trial.tHealers[i]  + " " + "\r\n"
+            names += "<:Healer:933835785352904864>"+ i + " " + trial.tHealers[i]  + " " + "\r\n"
             #names += "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Healers", value = names, inline='False')
+        
+        #TANKS
         names = ""
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
         for i in trial.tTanks:
-            names += i + " " + trial.tTanks[i]  + " " + "\r\n"
+            names += "<:Tank:933835838951948339>"+ i + " " + trial.tTanks[i]  + " " + "\r\n"
             #names += "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Tanks", value = names, inline='False')
+
+        #DPS
         names = ""
+        #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
         for i in trial.tDps:
-            names += i + " " + trial.tDps[i] + " " + "\r\n"
+            names += "<:DPS:933835811684757514>"+ i + " " + trial.tDps[i] + " " + "\r\n"
             #names += "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
-        print(names)
+
         embed.add_field(name="DPS", value = names, inline='False')
         names = "Healers: " + str(hCount) + " \nTanks: " + str(tCount) + " \nDPS: " + str(dCount)
         embed.add_field(name="Total", value = names, inline='False')
@@ -392,24 +405,31 @@ class Trial(commands.Cog, name="Trials"):
         )
         embed.set_footer(text="Remember to beep when backing up that dumptruck")
         #embed.set_author(name=trial.leader)
+        #BACKUP HEALERS
         names = ""
-
+        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
         for i in trial.oHealers:
-            names += i + " " + trial.oHealers[i] + "\r\n"
+            names += "{emoji}"+ i + " " + trial.oHealers[i] + "\r\n"
             hCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Healers", value = names, inline='False')
+        
+        #BACKUP TANKS
         names = ""
+        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
         for i in trial.oTanks:
-            names += i + " " + trial.oTanks[i] + "\r\n"
+            names += "{emoji}"+ i + " " + trial.oTanks[i] + "\r\n"
             tCount += 1
         if len(names) == 0:
             names = "None"
         embed.add_field(name="Tanks", value = names, inline='False')
+
+        #BACKUP DPS
         names = "" 
+        emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
         for i in trial.oDps:
-            names += i + " " + trial.oDps[i] + "\r\n"
+            names += "{emoji}"+ i + " " + trial.oDps[i] + "\r\n"
             dCount += 1
         if len(names) == 0:
             names = "None"
