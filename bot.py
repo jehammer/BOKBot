@@ -27,7 +27,7 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("Error, Unknown Command.")
     else:
-        await ctx.send("Error, unknown command. If this is a signup for a trial, is the trial started and loaded?")
+        await ctx.send("Error, something has gone wrong. Are you invoking the command correctly?")
 
 #Commands
 @bot.command(name="setstat")

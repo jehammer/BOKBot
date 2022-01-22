@@ -114,11 +114,24 @@ def saveToDoc():
     except:
         print("Error, shit didnt work")
 
-
 class Trial(commands.Cog, name="Trials"):
     """Recieves trial commands"""
 
     def __init__(self, bot: commands.Bot):
+        try:
+            global storage
+            dbfile = open('trialStorage.pkl', 'rb')
+            allData = pickle.load(dbfile)
+            for i in range(len(allData)):
+                # 0: trial, 1: date, 2: time, 3: leader, 4: tDps = {}, 
+                # 5: tHealers = {}, 6: tTanks = {}, 7: oDps = {}, 8: oHealers = {}, 9: oTanks = {}
+                storage[allData[i][0]] = EsoTrial(allData[i][1][0],allData[i][1][1],allData[i][1][2],allData[i][1][3],
+                    allData[i][1][4],allData[i][1][5],allData[i][1][6],allData[i][1][7],allData[i][1][8],allData[i][1][9])
+
+            dbfile.close()
+            print("Loaded!")
+        except Exception as e:
+            print(e)
         self.bot = bot
 
     #@commands.command()
@@ -138,8 +151,8 @@ class Trial(commands.Cog, name="Trials"):
 
             ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
             embed = nextcord.Embed(
-                title = trial + " " + date,
-                description = time,
+                title = trial + " " + date + " " + time,
+                description = "I hope people sign up for this.",
                 color = nextcord.Color.blue()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
@@ -211,7 +224,7 @@ class Trial(commands.Cog, name="Trials"):
                     elif msg[1].lower() == "tank":
                         trial.addTank(ctx.message.author.name, msg[2])
                     else:
-                        await ctx.send("Error, please type it as !su [type], [optional message]")
+                        await ctx.send("Error, please type it as !su [type] [optional message]")
                         worked = False
             except:
                 #Works without optional message. 
@@ -226,7 +239,7 @@ class Trial(commands.Cog, name="Trials"):
                 elif msg[1].lower() == "tank":
                     trial.addTank(ctx.message.author.name)
                 else:
-                    await ctx.send("Error, please type it as !su [type], [optional message]")
+                    await ctx.send("Error, please type it as !su [type] [optional message]")
                     worked = False
             if worked == True:
                 #Update trial
@@ -234,7 +247,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send(ctx.message.author.mention + " Added!")
                 saveToDoc()
         except:
-            await ctx.send("Error, please type it as !su [type], [optional message]. If you did this please notify Drak")
+            await ctx.send("Error, please type it as !su [type] [optional message]. If you did this please notify Drak")
 
     @commands.command()
     async def bu(self, ctx: commands.Context):
@@ -272,7 +285,7 @@ class Trial(commands.Cog, name="Trials"):
                     elif msg[1].lower() == "tank":
                         trial.bTank(ctx.message.author.name, msg[2])
                     else:
-                        await ctx.send("Error, please type it as !bu [type], [optional message]")
+                        await ctx.send("Error, please type it as !bu [type] [optional message]")
                         worked = False
             except:
                 msg = ctx.message.content
@@ -286,7 +299,7 @@ class Trial(commands.Cog, name="Trials"):
                 elif msg[1].lower() == "tank":
                     trial.bTank(ctx.message.author.name)
                 else:
-                    await ctx.send("Error, please type it as !bu [type], [optional message]")
+                    await ctx.send("Error, please type it as !bu [type] [optional message]")
                     worked = False
             if worked == True:
                 #Update trial
@@ -294,7 +307,7 @@ class Trial(commands.Cog, name="Trials"):
                 saveToDoc()
                 await ctx.send(ctx.author.mention + " Added for Backup!")
         except:
-            await ctx.send("Error, please type it as !bu [type], [optional message]. If you did this please notify Drak")
+            await ctx.send("Error, please type it as !bu [type] [optional message]. If you did this please notify Drak")
     
     @commands.command()
     async def wd(self, ctx: commands.Context):
@@ -350,8 +363,8 @@ class Trial(commands.Cog, name="Trials"):
         trial = storage.get(num)
 
         embed = nextcord.Embed(
-            title = trial.trial + " " + trial.date,
-            description = trial.time,
+            title = trial.trial + " " + trial.date + " " + trial.time,
+            description = "This battle will be legendary!", #trial.time,
             color = nextcord.Color.green()
         )
         embed.set_footer(text="Remember to spay or neuter your support!")
@@ -468,13 +481,16 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def listTrials(self, ctx: commands.Context):
         """For debugging purposes, prints out IDs of trials"""
-        msg = ""
-        if len(storage) > 0:
-            for i in storage:
-                msg += str(i) + "\n"
+        if ctx.message.author.id == 212634819190849536:
+            msg = ""
+            if len(storage) > 0:
+                for i in storage:
+                    msg += str(i) + "\n"
+            else:
+                msg = "None"
+            await ctx.send(msg)
         else:
-            msg = "None"
-        await ctx.send(msg)
+            await ctx.send("You do not have permission.")
 
     @commands.command()
     async def end(self, ctx: commands.Context):
@@ -566,6 +582,7 @@ class Trial(commands.Cog, name="Trials"):
         else:
             await ctx.send("You do not have permission to do that.")
 
+
     @commands.command()
     async def check(self, ctx: commands.Context):
         """Check the status of the pickle"""
@@ -578,6 +595,129 @@ class Trial(commands.Cog, name="Trials"):
                 dbfile.close()
             except Exception as e:
                 await ctx.send("Error, data not loaded. Have Drak check code.")
+        else:
+            await ctx.send("You do not have permission to do that.")
+
+    @commands.command()
+    async def clean(self, ctx: commands.Context, num):
+        """For Drak when someone doesnt end a trial"""
+        if ctx.message.author.id == 212634819190849536:
+            try:
+                num = int(num)
+                global storage
+                del storage[num]
+                saveToDoc()
+                await ctx.send("The butt has been wiped.")
+            except Exception as e:
+                await ctx.send("Error, data not cleaned.")
+                print(e)
+        else:
+            await ctx.send("You do not have permission to do that.")
+
+    @commands.command()
+    async def check(self, ctx: commands.Context, num):
+        """To see the status of an orphan"""
+        if ctx.message.author.id == 212634819190849536:
+            try:
+                num = int(num)
+                global storage
+                trial = storage.get(num)
+                #TODO: Make a single function for all this stuff.
+                dCount = 0
+                hCount = 0
+                tCount = 0
+                embed = nextcord.Embed(
+                    title = trial.trial + " " + trial.date + " " + trial.time,
+                    description = "This battle will be legendary!", #trial.time,
+                    color = nextcord.Color.green()
+                )
+                embed.set_footer(text="Remember to spay or neuter your support!")
+                embed.set_author(name=trial.leader)
+                
+                # HEALERS
+                names = ""
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
+                for i in trial.tHealers:
+                    names += "<:Healer:933835785352904864>"+ i + " " + trial.tHealers[i]  + " " + "\r\n"
+                    #names += "\r\n"
+                    hCount += 1
+                if len(names) == 0:
+                    names = "None"
+                embed.add_field(name="Healers", value = names, inline='False')
+                
+                #TANKS
+                names = ""
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
+                for i in trial.tTanks:
+                    names += "<:Tank:933835838951948339>"+ i + " " + trial.tTanks[i]  + " " + "\r\n"
+                    #names += "\r\n"
+                    tCount += 1
+                if len(names) == 0:
+                    names = "None"
+                embed.add_field(name="Tanks", value = names, inline='False')
+
+                #DPS
+                names = ""
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
+                for i in trial.tDps:
+                    names += "<:DPS:933835811684757514>"+ i + " " + trial.tDps[i] + " " + "\r\n"
+                    #names += "\r\n"
+                    dCount += 1
+                if len(names) == 0:
+                    names = "None"
+
+                embed.add_field(name="DPS", value = names, inline='False')
+                names = "Healers: " + str(hCount) + " \nTanks: " + str(tCount) + " \nDPS: " + str(dCount)
+                embed.add_field(name="Total", value = names, inline='False')
+                await ctx.send(embed=embed)        
+
+                #Show Backup/Overflow
+                dCount = 0
+                hCount = 0
+                tCount = 0
+                embed = nextcord.Embed(
+                    title = "Backups",
+                    #description = " ",
+                    color = nextcord.Color.orange()
+                )
+                embed.set_footer(text="Remember to beep when backing up that dumptruck")
+                #embed.set_author(name=trial.leader)
+                #BACKUP HEALERS
+                names = ""
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Healer")
+                for i in trial.oHealers:
+                    names += "<:Healer:933835785352904864>"+ i + " " + trial.oHealers[i] + "\r\n"
+                    hCount += 1
+                if len(names) == 0:
+                    names = "None"
+                embed.add_field(name="Healers", value = names, inline='False')
+                
+                #BACKUP TANKS
+                names = ""
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="Tank")
+                for i in trial.oTanks:
+                    names += "<:Tank:933835838951948339>"+ i + " " + trial.oTanks[i] + "\r\n"
+                    tCount += 1
+                if len(names) == 0:
+                    names = "None"
+                embed.add_field(name="Tanks", value = names, inline='False')
+
+                #BACKUP DPS
+                names = "" 
+                #emoji = nextcord.utils.get(ctx.message.guild.emojis, name="DPS")
+                for i in trial.oDps:
+                    names += "<:DPS:933835811684757514>"+ i + " " + trial.oDps[i] + "\r\n"
+                    dCount += 1
+                if len(names) == 0:
+                    names = "None"
+                embed.add_field(name="DPS", value = names, inline='False')
+
+                names = "Healers: " + str(hCount) + "\nTanks: " + str(tCount) + "\nDPS: " + str(dCount)
+                embed.add_field(name="Total", value = names, inline='False')
+                await ctx.send(embed=embed) 
+
+            except Exception as e:
+                await ctx.send(e)
         else:
             await ctx.send("You do not have permission to do that.")
 
