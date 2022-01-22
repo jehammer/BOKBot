@@ -126,7 +126,7 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def drakrez(self, ctx: commands.Context):
         """When he gets the highest rezzes instead of someone else"""
-        await ctx.send('https://www.youtube.com/watch?v=atdsXPYqD7U')
+        await ctx.send('https://youtu.be/uRbLz8COzHg')
 
     @commands.command()
     async def philosophy(self, ctx: commands.Context):
