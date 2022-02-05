@@ -78,6 +78,9 @@ class EsoTrial():
     #Fill the roster with overflow people
     def fillSpots(self):
         loop = True
+        #Plan for change:
+        # If user is in bu AND primary, remove from primary and slot them in as the bu role
+        #   IF there is not enough of that type
         while (loop):
             if len(self.tDps) < 8 and len(self.oDps) > 0:
                 first = list(self.oDps.keys())[0]
@@ -142,32 +145,36 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def trial(self, ctx: commands.Context):
         """Creates a new trial for BOK | format: !trial [leader],[trial],[date info],[time]"""
-
         try:
-            msg = ctx.message.content
-            msg = msg.split(" ",1) #Split into 2 parts of a list, the first space then the rest
-            msg = msg[1] #drop the !trial part
-            leader,trial,date,time = msg.split(",")
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                msg = ctx.message.content
+                msg = msg.split(" ",1) #Split into 2 parts of a list, the first space then the rest
+                msg = msg[1] #drop the !trial part
+                leader,trial,date,time = msg.split(",")
 
-            ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
-            embed = nextcord.Embed(
-                title = trial + " " + date + " " + time,
-                description = "I hope people sign up for this.",
-                color = nextcord.Color.blue()
-            )
-            embed.set_footer(text="Remember to spay or neuter your support!")
-            embed.set_author(name=leader)
-            embed.add_field(name="Healers", value='To Heal Us', inline='False')
-            embed.add_field(name="Tanks", value='To Be Stronk', inline='False')
-            embed.add_field(name="DPS", value='To Stand In Stupid', inline='False')
-            await ctx.send(embed=embed)
+                ran = ctx.message.channel.id #use the id of the text channel to make a channel-specific trial listing
+                embed = nextcord.Embed(
+                    title = trial + " " + date + " " + time,
+                    description = "I hope people sign up for this.",
+                    color = nextcord.Color.blue()
+                )
+                embed.set_footer(text="Remember to spay or neuter your support!")
+                embed.set_author(name=leader)
+                embed.add_field(name="Healers", value='To Heal Us', inline='False')
+                embed.add_field(name="Tanks", value='To Be Stronk', inline='False')
+                embed.add_field(name="DPS", value='To Stand In Stupid', inline='False')
+                await ctx.send(embed=embed)
 
-            #create new trial and put it in storage for later use
-            newTrial = EsoTrial(trial, date, time, leader, tDps = {}, tHealers = {}, tTanks = {}, oDps = {}, oHealers = {}, oTanks = {})
-            storage[ran] = newTrial
-            saveToDoc()
+                #create new trial and put it in storage for later use
+                newTrial = EsoTrial(trial, date, time, leader, tDps = {}, tHealers = {}, tTanks = {}, oDps = {}, oHealers = {}, oTanks = {})
+                storage[ran] = newTrial
+                saveToDoc()
+            else:
+                await ctx.send("You do not have permission to do this.")
         except Exception as e:
-            await ctx.send(e)#"Errror, please use !help trial if you are having problems or notify Drak")
+            await ctx.send("Errror, please use !help trial if you are having problems or notify Drak")
             
 
 #    @commands.command()
@@ -193,6 +200,11 @@ class Trial(commands.Cog, name="Trials"):
         global storage
         try:
             try:
+
+                # Plan for implementation:
+                # If already in main roster, say they cannot su twice
+                # IF in BU roster under the same role, swap from backup to primary
+                # IF in BU roster under a different role, allow for sign up
                 num = ctx.message.channel.id
                 trial = storage.get(num)
                 if ctx.message.author.name in trial.tDps.keys():
@@ -255,6 +267,10 @@ class Trial(commands.Cog, name="Trials"):
         worked = True        
         try:
             try:
+                # Plan for implementation:
+                # If already in bu roster, say they cannot bu twice
+                # IF in primary roster under the same role, swap from primary to bu
+                # IF in primary roster under a different role, allow for sign up
                 num = ctx.message.channel.id
                 trial = storage.get(num)
                 if ctx.message.author.name in trial.tDps.keys():
@@ -311,16 +327,16 @@ class Trial(commands.Cog, name="Trials"):
     
     @commands.command()
     async def wd(self, ctx: commands.Context):
-        """Use !wd to remove yourself from the roster. If you are in several spots use several times"""
+        """Use !wd to remove yourself from the roster. This will remove you from both BU and Main rosters"""
         try:
             worked = True
             num = ctx.message.channel.id
             trial = storage.get(num)
             if ctx.message.author.name in trial.tDps.keys() or ctx.message.author.name in trial.oDps.keys():
                 trial.removeDPS(ctx.message.author.name)
-            elif ctx.message.author.name in trial.tHealers.keys() or ctx.message.author.name in trial.oHealers.keys():
+            if ctx.message.author.name in trial.tHealers.keys() or ctx.message.author.name in trial.oHealers.keys():
                 trial.removeHealer(ctx.message.author.name)
-            elif ctx.message.author.name in trial.tTanks.keys() or ctx.message.author.name in trial.oTanks.keys():
+            if ctx.message.author.name in trial.tTanks.keys() or ctx.message.author.name in trial.oTanks.keys():
                 trial.removeTank(ctx.message.author.name)
             else:
                 worked = False
@@ -582,6 +598,52 @@ class Trial(commands.Cog, name="Trials"):
         else:
             await ctx.send("You do not have permission to do that.")
 
+
+    @commands.command()
+    async def remove(self, ctx: commands.Context):
+        """Removes someone from the roster"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+            user = ctx.message.author
+            if user in role.members or user in role2.members:    
+                found = False
+                worked = True
+                msg = ctx.message.content
+                msg = msg.split(" ",1)
+                msg = msg[1]   
+                num = ctx.message.channel.id
+                trial = storage.get(num)
+                if msg in trial.tDps.keys() or msg in trial.oDps.keys():
+                    trial.removeDPS(msg)
+                    found = True
+                if msg in trial.tHealers.keys() or msg in trial.oHealers.keys():
+                    trial.removeHealer(msg)
+                    found = True
+                if msg in trial.tTanks.keys() or msg in trial.oTanks.keys():
+                    trial.removeTank(msg)
+                    found = True
+                else:
+                    if found == False:
+                        worked = False
+                        await ctx.send("Person not found")
+                if worked == True:
+                    for i in ctx.guild.members:
+                        if i.name == ctx.message.author.name:               
+                            await ctx.send(ctx.message.author.mention + " removed " + msg)
+                    storage[num] = trial
+                    saveToDoc()
+        except Exception as e:
+            print(e)
+
+    @commands.command()
+    async def leader(self, ctx: commands.Context):
+        """Replaces the leader of a trial"""
+        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+        user = ctx.message.author
+        if user in role.members or user in role2.members:    
+            pass 
 
     @commands.command()
     async def check(self, ctx: commands.Context):
