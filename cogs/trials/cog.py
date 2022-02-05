@@ -329,18 +329,21 @@ class Trial(commands.Cog, name="Trials"):
     async def wd(self, ctx: commands.Context):
         """Use !wd to remove yourself from the roster. This will remove you from both BU and Main rosters"""
         try:
-            worked = True
+            worked = False
             num = ctx.message.channel.id
             trial = storage.get(num)
             if ctx.message.author.name in trial.tDps.keys() or ctx.message.author.name in trial.oDps.keys():
                 trial.removeDPS(ctx.message.author.name)
+                worked = True
             if ctx.message.author.name in trial.tHealers.keys() or ctx.message.author.name in trial.oHealers.keys():
                 trial.removeHealer(ctx.message.author.name)
+                worked = True
             if ctx.message.author.name in trial.tTanks.keys() or ctx.message.author.name in trial.oTanks.keys():
                 trial.removeTank(ctx.message.author.name)
+                worked = True
             else:
-                worked = False
-                await ctx.send("You are not signed up for this Trial")
+                if worked == False:
+                    await ctx.send("You are not signed up for this Trial")
             if worked == True:
                 for i in ctx.guild.members:
                     if i.name == ctx.message.author.name:               
