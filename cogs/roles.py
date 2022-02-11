@@ -1,8 +1,10 @@
 import nextcord
 from nextcord.ext import commands
+import logging
+
 
 class Roles(commands.Cog, name="Roles"):
-    """Recieves roles commands"""
+    """Receives roles commands"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -16,18 +18,19 @@ class Roles(commands.Cog, name="Roles"):
             await user.add_roles(role)
             await ctx.message.delete()
             await user.send("Welcome to Breath of Kynareth!")
-        except:
+        except Exception as e:
             await ctx.message.author.send("Error, unable to grant role, please notify a Storm Bringer")
+            logging.error("Agree error: " + str(e))
 
     @commands.command()
     async def role(self, ctx: commands.Context):
         """use !role [role] to get the request role from roles"""
         try:
             msg = ctx.message.content
-            msg = msg.split(" ",1) #Split into 2 parts of a list
+            msg = msg.split(" ", 1)  # Split into 2 parts of a list
             req = msg[1].lower()
             user = ctx.message.author
-            #code reuse is just beautiful. Though I am user there are better ways to do this. I will look into it.
+            # code reuse is just beautiful. Though I am user there are better ways to do this. I will look into it.
 
             if req == "tank":
                 role = nextcord.utils.get(ctx.guild.roles, name="Tank")
@@ -60,7 +63,7 @@ class Roles(commands.Cog, name="Roles"):
                 else:
                     await user.add_roles(role)
                     await ctx.message.delete()
-                    await user.send(req + " role granted")  
+                    await user.send(req + " role granted")
 
             elif req == "ebonheart":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ebonheart")
@@ -71,7 +74,7 @@ class Roles(commands.Cog, name="Roles"):
                 else:
                     await user.add_roles(role)
                     await ctx.message.delete()
-                    await user.send(req + " role granted")  
+                    await user.send(req + " role granted")
 
             elif req == "daggerfall":
                 role = nextcord.utils.get(ctx.guild.roles, name="Daggerfall")
@@ -105,7 +108,7 @@ class Roles(commands.Cog, name="Roles"):
                     await user.add_roles(role)
                     await ctx.message.delete()
                     await user.send(req + " role granted")
-                
+
             elif req == "ex-cons":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ex-Cons")
                 if user in role.members:
@@ -128,14 +131,16 @@ class Roles(commands.Cog, name="Roles"):
                     await ctx.message.delete()
                     await user.send(req + " role granted")
             else:
-                await user.send("Error, role not found. use !roles to see which roles you can request.")                   
-        except:
-            await ctx.message.author.send("Error, unable to grant role, please notify a Storm Bringer")        
+                await user.send("Error, role not found. use !roles to see which roles you can request.")
+        except Exception as e:
+            await ctx.message.author.send("Error, unable to grant role, please notify a Storm Bringer")
+            logging.error("Role error: " + str(e))
 
     @commands.command()
     async def roles(self, ctx: commands.Context):
         """Lists the roles you can request from the bot"""
-        await ctx.send("Healer, DPS, Tank, Aldmeri, Daggerfall, Ebonheart, Crafter, Ex-Cons, 160") 
-        
+        await ctx.send("Healer, DPS, Tank, Aldmeri, Daggerfall, Ebonheart, Crafter, Ex-Cons, 160")
+
+
 def setup(bot: commands.Bot):
     bot.add_cog(Roles(bot))
