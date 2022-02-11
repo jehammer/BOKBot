@@ -1,12 +1,18 @@
 import nextcord
 from nextcord.ext import commands
 import random
+import logging
 
-#Singular function to get random trials depending on what is currently doable by the guild.
-def getTrial(cap):
+logging.basicConfig(level=logging.INFO)
+
+
+# Singular function to get random trials depending on what is currently doable by the guild.
+
+
+def get_trial(cap):
     loop = True
     last4 = []
-    while (loop):
+    while loop:
         ran = random.randint(1, cap)
         if ran not in last4:
             loop = False
@@ -37,30 +43,35 @@ def getTrial(cap):
     else:
         last4.pop()
         last4.append(ran)
+    logging.info("Status of last4: " + str(last4))
     return trial
+
 
 class Things(commands.Cog, name="Fun Things"):
     """For Fun/Event Type Things"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        logging.info("Things cog loaded")
+
     # Get a trial randomly chosen
     @commands.command()
     async def ntrial(self, ctx: commands.Context):
         """Gives you a random normal trial to do"""
-        trial = getTrial(10)
+        trial = get_trial(10)
         await ctx.send("Normal " + trial)
+        logging.info("Random normal generated: " + trial)
 
     @commands.command()
     async def vtrial(self, ctx: commands.Context):
         """Gives you a random veteran trial to do"""
-        trial = getTrial(6)
+        trial = get_trial(10)
         await ctx.send("Veteran " + trial)
 
     @commands.command()
     async def hmtrial(self, ctx: commands.Context):
         """Gives you a random veteran hm trial to do"""
-        trial = getTrial(3)
+        trial = get_trial(3)
         await ctx.send("Veteran " + trial + " HM")
 
     @commands.command()
@@ -71,20 +82,20 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def lore(self, ctx: commands.Context):
         """Shows a random lore tidbit"""
-        ran = random.randint(1, 4) #Update to account for number of files
+        ran = random.randint(1, 4)  # Update to account for number of files
         grab = str(ran)
         grab += ".txt"
-        with open('Lore/'+ grab,) as l:
-            message = l.read();
+        with open('Lore/' + grab, ) as l:
+            message = l.read()
         await ctx.send(message)
 
     @commands.command()
     async def joke(self, ctx: commands.Context):
         """Tells a Joke"""
-        ran = random.randint(1, 3) #Update to account for number of files
+        ran = random.randint(1, 3)  # Update to account for number of files
         grab = str(ran)
         grab += ".txt"
-        with open('Jokes/'+ grab,encoding="utf8") as l:
+        with open('Jokes/' + grab, encoding="utf8") as l:
             message = l.read()
         await ctx.send(message)
 
@@ -111,7 +122,8 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def fisted(self, ctx: commands.Context):
         """It happens to all of us"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
+        await ctx.send(
+            'https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
 
     @commands.command()
     async def chainz(self, ctx: commands.Context):
@@ -131,13 +143,17 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def philosophy(self, ctx: commands.Context):
         """The philosophy of Drak"""
-        await ctx.send("All Healers are soft mommy doms \n all Tanks are masochists \n all DPS are sadistic \n - Drak the Wise, who ponders his orb.")
+        await ctx.send(
+            "All Healers are soft mommy doms \n all Tanks are masochists \n all DPS are sadistic \n - Drak the Wise, "
+            "who ponders his orb.")
 
     @commands.command()
     async def translate(self, ctx: commands.Context):
         """For the Boomers to understand Drak"""
-        msg = """Pog/Poggers: A triumphant cry of celebration. \n Based: The opposite of cringe. \n Redpilled: To have seen reality for what it is. \n Baller: Very nice"""
+        msg = """Pog/Poggers: A triumphant cry of celebration. \n Based: The opposite of cringe. \n Redpilled: To 
+        have seen reality for what it is. \n Baller: Very nice """
         await ctx.send(msg)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))

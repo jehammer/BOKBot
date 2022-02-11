@@ -1,11 +1,12 @@
 from nextcord.ext import commands
-
+import logging
 
 class Gif(commands.Cog, name="Gifs"):
     """Receives gif commands"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        logging.info("Gifs Cog loaded")
 
     # @commands.command()
     # async def gif(self, ctx: commands.Context):
