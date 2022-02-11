@@ -4,3 +4,4 @@ trialStorage
 trialStorage.pkl
 .idea/
 venv/
+*.pyc
