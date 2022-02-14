@@ -83,7 +83,7 @@ class EsoTrial:
     # Fill the roster with overflow people
     def fill_spots(self, num):
         loop = True
-        # Plan for change:
+        # TODO Plan for change:
         # If user is in bu AND primary, remove from primary and slot them in as the bu role
         #   IF there is not enough of that type
         while loop:
@@ -450,32 +450,7 @@ class Trial(commands.Cog, name="Trials"):
             user = ctx.message.author
             if user in role.members or user in role2.members:
                 num = ctx.message.channel.id
-                trial = storage.get(num)
-                names = "\nHealers \n"
-                for i in trial.trial_healers:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_healers) == 0:
-                    names += "None " + "\n"
-
-                names += "\nTanks \n"
-                for i in trial.trial_tanks:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_tanks) == 0:
-                    names += "None" + "\n"
-
-                names += "\nDPS \n"
-                for i in trial.trial_dps:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_dps) == 0:
-                    names += "None" + "\n"
-
-                await ctx.send(names)
+                await self.call_everyone(num, ctx)
                 await ctx.send("It is go time!")
                 del storage[num]
                 save_to_doc()
@@ -494,35 +469,43 @@ class Trial(commands.Cog, name="Trials"):
             user = ctx.message.author
             if user in role.members or user in role2.members:
                 num = ctx.message.channel.id
-                trial = storage.get(num)
-                names = "\nHealers \n"
-                for i in trial.trial_healers:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_healers) == 0:
-                    names += "None " + "\n"
-
-                names += "\nTanks \n"
-                for i in trial.trial_tanks:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_tanks) == 0:
-                    names += "None" + "\n"
-
-                names += "\nDPS \n"
-                for i in trial.trial_dps:
-                    for j in ctx.guild.members:
-                        if i == j.name:
-                            names += j.mention + "\n"
-                if len(trial.trial_dps) == 0:
-                    names += "None" + "\n"
-
-                await ctx.send(names)
+                await self.call_everyone(num, ctx)
                 await ctx.send("It is time to do the thing!")
             else:
                 await ctx.send("You do not have permission for that.")
+        except Exception as e:
+            await ctx.send("Error! Idk something went wrong!")
+            logging.error("Summon error: " + str(e))
+
+    async def call_everyone(self, num, ctx):
+        # TODO: Finish and test this
+        try:
+            trial = storage.get(num)
+            names = "\nHealers \n"
+            for i in trial.trial_healers:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_healers) == 0:
+                names += "None " + "\n"
+
+            names += "\nTanks \n"
+            for i in trial.trial_tanks:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_tanks) == 0:
+                names += "None" + "\n"
+
+            names += "\nDPS \n"
+            for i in trial.trial_dps:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_dps) == 0:
+                names += "None" + "\n"
+
+            await ctx.send(names)
         except Exception as e:
             await ctx.send("Error! Idk something went wrong!")
             logging.error("Summon error: " + str(e))
@@ -602,14 +585,14 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Remove error: " + str(e))
 
     @commands.command()
-    async def swapleader(self, ctx: commands.Context):
+    async def leader(self, ctx: commands.Context):
         """Replaces the leader of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
         role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
         if user in role.members or user in role2.members:
             # TODO: Implement this and functions for changing time/date and trial, and manually adding people to roster
-            pass
+            await ctx.send("This has not been implemented yet")
 
     @commands.command()
     async def clean(self, ctx: commands.Context, num):
@@ -631,7 +614,6 @@ class Trial(commands.Cog, name="Trials"):
         try:
             global storage
             trial = storage.get(num)
-            # TODO: Make a single function for all this stuff.
             dps_count = 0
             healer_count = 0
             tank_count = 0
@@ -725,7 +707,6 @@ class Trial(commands.Cog, name="Trials"):
         if ctx.message.author.id == 212634819190849536:
             try:
                 num = int(num)
-                # TODO: Make a single function for all this stuff.
                 primary_embed, backup_embed = await self.print_roster(num)
 
                 await ctx.send(embed=primary_embed)

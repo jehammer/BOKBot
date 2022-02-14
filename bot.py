@@ -11,8 +11,6 @@ intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 
 
-# TODO: Slash commands when they become available, or redevelop in another system that supports it.
-
 # Events
 @bot.event
 async def on_member_join(member):

@@ -1,7 +1,9 @@
+import asyncio
 import nextcord
 from nextcord.ext import commands
 import random
 import logging
+from nextcord import FFmpegPCMAudio
 
 logging.basicConfig(level=logging.INFO)
 
@@ -153,6 +155,23 @@ class Things(commands.Cog, name="Fun Things"):
         msg = """Pog/Poggers: A triumphant cry of celebration. \n Based: The opposite of cringe. \n Redpilled: To 
         have seen reality for what it is. \n Baller: Very nice """
         await ctx.send(msg)
+
+    @commands.command()
+    async def nut(self, ctx: commands.Context):
+        """Nut hard"""
+        try:
+            if ctx.author.voice:
+                channel = ctx.author.voice.channel
+                voice = await channel.connect()
+                source = FFmpegPCMAudio('Audio/nut.wav')
+                voice.play(source)
+                while voice.is_playing():
+                    await asyncio.sleep(1)
+                await ctx.guild.voice_client.disconnect()
+            else:
+                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
+        except Exception as e:
+            print(e)
 
 
 def setup(bot: commands.Bot):
