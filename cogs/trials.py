@@ -183,7 +183,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 await ctx.send("You do not have permission to do this.")
         except Exception as e:
-            await ctx.send("Error, please use !help trial if you are having problems or notify Drak")
+            await ctx.send("Please use !help trial if you are having problems or notify Drak")
             logging.error("Trial creation error: " + str(e))
 
     @commands.command()
@@ -229,7 +229,7 @@ class Trial(commands.Cog, name="Trials"):
                     elif msg[1].lower() == "tank":
                         trial.add_tank(ctx.message.author.name, msg[2])
                     else:
-                        await ctx.send("Error, please type it as !su [type] [optional message]")
+                        await ctx.send("Please type it as !su [type] [optional message]")
                         worked = False
             except:  # TODO: work a way around the lack of an optional message without throwing an error
                 # Works without optional message.
@@ -244,7 +244,7 @@ class Trial(commands.Cog, name="Trials"):
                 elif msg[1].lower() == "tank":
                     trial.add_tank(ctx.message.author.name)
                 else:
-                    await ctx.send("Error, please type it as !su [type] [optional message]")
+                    await ctx.send("Please type it as !su [type] [optional message]")
                     worked = False
             if worked:
                 # Update trial
@@ -252,7 +252,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send(ctx.message.author.mention + " Added!")
                 save_to_doc()
         except Exception as e:
-            await ctx.send("Error, please type it as !su [type] [optional message]. If you did this please notify Drak")
+            await ctx.send("Please type it as !su [type] [optional message]. If you did this please notify Drak")
             logging.error("SU error:" + str(e))
 
     @commands.command()
@@ -295,7 +295,7 @@ class Trial(commands.Cog, name="Trials"):
                     elif msg[1].lower() == "tank":
                         trial.add_backup_tank(ctx.message.author.name, msg[2])
                     else:
-                        await ctx.send("Error, please type it as !bu [type] [optional message]")
+                        await ctx.send("Please type it as !bu [type] [optional message]")
                         worked = False
             except:
                 msg = ctx.message.content
@@ -309,7 +309,7 @@ class Trial(commands.Cog, name="Trials"):
                 elif msg[1].lower() == "tank":
                     trial.add_backup_tank(ctx.message.author.name)
                 else:
-                    await ctx.send("Error, please type it as !bu [type] [optional message]")
+                    await ctx.send("Please type it as !bu [type] [optional message]")
                     worked = False
             if worked:
                 # Update trial
@@ -317,7 +317,7 @@ class Trial(commands.Cog, name="Trials"):
                 save_to_doc()
                 await ctx.send(ctx.author.mention + " Added for Backup!")
         except Exception as e:
-            await ctx.send("Error, please type it as !bu [type] [optional message]. If you did this please notify Drak")
+            await ctx.send("Please type it as !bu [type] [optional message]. If you did this please notify Drak")
             logging.error("BU error:" + str(e))
 
     @commands.command()
@@ -329,13 +329,11 @@ class Trial(commands.Cog, name="Trials"):
             trial = storage.get(num)
             if ctx.message.author.name in trial.trial_dps.keys() or \
                     ctx.message.author.name in trial.backup_dps.keys():
-
                 trial.remove_dps(ctx.message.author.name)
                 worked = True
 
             if ctx.message.author.name in trial.trial_healers.keys() or \
                     ctx.message.author.name in trial.backup_healers.keys():
-
                 trial.remove_healer(ctx.message.author.name)
                 worked = True
 
@@ -439,7 +437,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 await ctx.send("You do not have permission for that.")
         except:
-            await ctx.send("Error! Trial not deleted!")
+            await ctx.send("Trial not deleted! Something has gone wrong.")
 
     @commands.command()
     async def gather(self, ctx: commands.Context):
@@ -457,7 +455,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 await ctx.send("You do not have permission for that.")
         except Exception as e:
-            await ctx.send("Error! Idk something went wrong!")
+            await ctx.send("Something went wrong.")
             logging.error("Gather error: " + str(e))
 
     @commands.command()
@@ -474,40 +472,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 await ctx.send("You do not have permission for that.")
         except Exception as e:
-            await ctx.send("Error! Idk something went wrong!")
-            logging.error("Summon error: " + str(e))
-
-    async def call_everyone(self, num, ctx):
-        # TODO: Finish and test this
-        try:
-            trial = storage.get(num)
-            names = "\nHealers \n"
-            for i in trial.trial_healers:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n"
-            if len(trial.trial_healers) == 0:
-                names += "None " + "\n"
-
-            names += "\nTanks \n"
-            for i in trial.trial_tanks:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n"
-            if len(trial.trial_tanks) == 0:
-                names += "None" + "\n"
-
-            names += "\nDPS \n"
-            for i in trial.trial_dps:
-                for j in ctx.guild.members:
-                    if i == j.name:
-                        names += j.mention + "\n"
-            if len(trial.trial_dps) == 0:
-                names += "None" + "\n"
-
-            await ctx.send(names)
-        except Exception as e:
-            await ctx.send("Error! Idk something went wrong!")
+            await ctx.send("Idk something went wrong!")
             logging.error("Summon error: " + str(e))
 
     @commands.command()
@@ -518,7 +483,7 @@ class Trial(commands.Cog, name="Trials"):
                 save_to_doc()
                 await ctx.send("Saved!")
             except Exception as e:
-                await ctx.send("Error, issue saving. Have Drak try to fix.")
+                await ctx.send("Issue saving. Have Drak try to fix.")
                 print("Error when saving data: " + str(e))
         else:
             await ctx.send("You do not have permission to do that.")
@@ -543,17 +508,19 @@ class Trial(commands.Cog, name="Trials"):
                 db_file.close()
                 await ctx.send("Loaded!")
             except Exception as e:
-                await ctx.send("Error, data not loaded. Have Drak check code.")
+                await ctx.send("Data not loaded. Have Drak check code.")
                 logging.error("Load error: " + str(e))
         else:
             await ctx.send("You do not have permission to do that.")
+
+    # Commands for adding, removing, and modifying the roster
 
     @commands.command()
     async def remove(self, ctx: commands.Context):
         """Removes someone from the roster"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")  # check if user has perms
             user = ctx.message.author
             if user in role.members or user in role2.members:
                 found = False
@@ -585,14 +552,125 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Remove error: " + str(e))
 
     @commands.command()
-    async def leader(self, ctx: commands.Context):
+    async def add(self, ctx: commands.Context, p_type, member: nextcord.Member):
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")  # check if user has perms
+            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+            user = ctx.message.author
+            if user in role.members or user in role2.members:
+                num = ctx.message.channel.id # Get channel id, use it to grab trial, and add user into the trial
+                trial = storage.get(num)
+                if p_type.lower() == "dps":
+                    trial.add_dps(member.name)
+                elif p_type.lower() == "healer":
+                    trial.add_healer(member.name)
+                elif p_type.lower() == "tank":
+                    trial.add_tank(member.name)
+                else:
+                    await ctx.send("could not find role")
+                storage[num] = trial # save trial and save back to storage
+                save_to_doc()
+                await ctx.send("Player added!")
+            else:
+                await ctx.send("You do not have permission to do that.")
+        except Exception as e:
+            await ctx.send("Something has gone wrong.")
+            logging.error("Add user error: " + str(e))
+
+    @commands.command()
+    async def leader(self, ctx: commands.Context, leader):
         """Replaces the leader of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
         role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
         if user in role.members or user in role2.members:
-            # TODO: Implement this and functions for changing time/date and trial, and manually adding people to roster
-            await ctx.send("This has not been implemented yet")
+            try:
+                num = ctx.message.channel.id
+                trial = storage.get(num)
+                old_leader = trial.leader
+                trial.leader = leader
+                storage[num] = trial
+                save_to_doc()
+                await ctx.send("Trial leader has been changed from " + old_leader + " to " + trial.leader)
+            except Exception as e:
+                logging.error("Leader replacement error: " + str(e))
+                await ctx.send("Something has gone wrong")
+        else:
+            await ctx.send("You do not have permission to do this")
+
+    @commands.command(name="changetrial")
+    async def change_trial(self, ctx: commands.Context):
+        """Replaces the trial of a trial"""
+        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+        user = ctx.message.author
+        if user in role.members or user in role2.members:
+            try:
+                num = ctx.message.channel.id
+                msg = ctx.message.content
+                msg = msg.split(" ", 1)
+                msg = msg[1]
+                trial = storage.get(num)
+                old_trial = trial.trial
+                trial.trial = msg
+                storage[num] = trial
+                save_to_doc()
+                await ctx.send("Trial has been changed from " + old_trial + " to " + trial.trial)
+            except Exception as e:
+                logging.error("Trial replacement error: " + str(e))
+                await ctx.send("Something has gone wrong")
+        else:
+            await ctx.send("You do not have permission to do this")
+
+    @commands.command(name="date")
+    async def change_date(self, ctx: commands.Context):
+        """Replaces the date of a trial"""
+        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+        user = ctx.message.author
+        if user in role.members or user in role2.members:
+            try:
+                num = ctx.message.channel.id
+                msg = ctx.message.content
+                msg = msg.split(" ", 1)
+                msg = msg[1]
+                trial = storage.get(num)
+                old_date = trial.date
+                trial.date = msg
+                storage[num] = trial
+                save_to_doc()
+                await ctx.send("Trial date has been changed from " + old_date + " to " + trial.date)
+            except Exception as e:
+                logging.error("Trial date replacement error: " + str(e))
+                await ctx.send("Something has gone wrong")
+        else:
+            await ctx.send("You do not have permission to do this")
+
+    @commands.command()
+    async def time(self, ctx: commands.Context):
+        """Replaces the time of a trial"""
+        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
+        user = ctx.message.author
+        if user in role.members or user in role2.members:
+            try:
+                num = ctx.message.channel.id
+                msg = ctx.message.content
+                msg = msg.split(" ", 1)
+                msg = msg[1]
+                trial = storage.get(num)
+                old_time = trial.time
+                trial.time = msg
+                storage[num] = trial
+                save_to_doc()
+                await ctx.send("Trial time has been changed from " + old_time + " to " + trial.time)
+            except Exception as e:
+                logging.error("Trial time replacement error: " + str(e))
+                await ctx.send("Something has gone wrong")
+        else:
+            await ctx.send("You do not have permission to do this")
+
+        # TODO: Implement this and functions for manually adding people to roster
 
     @commands.command()
     async def clean(self, ctx: commands.Context, num):
@@ -700,6 +778,39 @@ class Trial(commands.Cog, name="Trials"):
             return embed, embed2
         except Exception as e:
             logging.error("Print roster error: " + str(e))
+
+    async def call_everyone(self, num, ctx):
+        # TODO: Finish and test this
+        try:
+            trial = storage.get(num)
+            names = "\nHealers \n"
+            for i in trial.trial_healers:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_healers) == 0:
+                names += "None " + "\n"
+
+            names += "\nTanks \n"
+            for i in trial.trial_tanks:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_tanks) == 0:
+                names += "None" + "\n"
+
+            names += "\nDPS \n"
+            for i in trial.trial_dps:
+                for j in ctx.guild.members:
+                    if i == j.name:
+                        names += j.mention + "\n"
+            if len(trial.trial_dps) == 0:
+                names += "None" + "\n"
+
+            await ctx.send(names)
+        except Exception as e:
+            await ctx.send("Error! Idk something went wrong!")
+            logging.error("Summon error: " + str(e))
 
     @commands.command()
     async def check(self, ctx: commands.Context, num):

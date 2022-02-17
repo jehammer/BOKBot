@@ -30,9 +30,9 @@ async def on_member_join(member):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send("Error, Unknown Command.")
+        await ctx.send("That is not a command I know.")
     else:
-        await ctx.send("Error, something has gone wrong. Are you invoking the command correctly?")
+        await ctx.send("You did not use the command correctly. Please consult the guide in <#932438565009379358>")
 
 
 # Commands
@@ -49,6 +49,7 @@ async def set_dev(ctx):
 
 
 def load_cogs():
+    """Load cogs from the cogs folder"""
     for filename in os.listdir("cogs"):
         if filename.endswith(".py") and not filename.startswith("_"):
             try:

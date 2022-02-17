@@ -16,10 +16,10 @@ class Roles(commands.Cog, name="Roles"):
             user = ctx.message.author
             role = nextcord.utils.get(ctx.guild.roles, name="Kynes Founded")
             await user.add_roles(role)
-            await ctx.message.delete()
+            # await ctx.message.delete()
             await user.send("Welcome to Breath of Kynareth!")
         except Exception as e:
-            await ctx.message.author.send("Error, unable to grant role, please notify a Storm Bringer")
+            await ctx.message.author.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Agree error: " + str(e))
 
     @commands.command()
@@ -36,104 +36,104 @@ class Roles(commands.Cog, name="Roles"):
                 role = nextcord.utils.get(ctx.guild.roles, name="Tank")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "healer":
                 role = nextcord.utils.get(ctx.guild.roles, name="Healer")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
-                    await user.sende(req + " role removed")
+                    # await ctx.message.delete()
+                    await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "dps":
                 role = nextcord.utils.get(ctx.guild.roles, name="DPS")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "ebonheart":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ebonheart")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "daggerfall":
                 role = nextcord.utils.get(ctx.guild.roles, name="Daggerfall")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "aldmeri":
                 role = nextcord.utils.get(ctx.guild.roles, name="Aldmeri")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "crafter":
                 role = nextcord.utils.get(ctx.guild.roles, name="Crafter")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "ex-cons":
                 role = nextcord.utils.get(ctx.guild.roles, name="Ex-Cons")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
 
             elif req == "160":
                 role = nextcord.utils.get(ctx.guild.roles, name="Kyne's Follower")
                 if user in role.members:
                     await user.remove_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role removed")
                 else:
                     await user.add_roles(role)
-                    await ctx.message.delete()
+                    # await ctx.message.delete()
                     await user.send(req + " role granted")
             else:
-                await user.send("Error, role not found. use !roles to see which roles you can request.")
+                await user.send("Role not found. use !roles to see which roles you can request.")
         except Exception as e:
-            await ctx.message.author.send("Error, unable to grant role, please notify a Storm Bringer")
+            await ctx.message.author.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Role error: " + str(e))
 
     @commands.command()

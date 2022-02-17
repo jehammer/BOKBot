@@ -1,9 +1,11 @@
 import asyncio
+
 import nextcord
 from nextcord.ext import commands
 import random
 import logging
 from nextcord import FFmpegPCMAudio
+from nextcord.utils import get
 
 logging.basicConfig(level=logging.INFO)
 
@@ -152,26 +154,44 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def translate(self, ctx: commands.Context):
         """For the Boomers to understand Drak"""
-        msg = """Pog/Poggers: A triumphant cry of celebration. \n Based: The opposite of cringe. \n Redpilled: To 
-        have seen reality for what it is. \n Baller: Very nice """
-        await ctx.send(msg)
+
+        await ctx.send("Pog/Poggers: A triumphant cry of celebration. \nBased: The opposite of cringe. "
+                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice")
 
     @commands.command()
     async def nut(self, ctx: commands.Context):
         """Nut hard"""
         try:
+            # If user is in a voice channel, connect to channel, play audio, then leave
             if ctx.author.voice:
                 channel = ctx.author.voice.channel
                 voice = await channel.connect()
                 source = FFmpegPCMAudio('Audio/nut.wav')
                 voice.play(source)
                 while voice.is_playing():
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(2)
                 await ctx.guild.voice_client.disconnect()
             else:
                 await ctx.send("You are not in a voice channel, you must be to use voice commands.")
         except Exception as e:
             print(e)
+
+    @commands.command(name="getarma")
+    async def get_arma(self, ctx: commands.Context):
+        """Gets Arma with a series of DMs and pings in case he forgets again"""
+        try:
+            arma = ctx.message.guild.get_member(152077378317844480)
+            if arma:
+                for i in range(4):
+                    await arma.send("It is time for your regularly scheduled event")
+                    await ctx.send(arma.mention + " it is time for you to get on!")
+                    await asyncio.sleep(.5)
+
+            else:
+                await ctx.send("Cannot find Arma")
+        except Exception as e:
+            await ctx.send("I cannot call Arma")
+            logging.error("Call Arma error: " + str(e))
 
 
 def setup(bot: commands.Bot):
