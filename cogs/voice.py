@@ -15,7 +15,7 @@ class Voice(commands.Cog, name="Voice"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        logging.info("Things cog loaded")
+        logging.info("Voice cog loaded")
 
     @commands.command()
     async def nut(self, ctx: commands.Context):
