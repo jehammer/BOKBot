@@ -148,7 +148,7 @@ class Things(commands.Cog, name="Fun Things"):
     async def philosophy(self, ctx: commands.Context):
         """The philosophy of Drak"""
         await ctx.send(
-            "All Healers are soft mommy doms \n all Tanks are masochists \n all DPS are sadistic \n - Drak the Wise, "
+            "All Healers are soft mommy doms \nAll Tanks are masochists \nAll DPS are sadistic \n - Drak the Wise, "
             "who ponders his orb.")
 
     @commands.command()
@@ -156,25 +156,10 @@ class Things(commands.Cog, name="Fun Things"):
         """For the Boomers to understand Drak"""
 
         await ctx.send("Pog/Poggers: A triumphant cry of celebration. \nBased: The opposite of cringe. "
-                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice")
-
-    @commands.command()
-    async def nut(self, ctx: commands.Context):
-        """Nut hard"""
-        try:
-            # If user is in a voice channel, connect to channel, play audio, then leave
-            if ctx.author.voice:
-                channel = ctx.author.voice.channel
-                voice = await channel.connect()
-                source = FFmpegPCMAudio('Audio/nut.wav')
-                voice.play(source)
-                while voice.is_playing():
-                    await asyncio.sleep(2)
-                await ctx.guild.voice_client.disconnect()
-            else:
-                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
-        except Exception as e:
-            print(e)
+                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice"
+                       "\nNo Cap: An expression of authenticity."
+                       "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
+                       "\nBussin: Same as Baller")
 
     @commands.command(name="getarma")
     async def get_arma(self, ctx: commands.Context):

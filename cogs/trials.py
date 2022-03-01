@@ -109,7 +109,7 @@ class EsoTrial:
                 del self.backup_tanks[first]
             else:
                 loop = False
-        logging.info("Spots filled in trial id " + num)
+        logging.info("Spots filled in trial id " + str(num))
 
 
 def save_to_doc():
