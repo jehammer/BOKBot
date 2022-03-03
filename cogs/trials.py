@@ -153,9 +153,8 @@ class Trial(commands.Cog, name="Trials"):
         """Creates a new trial for BOK | format: !trial [leader],[trial],[date info],[time]"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 msg = ctx.message.content
                 msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
                 msg = msg[1]  # drop the !trial part
@@ -358,9 +357,8 @@ class Trial(commands.Cog, name="Trials"):
     async def fill(self, ctx: commands.Context):
         """For trial leaders to fill the roster from the backup roster"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 num = ctx.message.channel.id
                 trial = storage.get(num)
@@ -372,7 +370,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Something has gone wrong! Consult Drak!")
                 logging.error("Fill error: " + str(e))
         else:
-            await ctx.send("You must be a Storm Bringer or Raid Lead to fill a roster.")
+            await ctx.send("You must be a Storm Bringer to fill a roster.")
 
     @commands.command()
     async def status(self, ctx: commands.Context):
@@ -428,9 +426,8 @@ class Trial(commands.Cog, name="Trials"):
         """For raid leads, ends the trial."""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 num = ctx.message.channel.id
                 del storage[num]
                 await ctx.send("Trial Closed!")
@@ -444,9 +441,8 @@ class Trial(commands.Cog, name="Trials"):
         """for raid leads, closes the roster and notifies everyone to come."""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 num = ctx.message.channel.id
                 await self.call_everyone(num, ctx)
                 await ctx.send("It is go time!")
@@ -463,9 +459,8 @@ class Trial(commands.Cog, name="Trials"):
         """for raid leads, closes the roster and notifies everyone to come."""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 num = ctx.message.channel.id
                 await self.call_everyone(num, ctx)
                 await ctx.send("It is time to do the thing!")
@@ -520,9 +515,9 @@ class Trial(commands.Cog, name="Trials"):
         """Removes someone from the roster"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")  # check if user has perms
+            # check if user has perms
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 found = False
                 worked = True
                 msg = ctx.message.content
@@ -555,9 +550,8 @@ class Trial(commands.Cog, name="Trials"):
     async def add(self, ctx: commands.Context, p_type, member: nextcord.Member):
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")  # check if user has perms
-            role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
             user = ctx.message.author
-            if user in role.members or user in role2.members:
+            if user in role.members:
                 num = ctx.message.channel.id # Get channel id, use it to grab trial, and add user into the trial
                 trial = storage.get(num)
                 if p_type.lower() == "dps":
@@ -581,9 +575,8 @@ class Trial(commands.Cog, name="Trials"):
     async def leader(self, ctx: commands.Context, leader):
         """Replaces the leader of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 num = ctx.message.channel.id
                 trial = storage.get(num)
@@ -602,9 +595,8 @@ class Trial(commands.Cog, name="Trials"):
     async def change_trial(self, ctx: commands.Context):
         """Replaces the trial of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 num = ctx.message.channel.id
                 msg = ctx.message.content
@@ -626,9 +618,8 @@ class Trial(commands.Cog, name="Trials"):
     async def change_date(self, ctx: commands.Context):
         """Replaces the date of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 num = ctx.message.channel.id
                 msg = ctx.message.content
@@ -650,9 +641,8 @@ class Trial(commands.Cog, name="Trials"):
     async def time(self, ctx: commands.Context):
         """Replaces the time of a trial"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 num = ctx.message.channel.id
                 msg = ctx.message.content
