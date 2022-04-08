@@ -1,11 +1,10 @@
 import asyncio
 
 import nextcord
-from nextcord.ext import commands
+from nextcord.ext import commands, tasks
 import random
 import logging
-from nextcord import FFmpegPCMAudio
-from nextcord.utils import get
+import datetime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -183,6 +182,18 @@ class Things(commands.Cog, name="Fun Things"):
                 logging.error("Call Arma error: " + str(e))
         else:
             await ctx.send("You do not have permission to use this command.")
+
+# TODO: Talk to arma about implementation of this
+
+#    @tasks.loop(time=datetime.time(12, 0, 0, 0))
+#    async def arma_reminder(self, bot):
+#        """An automated task to remind Arma to do stuff"""
+#        # Check if it is Monday at Noon
+#        if datetime.today().weekday() == 0:
+#            guild = bot.get_guild(id=574095793414209556)
+#            arma = guild.get_member(152077378317844480)
+#            if arma:
+#                await arma.send("Reminder to go and look at Guild Traders")
 
 
 def setup(bot: commands.Bot):

@@ -35,6 +35,24 @@ class Voice(commands.Cog, name="Voice"):
         except Exception as e:
             print(e)
 
+    @commands.command()
+    async def cat(self, ctx: commands.Context):
+        """Poptart Cats"""
+        try:
+            # If user is in a voice channel, connect to channel, play audio, then leave
+            if ctx.author.voice:
+                channel = ctx.author.voice.channel
+                voice = await channel.connect()
+                source = FFmpegPCMAudio('Audio/Nyan Cat.wav')
+                voice.play(source)
+                while voice.is_playing():
+                    await asyncio.sleep(2)
+                await ctx.guild.voice_client.disconnect()
+            else:
+                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
+        except Exception as e:
+            print(e)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Voice(bot))
