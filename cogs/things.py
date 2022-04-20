@@ -164,9 +164,8 @@ class Things(commands.Cog, name="Fun Things"):
     async def get_arma(self, ctx: commands.Context):
         """Gets Arma with a series of DMs and pings in case he forgets again"""
         role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        role2 = nextcord.utils.get(ctx.message.author.guild.roles, name="Raid Lead")
         user = ctx.message.author
-        if user in role.members or user in role2.members:
+        if user in role.members:
             try:
                 arma = ctx.message.guild.get_member(152077378317844480)
                 if arma:
@@ -182,6 +181,70 @@ class Things(commands.Cog, name="Fun Things"):
                 logging.error("Call Arma error: " + str(e))
         else:
             await ctx.send("You do not have permission to use this command.")
+
+    @commands.command(name="twitch")
+    async def get_twitch_url(self, ctx: commands.context):
+        """Share Draks Twitch URL"""
+        try:
+            await ctx.send("https://www.twitch.tv/drakadorx")
+        except Exception as e:
+            await ctx.send("Unable to send link.")
+        logging.error("Print Twitch Error: " + str(e))
+
+    @commands.command(name="8ball")
+    async def magic_eight_ball(self, ctx: commands.context):
+        """Answers a Yes or No Question like a magic 8 ball"""
+        # responses from here: https://en.wikipedia.org/wiki/Magic_8-ball#Possible_answers
+        try:
+            ran = random.randint(1, 20)
+            response = ""
+            match ran:
+                case 1:
+                    response = "It is certain."
+                case 2:
+                    response = "It is decidedly so."
+                case 3:
+                    response = "Without a doubt."
+                case 4:
+                    response = "Yes definitely."
+                case 5:
+                    response = "You may rely on it."
+                case 6:
+                    response = "As I see it, yes."
+                case 7:
+                    response = "Most likely."
+                case 8:
+                    response = "Outlook good."
+                case 9:
+                    response = "Yes."
+                case 10:
+                    response = "Signs point to yes."
+                case 11:
+                    response = "Reply hazy, try again."
+                case 12:
+                    response = "Ask again later."
+                case 13:
+                    response = "Better not tell you now."
+                case 14:
+                    response = "Cannot predict now."
+                case 15:
+                    response = "Concentrate and ask again."
+                case 16:
+                    response = "Don't count on it."
+                case 17:
+                    response = "My reply is no."
+                case 18:
+                    response = "My sources say no."
+                case 19:
+                    response = "Outlook not so good."
+                case 20:
+                    response = "Very doubtful. "
+            await ctx.reply(response)
+        except Exception as e:
+            await ctx.send("Unable to use the magic, something is blocking it!")
+            logging.error("Magic 8 Ball Error: " + str(e))
+
+
 
 # TODO: Talk to arma about implementation of this
 
