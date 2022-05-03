@@ -1,10 +1,9 @@
 import asyncio
-
 import nextcord
-from nextcord.ext import commands  # , tasks
+from nextcord.ext import commands, tasks
 import random
 import logging
-# import datetime
+import datetime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -56,6 +55,7 @@ class Things(commands.Cog, name="Fun Things"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         logging.info("Things cog loaded")
+        self.scheduled_good_morning.start()
 
     # Get a trial randomly chosen
     @commands.command()
@@ -293,6 +293,12 @@ Goodnight BOK
     async def morning(self, ctx: commands.context):
         """A way to say good morning to bok"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/970733506948890655/sleepy-sleep.gif')
+
+    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
+    async def scheduled_good_morning(self):
+        channel = self.bot.get_guild(574095793414209556).get_channel(574095793414209558)
+        await channel.send("Good Morning!")
+
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
