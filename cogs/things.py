@@ -84,7 +84,7 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def lore(self, ctx: commands.Context):
         """Shows a random lore tidbit"""
-        ran = random.randint(1, 4)  # Update to account for number of files
+        ran = random.randint(1, 10)  # Update to account for number of files
         grab = str(ran)
         grab += ".txt"
         with open('Lore/' + grab, ) as l:
