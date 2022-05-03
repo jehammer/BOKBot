@@ -1,16 +1,15 @@
 import asyncio
 
 import nextcord
-from nextcord.ext import commands, tasks
+from nextcord.ext import commands  # , tasks
 import random
 import logging
-import datetime
+# import datetime
 
 logging.basicConfig(level=logging.INFO)
 
 
 # Singular function to get random trials depending on what is currently doable by the guild.
-
 
 def get_trial(cap):
     loop = True
@@ -189,11 +188,11 @@ class Things(commands.Cog, name="Fun Things"):
             await ctx.send("https://www.twitch.tv/drakadorx")
         except Exception as e:
             await ctx.send("Unable to send link.")
-        logging.error("Print Twitch Error: " + str(e))
+            logging.error("Print Twitch Error: " + str(e))
 
     @commands.command(name="8ball")
     async def magic_eight_ball(self, ctx: commands.context):
-        """Answers a Yes or No Question like a magic 8 ball"""
+        """Answers a question like a magic 8-ball"""
         # responses from here: https://en.wikipedia.org/wiki/Magic_8-ball#Possible_answers
         try:
             ran = random.randint(1, 20)
@@ -239,14 +238,60 @@ class Things(commands.Cog, name="Fun Things"):
                     response = "Outlook not so good."
                 case 20:
                     response = "Very doubtful. "
+            if ran % 2 == 1:
+                ran = random.randint(1, 10)  # Give this a like 1 in 10 chance of showing up if the number is odd
+                if ran == 2:
+                    response = "Fuck off I am sleeping."
+
             await ctx.reply(response)
         except Exception as e:
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
 
+    @commands.command()
+    async def goodnight(self, ctx: commands.context):
+        """A way to say goodnight to bok"""
 
+        # Wow, this looks ugly, ah well. Say goodnight to the guildies
+        message = """
+In the great big room
+There was a parse dummy backwards in the room
+And a merchant buffoon.
+And a picture of our first trial clear
+And there were there were three little pvpers sitting on chairs
+And two little kittens, and even two chickens
+And even a Leah, asking for pizza at 1 AM
+And a blacksmith and a clothier and a bowl full of alchemy
+And a quiet old guild-mom who was whispering “hush”
 
-# TODO: Talk to arma about implementation of this
+Goodnight room
+Goodnight moon
+Goodnight parse dummy backwards in the room
+Goodnight light
+And the buffoon
+Goodnight pvpers
+Goodnight chairs
+Goodnight kittens
+And goodnight chickens
+Goodnight clocks
+And goodnight socks
+Goodnight Leah
+Goodnight blacksmith
+And goodnight clothier
+Goodnight nobody
+Goodnight alchemy
+And goodnight to the guild-mom whispering “hush”
+Goodnight stars
+Goodnight air
+Goodnight noises everywhere
+Goodnight BOK
+"""
+        await ctx.send(message)
+
+    @commands.command()
+    async def morning(self, ctx: commands.context):
+        """A way to say good morning to bok"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/970733506948890655/sleepy-sleep.gif')
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):

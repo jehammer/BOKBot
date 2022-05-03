@@ -6,4 +6,4 @@ An open-source template based off of BOKBot will be made later on, once I feel t
 No, this is not the malware. Just shares the name but this is friendly and will only slightly steal your data.
 
 
-Bot Ver: 1.5.0
+Bot Ver: 2.0.0

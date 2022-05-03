@@ -19,7 +19,7 @@ class Roles(commands.Cog, name="Roles"):
             # await ctx.message.delete()
             await user.send("Welcome to Breath of Kynareth!")
         except Exception as e:
-            await ctx.message.author.send("Unable to grant role, please notify a Storm Bringer")
+            await ctx.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Agree error: " + str(e))
 
     @commands.command()
@@ -131,9 +131,9 @@ class Roles(commands.Cog, name="Roles"):
                     # await ctx.message.delete()
                     await user.send(req + " role granted")
             else:
-                await user.send("Role not found. use !roles to see which roles you can request.")
+                await ctx.send("Role not found. use !roles to see which roles you can request.")
         except Exception as e:
-            await ctx.message.author.send("Unable to grant role, please notify a Storm Bringer")
+            await ctx.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Role error: " + str(e))
 
     @commands.command()

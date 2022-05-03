@@ -10,6 +10,15 @@ intents = nextcord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 
+# Remove Help command for custom one (for later)
+# TODO: Implement custom help commands
+# bot.remove_command("help")
+
+
+#@bot.command()
+#async def help(ctx):
+#    embed = nextcord.Embed(title="BOKBot Help", description="Help command for BOKBot")
+
 
 # Events
 @bot.event
@@ -32,7 +41,8 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
     else:
-        await ctx.send("You did not use the command correctly. Please consult the guide in <#932438565009379358>")
+        await ctx.send("Something went wrong with the command. If needed please consult the guide "
+                       "in <#932438565009379358>")
 
 
 # Commands
@@ -40,12 +50,6 @@ async def on_command_error(ctx, error):
 async def change_playing():
     await bot.change_presence(activity=nextcord.Game(name="Several Godslayer Progs"))
     print(f"Status has been set")
-
-
-@bot.command(name="setdev")
-async def set_dev(ctx):
-    if ctx.message.author.id == 212634819190849536:
-        await bot.change_presence(activity=nextcord.Game(name="On Test Bot"))
 
 
 def load_cogs():

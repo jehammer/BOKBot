@@ -2,12 +2,11 @@ import nextcord
 from nextcord.ext import commands
 import pickle
 import logging
-
-# TODO: Actually comment through this stuff.
+import asyncio
 
 logging.basicConfig(level=logging.INFO)
 
-# Dictionary to store different embeds
+# Dictionary to store different trial info
 storage = {}
 
 
@@ -80,43 +79,48 @@ class EsoTrial:
         else:
             del self.backup_tanks[n_tank]
 
-    # Fill the roster with overflow people
+    # Fill the roster with backup people
+    #   If there is less than max spots in main roster ,and more than 0 people in backup roster, then go ahead and move
+    #   people from the backup roster to the primary roster until all slots are filled or backups are used up
     def fill_spots(self, num):
-        loop = True
-        # TODO Plan for change:
-        # If user is in bu AND primary, remove from primary and slot them in as the bu role
-        #   IF there is not enough of that type
-        while loop:
-            if len(self.trial_dps) < 8 and len(self.backup_dps) > 0:
-                first = list(self.backup_dps.keys())[0]
-                self.trial_dps[first] = self.backup_dps.get(first)
-                del self.backup_dps[first]
-            else:
-                loop = False
-        loop = True
-        while loop:
-            if len(self.trial_healers) < 2 and len(self.backup_healers) > 0:
-                first = list(self.backup_healers.keys())[0]
-                self.trial_healers[first] = self.backup_healers.get(first)
-                del self.backup_healers[first]
-            else:
-                loop = False
-        loop = True
-        while loop:
-            if len(self.trial_tanks) < 2 and len(self.backup_tanks) > 0:
-                first = list(self.backup_tanks.keys())[0]
-                self.trial_tanks[first] = self.backup_tanks.get(first)
-                del self.backup_tanks[first]
-            else:
-                loop = False
-        logging.info("Spots filled in trial id " + str(num))
+        try:
+            loop = True
+            while loop:
+                if len(self.trial_dps) < 8 and len(self.backup_dps) > 0:
+                    first = list(self.backup_dps.keys())[0]
+                    self.trial_dps[first] = self.backup_dps.get(first)
+                    del self.backup_dps[first]
+                else:
+                    loop = False
+            loop = True
+            while loop:
+                if len(self.trial_healers) < 2 and len(self.backup_healers) > 0:
+                    first = list(self.backup_healers.keys())[0]
+                    self.trial_healers[first] = self.backup_healers.get(first)
+                    del self.backup_healers[first]
+                else:
+                    loop = False
+            loop = True
+            while loop:
+                if len(self.trial_tanks) < 2 and len(self.backup_tanks) > 0:
+                    first = list(self.backup_tanks.keys())[0]
+                    self.trial_tanks[first] = self.backup_tanks.get(first)
+                    del self.backup_tanks[first]
+                else:
+                    loop = False
+            save_to_doc()
+            logging.info("Spots filled in trial id " + str(num))
+        except Exception as e:
+            logging.error("Fill_Spots error: " + str(e))
 
 
 def save_to_doc():
+    """Saves the trials to a pickle"""
     try:
         global storage
         db_file = open('trialStorage.pkl', 'wb')
         to_dump = []
+        # get_data returns a list of the information in the trial, so the key and info is kep together in one list
         for key in storage:
             to_dump.append([key, storage[key].get_data()])
         pickle.dump(to_dump, db_file)
@@ -137,16 +141,19 @@ class Trial(commands.Cog, name="Trials"):
                 # 0: trial, 1: date, 2: time, 3: leader, 4: trial_dps = {},
                 # 5: trial_healers = {}, 6: trial_tanks = {}, 7: backup_dps = {},
                 # 8: backup_healers = {}, 9: backup_tanks = {}
+                # This is disgusting. There has to be a better way to write this.
+                # It looks like this because the pickle file saves the object into a list, the list has to be unpacked
+                #   back into the EsoTrial object, with another list inside it that must be unpacked into the object
                 storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2],
                                                    all_data[i][1][3], all_data[i][1][4], all_data[i][1][5],
                                                    all_data[i][1][6], all_data[i][1][7],
                                                    all_data[i][1][8], all_data[i][1][9])
 
             db_file.close()
+            self.bot = bot
             logging.info("Loaded Trials and Trial Cog!")
         except Exception as e:
             logging.error("Error, unable to load:" + str(e))
-        self.bot = bot
 
     @commands.command()
     async def trial(self, ctx: commands.Context):
@@ -193,28 +200,27 @@ class Trial(commands.Cog, name="Trials"):
         try:
             try:
 
-                # Plan for implementation:
-                # If already in main roster, say they cannot su twice
-                # IF in BU roster under the same role, swap from backup to primary
-                # IF in BU roster under a different role, allow for sign up
+                # Get user ID and add them into the roster
+
                 num = ctx.message.channel.id
+                user_id = ctx.message.author.id
                 trial = storage.get(num)
-                if ctx.message.author.name in trial.trial_dps.keys():
+                if user_id in trial.trial_dps.keys():
                     await ctx.send("You are already signed up as DPS!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_dps.keys():
+                elif user_id in trial.backup_dps.keys():
                     await ctx.send("You are already signed up as backup DPS!")
                     worked = False
-                elif ctx.message.author.name in trial.trial_healers.keys():
+                elif user_id in trial.trial_healers.keys():
                     await ctx.send("You are already signed up as a Healer!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_healers.keys():
+                elif user_id in trial.backup_healers.keys():
                     await ctx.send("You are already signed up as a backup Healer!")
                     worked = False
-                elif ctx.message.author.name in trial.trial_tanks.keys():
+                elif user_id in trial.trial_tanks.keys():
                     await ctx.send("You are already signed up as a Tank!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_tanks.keys():
+                elif user_id in trial.backup_tanks.keys():
                     await ctx.send("You are already signed up as a backup Tank!")
                     worked = False
                 else:
@@ -222,11 +228,11 @@ class Trial(commands.Cog, name="Trials"):
                     msg = ctx.message.content
                     msg = msg.split(" ", 2)  # Split into 2 parts of a list
                     if msg[1].lower() == "dps":
-                        trial.add_dps(ctx.message.author.name, msg[2])
+                        trial.add_dps(user_id, msg[2])
                     elif msg[1].lower() == "healer":
-                        trial.add_healer(ctx.message.author.name, msg[2])
+                        trial.add_healer(user_id, msg[2])
                     elif msg[1].lower() == "tank":
-                        trial.add_tank(ctx.message.author.name, msg[2])
+                        trial.add_tank(user_id, msg[2])
                     else:
                         await ctx.send("Please type it as !su [type] [optional message]")
                         worked = False
@@ -235,13 +241,14 @@ class Trial(commands.Cog, name="Trials"):
                 msg = ctx.message.content
                 msg = msg.split(" ", 1)  # Split into 2 parts of a list
                 num = ctx.message.channel.id
+                user_id = ctx.message.author.id
                 trial = storage.get(num)
                 if msg[1].lower() == "dps":
-                    trial.add_dps(ctx.message.author.name)
+                    trial.add_dps(user_id)
                 elif msg[1].lower() == "healer":
-                    trial.add_healer(ctx.message.author.name)
+                    trial.add_healer(user_id)
                 elif msg[1].lower() == "tank":
-                    trial.add_tank(ctx.message.author.name)
+                    trial.add_tank(user_id)
                 else:
                     await ctx.send("Please type it as !su [type] [optional message]")
                     worked = False
@@ -260,53 +267,51 @@ class Trial(commands.Cog, name="Trials"):
         worked = True
         try:
             try:
-                # TODO Plan for implementation:
-                # If already in bu roster, say they cannot bu twice
-                # IF in primary roster under the same role, swap from primary to bu
-                # IF in primary roster under a different role, allow for sign up
                 num = ctx.message.channel.id
                 trial = storage.get(num)
-                if ctx.message.author.name in trial.trial_dps.keys():
+                user_id = ctx.message.author.id
+                if user_id in trial.trial_dps.keys():
                     await ctx.send("You are already signed up as DPS!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_dps.keys():
+                elif user_id in trial.backup_dps.keys():
                     await ctx.send("You are already signed up as backup DPS!")
                     worked = False
-                elif ctx.message.author.name in trial.trial_healers.keys():
+                elif user_id in trial.trial_healers.keys():
                     await ctx.send("You are already signed up as a Healer!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_healers.keys():
+                elif user_id in trial.backup_healers.keys():
                     await ctx.send("You are already signed up as a backup Healer!")
                     worked = False
-                elif ctx.message.author.name in trial.trial_tanks.keys():
+                elif user_id in trial.trial_tanks.keys():
                     await ctx.send("You are already signed up as a Tank!")
                     worked = False
-                elif ctx.message.author.name in trial.backup_tanks.keys():
+                elif user_id in trial.backup_tanks.keys():
                     await ctx.send("You are already signed up as a backup Tank!")
                     worked = False
                 else:
                     msg = ctx.message.content
                     msg = msg.split(" ", 2)  # Split into 2 parts of a list
                     if msg[1].lower() == "dps":
-                        trial.add_backup_dps(ctx.message.author.name, msg[2])
+                        trial.add_backup_dps(user_id, msg[2])
                     elif msg[1].lower() == "healer":
-                        trial.add_backup_healer(ctx.message.author.name, msg[2])
+                        trial.add_backup_healer(user_id, msg[2])
                     elif msg[1].lower() == "tank":
-                        trial.add_backup_tank(ctx.message.author.name, msg[2])
+                        trial.add_backup_tank(user_id, msg[2])
                     else:
                         await ctx.send("Please type it as !bu [type] [optional message]")
                         worked = False
-            except:
+            except:  # Another area where I need to handle this better
                 msg = ctx.message.content
                 msg = msg.split(" ", 2)  # Split into 2 parts of a list
                 num = ctx.message.channel.id
                 trial = storage.get(num)
+                user_id = ctx.message.author.id
                 if msg[1].lower() == "dps":
-                    trial.add_backup_dps(ctx.message.author.name)
+                    trial.add_backup_dps(user_id)
                 elif msg[1].lower() == "healer":
-                    trial.add_backup_healer(ctx.message.author.name)
+                    trial.add_backup_healer(user_id)
                 elif msg[1].lower() == "tank":
-                    trial.add_backup_tank(ctx.message.author.name)
+                    trial.add_backup_tank(user_id)
                 else:
                     await ctx.send("Please type it as !bu [type] [optional message]")
                     worked = False
@@ -326,31 +331,32 @@ class Trial(commands.Cog, name="Trials"):
             worked = False
             num = ctx.message.channel.id
             trial = storage.get(num)
-            if ctx.message.author.name in trial.trial_dps.keys() or \
-                    ctx.message.author.name in trial.backup_dps.keys():
-                trial.remove_dps(ctx.message.author.name)
+            user_id = ctx.message.author.id
+            if user_id in trial.trial_dps.keys() or \
+                    user_id in trial.backup_dps.keys():
+                trial.remove_dps(user_id)
                 worked = True
 
-            if ctx.message.author.name in trial.trial_healers.keys() or \
-                    ctx.message.author.name in trial.backup_healers.keys():
-                trial.remove_healer(ctx.message.author.name)
+            if user_id in trial.trial_healers.keys() or \
+                    user_id in trial.backup_healers.keys():
+                trial.remove_healer(user_id)
                 worked = True
 
-            if ctx.message.author.name in trial.trial_tanks.keys() or \
-                    ctx.message.author.name in trial.backup_tanks.keys():
-                trial.remove_tank(ctx.message.author.name)
+            if user_id in trial.trial_tanks.keys() or \
+                    user_id in trial.backup_tanks.keys():
+                trial.remove_tank(user_id)
                 worked = True
             else:
                 if not worked:
                     await ctx.send("You are not signed up for this Trial")
             if worked:
                 for i in ctx.guild.members:
-                    if i.name == ctx.message.author.name:
-                        await ctx.send(ctx.message.author.mention + " removed :(")
+                    if i.id == user_id:
+                        await ctx.reply("Removed :(")
                 storage[num] = trial
                 save_to_doc()
         except Exception as e:
-            await ctx.send("Something has gone wrong! Consult Drak!")
+            await ctx.send("Unable to withdraw you from the roster")
             logging.error("WD error: " + str(e))
 
     @commands.command()
@@ -367,7 +373,7 @@ class Trial(commands.Cog, name="Trials"):
                 save_to_doc()
                 await ctx.send("Spots filled!")
             except Exception as e:
-                await ctx.send("Something has gone wrong! Consult Drak!")
+                await ctx.send("Unable to fill the roster")
                 logging.error("Fill error: " + str(e))
         else:
             await ctx.send("You must be a Storm Bringer to fill a roster.")
@@ -375,11 +381,15 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def status(self, ctx: commands.Context):
         """Prints out a list of all who are signed up as main and backups"""
-        num = ctx.message.channel.id
-        primary_embed, backup_embed = await self.print_roster(num)
+        try:
+            num = ctx.message.channel.id
+            primary_embed, backup_embed = await self.print_roster(num, ctx.guild.id)
 
-        await ctx.send(embed=primary_embed)
-        await ctx.send(embed=backup_embed)
+            await ctx.send(embed=primary_embed)
+            await ctx.send(embed=backup_embed)
+        except Exception as e:
+            logging.error("Status check error: " + str(e))
+            await ctx.send("Unable to send status, have Drak check the bot.")
 
     @commands.command()
     async def msg(self, ctx: commands.Context):
@@ -389,20 +399,21 @@ class Trial(commands.Cog, name="Trials"):
         msg = ctx.message.content
         msg = msg.split(" ", 1)
         msg = msg[1]
-        if ctx.message.author.name in trial.trial_dps.keys():
-            trial.trial_dps[ctx.message.author.name] = msg
-        elif ctx.message.author.name in trial.backup_dps:
-            trial.backup_dps[ctx.message.author.name] = msg
-        elif ctx.message.author.name in trial.trial_healers:
-            trial.trial_healers[ctx.message.author.name] = msg
-        elif ctx.message.author.name in trial.backup_healers:
-            trial.backup_healers[ctx.message.author.name] = msg
-        elif ctx.message.author.name in trial.trial_tanks:
-            trial.trial_tanks[ctx.message.author.name] = msg
-        elif ctx.message.author.name in trial.backup_tanks:
-            trial.backup_tanks[ctx.message.author.name] = msg
+        user_id = ctx.message.author.id
+        if user_id in trial.trial_dps.keys():
+            trial.trial_dps[user_id] = msg
+        elif user_id in trial.backup_dps:
+            trial.backup_dps[user_id] = msg
+        elif user_id in trial.trial_healers:
+            trial.trial_healers[user_id] = msg
+        elif user_id in trial.backup_healers:
+            trial.backup_healers[user_id] = msg
+        elif user_id in trial.trial_tanks:
+            trial.trial_tanks[user_id] = msg
+        elif user_id in trial.backup_tanks:
+            trial.backup_tanks[user_id] = msg
         else:
-            await ctx.send("Error, are you in the trial?")
+            await ctx.send("You are not signed up for the trial.")
             found = False
         if found:
             await ctx.send("Updated!")
@@ -438,25 +449,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def gather(self, ctx: commands.Context):
-        """for raid leads, closes the roster and notifies everyone to come."""
-        try:
-            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            user = ctx.message.author
-            if user in role.members:
-                num = ctx.message.channel.id
-                await self.call_everyone(num, ctx)
-                await ctx.send("It is go time!")
-                del storage[num]
-                save_to_doc()
-            else:
-                await ctx.send("You do not have permission for that.")
-        except Exception as e:
-            await ctx.send("Something went wrong.")
-            logging.error("Gather error: " + str(e))
-
-    @commands.command()
-    async def summon(self, ctx: commands.Context):
-        """for raid leads, closes the roster and notifies everyone to come."""
+        """for raid leads, notifies everyone to come."""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -513,17 +506,19 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def remove(self, ctx: commands.Context):
         """Removes someone from the roster"""
+
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            # check if user has perms
             user = ctx.message.author
             if user in role.members:
                 found = False
                 worked = True
                 msg = ctx.message.content
-                msg = msg.split(" ", 1)
-                msg = msg[1]
-                num = ctx.message.channel.id
+                msg = msg.split(" ", 2)
+                num = int(msg[1])  # stores the channel id for the trial
+
+                # reusing msg because there is no way this will be confusing down the line. It stores the persons id
+                msg = int(msg[2])
                 trial = storage.get(num)
                 if msg in trial.trial_dps.keys() or msg in trial.backup_dps.keys():
                     trial.remove_dps(msg)
@@ -536,11 +531,11 @@ class Trial(commands.Cog, name="Trials"):
                 else:
                     if not found:
                         worked = False
-                        await ctx.send("Person not found")
+                        await ctx.send("Person not found, remember to copy the persons ID number.")
                 if worked:
-                    for i in ctx.guild.members:
-                        if i.name == ctx.message.author.name:
-                            await ctx.send(ctx.message.author.mention + " removed " + msg)
+                    # How to get the display name of a user, when using the bot gets the code angry at you
+                    removed = ctx.channel.guild.get_member(msg).display_name
+                    await ctx.reply("Removed " + removed)
                     storage[num] = trial
                     save_to_doc()
         except Exception as e:
@@ -552,19 +547,25 @@ class Trial(commands.Cog, name="Trials"):
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")  # check if user has perms
             user = ctx.message.author
             if user in role.members:
-                num = ctx.message.channel.id # Get channel id, use it to grab trial, and add user into the trial
+                num = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
                 trial = storage.get(num)
+                added_member_id = member.id
+                worked = False
                 if p_type.lower() == "dps":
-                    trial.add_dps(member.name)
+                    trial.add_dps(added_member_id)
+                    worked = True
                 elif p_type.lower() == "healer":
-                    trial.add_healer(member.name)
+                    trial.add_healer(added_member_id)
+                    worked = True
                 elif p_type.lower() == "tank":
-                    trial.add_tank(member.name)
+                    trial.add_tank(added_member_id)
+                    worked = True
                 else:
                     await ctx.send("could not find role")
-                storage[num] = trial # save trial and save back to storage
-                save_to_doc()
-                await ctx.send("Player added!")
+                if worked:  # If True
+                    storage[num] = trial  # save trial and save back to storage
+                    save_to_doc()
+                    await ctx.send("Player added!")
             else:
                 await ctx.send("You do not have permission to do that.")
         except Exception as e:
@@ -587,7 +588,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Trial leader has been changed from " + old_leader + " to " + trial.leader)
             except Exception as e:
                 logging.error("Leader replacement error: " + str(e))
-                await ctx.send("Something has gone wrong")
+                await ctx.send("Unable to replace leader")
         else:
             await ctx.send("You do not have permission to do this")
 
@@ -610,7 +611,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Trial has been changed from " + old_trial + " to " + trial.trial)
             except Exception as e:
                 logging.error("Trial replacement error: " + str(e))
-                await ctx.send("Something has gone wrong")
+                await ctx.send("Unable to change trial")
         else:
             await ctx.send("You do not have permission to do this")
 
@@ -633,7 +634,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Trial date has been changed from " + old_date + " to " + trial.date)
             except Exception as e:
                 logging.error("Trial date replacement error: " + str(e))
-                await ctx.send("Something has gone wrong")
+                await ctx.send("unable to change date")
         else:
             await ctx.send("You do not have permission to do this")
 
@@ -656,15 +657,13 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Trial time has been changed from " + old_time + " to " + trial.time)
             except Exception as e:
                 logging.error("Trial time replacement error: " + str(e))
-                await ctx.send("Something has gone wrong")
+                await ctx.send("Unable to change time")
         else:
             await ctx.send("You do not have permission to do this")
 
-        # TODO: Implement this and functions for manually adding people to roster
-
     @commands.command()
     async def clean(self, ctx: commands.Context, num):
-        """For Drak when someone doesnt end a trial"""
+        """For Drak when someone doesn't end a trial"""
         if ctx.message.author.id == 212634819190849536:
             try:
                 num = int(num)
@@ -673,21 +672,22 @@ class Trial(commands.Cog, name="Trials"):
                 save_to_doc()
                 await ctx.send("The butt has been wiped.")
             except Exception as e:
-                await ctx.send("Error, data not cleaned.")
+                await ctx.send("Unable to wipe the butt, the wipes are dry.")
                 logging.error("Clean error: " + str(e))
         else:
             await ctx.send("You do not have permission to do that.")
 
-    async def print_roster(self, num):
+    async def print_roster(self, num, guild_id):
         try:
             global storage
             trial = storage.get(num)
             dps_count = 0
             healer_count = 0
             tank_count = 0
+            guild = self.bot.get_guild(guild_id)
             embed = nextcord.Embed(
                 title=trial.trial + " " + trial.date + " " + trial.time,
-                description="This battle will be legendary!",  # trial.time,
+                description="This battle will be legendary!",
                 color=nextcord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
@@ -695,31 +695,74 @@ class Trial(commands.Cog, name="Trials"):
 
             # HEALERS
             names = ""
-            for i in trial.trial_healers:
-                names += "<:Healer:933835785352904864>" + i + " " + trial.trial_healers[i] + " " + "\r\n"
-                healer_count += 1
-            if len(names) == 0:
+            if len(trial.trial_healers) == 0:
                 names = "None"
-            embed.add_field(name="Healers", value=names, inline=False)
+            else:
+                to_remove = []
+                for i in trial.trial_healers:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        # Check if there are no healers left, if so then set names to None
+                        if len(to_remove) == len(trial.trial_healers):
+                            names = "None"
+                    else:
+                        names += "<:Healer:933835785352904864>" + member_name.display_name + " " + \
+                                 trial.trial_healers[i] + " " + "\r\n"
+                        healer_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_healer(i)
+                    save_to_doc()
 
+            embed.add_field(name="Healers", value=names, inline=False)
             # TANKS
             names = ""
-            for i in trial.trial_tanks:
-                names += "<:Tank:933835838951948339>" + i + " " + trial.trial_tanks[i] + " " + "\r\n"
-                tank_count += 1
-            if len(names) == 0:
+            if len(trial.trial_tanks) == 0:
                 names = "None"
+            else:
+                to_remove = []
+                tanks = trial.trial_tanks
+                for i in tanks:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        if len(to_remove) == len(trial.trial_tanks):
+                            names = "None"
+                    else:
+                        names += "<:Tank:933835838951948339>" + member_name.display_name + " " + trial.trial_tanks[i] \
+                                 + " " + "\r\n"
+                        tank_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_tank(i)
+                    save_to_doc()
             embed.add_field(name="Tanks", value=names, inline=False)
 
             # DPS
             names = ""
-            for i in trial.trial_dps:
-                names += "<:DPS:933835811684757514>" + i + " " + trial.trial_dps[i] + " " + "\r\n"
-                dps_count += 1
-            if len(names) == 0:
+            if len(trial.trial_dps) == 0:
                 names = "None"
+            else:
+                to_remove = []
+                dps = trial.trial_dps
+                for i in dps:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        if len(to_remove) == len(trial.trial_dps):
+                            names = "None"
+                    else:
+                        names += "<:DPS:933835811684757514>" + member_name.display_name + " " \
+                                 + trial.trial_dps[i] + " " + "\r\n"
+                        dps_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_dps(i)
+                    save_to_doc()
 
             embed.add_field(name="DPS", value=names, inline=False)
+
             names = "Healers: " + str(healer_count) + " \nTanks: " + str(tank_count) + " \nDPS: " + str(dps_count)
             embed.add_field(name="Total", value=names, inline=False)
 
@@ -733,33 +776,76 @@ class Trial(commands.Cog, name="Trials"):
                 color=nextcord.Color.orange()
             )
             embed2.set_footer(text="Remember to beep when backing up that dump truck")
-            # embed.set_author(name=trial.leader)
             # BACKUP HEALERS
             names = ""
-            for i in trial.backup_healers:
-                names += "<:Healer:933835785352904864>" + i + " " + trial.backup_healers[i] + "\r\n"
-                healer_count += 1
-            if len(names) == 0:
+            if len(trial.backup_healers) == 0:
                 names = "None"
+            else:
+                to_remove = []
+                backup_healers = trial.backup_healers
+                for i in backup_healers:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        if len(to_remove) == len(trial.backup_healers):
+                            names = "None"
+                    else:
+                        names += "<:Healer:933835785352904864>" + member_name.display_name + " " + \
+                                 trial.backup_healers[i] + "\r\n"
+                        healer_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_healer(i)
+                    save_to_doc()
+
             embed2.add_field(name="Healers", value=names, inline=False)
 
             # BACKUP TANKS
             names = ""
-
-            for i in trial.backup_tanks:
-                names += "<:Tank:933835838951948339>" + i + " " + trial.backup_tanks[i] + "\r\n"
-                tank_count += 1
-            if len(names) == 0:
+            if len(trial.backup_tanks) == 0:
                 names = "None"
+            else:
+                to_remove = []
+                tanks = trial.backup_tanks
+                for i in tanks:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        if len(to_remove) == len(trial.backup_tanks):
+                            names = "None"
+                    else:
+                        names += "<:Tank:933835838951948339>" + member_name.display_name + " " + trial.backup_tanks[i] \
+                                 + "\r\n"
+                        tank_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_tank(i)
+                    save_to_doc()
+
             embed2.add_field(name="Tanks", value=names, inline=False)
 
             # BACKUP DPS
             names = ""
-            for i in trial.backup_dps:
-                names += "<:DPS:933835811684757514>" + i + " " + trial.backup_dps[i] + "\r\n"
-                dps_count += 1
-            if len(names) == 0:
+            if len(trial.backup_dps) == 0:
                 names = "None"
+            else:
+                to_remove = []
+                dps = trial.backup_dps
+                for i in dps:
+                    member_name = guild.get_member(i)
+                    if member_name is None:
+                        to_remove.append(i)
+                        if len(to_remove) == len(trial.backup_dps):
+                            names = "None"
+                    else:
+                        names += "<:DPS:933835811684757514>" + member_name.display_name + " " + trial.backup_dps[i] \
+                                 + "\r\n"
+                        dps_count += 1
+                if len(to_remove) > 0:
+                    for i in to_remove:
+                        trial.remove_dps(i)
+                    save_to_doc()
+
             embed2.add_field(name="DPS", value=names, inline=False)
 
             names = "Healers: " + str(healer_count) + "\nTanks: " + str(tank_count) + "\nDPS: " + str(dps_count)
@@ -770,13 +856,12 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Print roster error: " + str(e))
 
     async def call_everyone(self, num, ctx):
-        # TODO: Finish and test this
         try:
             trial = storage.get(num)
             names = "\nHealers \n"
             for i in trial.trial_healers:
                 for j in ctx.guild.members:
-                    if i == j.name:
+                    if i == j.id:
                         names += j.mention + "\n"
             if len(trial.trial_healers) == 0:
                 names += "None " + "\n"
@@ -784,7 +869,7 @@ class Trial(commands.Cog, name="Trials"):
             names += "\nTanks \n"
             for i in trial.trial_tanks:
                 for j in ctx.guild.members:
-                    if i == j.name:
+                    if i == j.id:
                         names += j.mention + "\n"
             if len(trial.trial_tanks) == 0:
                 names += "None" + "\n"
@@ -792,14 +877,14 @@ class Trial(commands.Cog, name="Trials"):
             names += "\nDPS \n"
             for i in trial.trial_dps:
                 for j in ctx.guild.members:
-                    if i == j.name:
+                    if i == j.id:
                         names += j.mention + "\n"
             if len(trial.trial_dps) == 0:
                 names += "None" + "\n"
 
             await ctx.send(names)
         except Exception as e:
-            await ctx.send("Error! Idk something went wrong!")
+            await ctx.send("Error printing roster")
             logging.error("Summon error: " + str(e))
 
     @commands.command()
@@ -808,7 +893,7 @@ class Trial(commands.Cog, name="Trials"):
         if ctx.message.author.id == 212634819190849536:
             try:
                 num = int(num)
-                primary_embed, backup_embed = await self.print_roster(num)
+                primary_embed, backup_embed = await self.print_roster(num, ctx.guild.id)
 
                 await ctx.send(embed=primary_embed)
                 await ctx.send(embed=backup_embed)
@@ -817,6 +902,77 @@ class Trial(commands.Cog, name="Trials"):
                 logging.error("Check Error: " + str(e))
         else:
             await ctx.send("You do not have permission to do that.")
+
+    @commands.command()
+    async def close(self, ctx: commands.Context):
+        """Closes a roster and deletes a channel for a trial"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                # def check(m: nextcord.Message):  # m = discord.Message.
+                # return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
+                #  checking author and channel, you could add a line to check the content.
+                # and m.content == "xxx"
+                # the check won't become True until it detects (in the example case): xxx
+                # but that's not what we want here.
+
+                # Not using this but keeping it in comments for later development
+
+                try:
+                    counter = 1
+                    total = ""
+                    key_list = []
+                    for i in storage.keys():
+                        channel_name = ctx.guild.get_channel(i).name
+                        total += str(counter) + ": " + channel_name + "\n"
+                        counter += 1
+                        key_list.append(i)
+                    await ctx.reply("Enter a number from the list below to have the roster closed and "
+                                    "the channel deleted")
+                    await ctx.send(total)
+
+                    #                        event = on_message without on_
+                    msg = await self.bot.wait_for(event='message', timeout=60.0)
+                    # msg = nextcord.Message
+                except asyncio.TimeoutError:
+                    # at this point, the check didn't become True, let's handle it.
+                    await ctx.send(f"{ctx.author.mention}, bot has timed out")
+                    return
+                else:
+                    # at this point, the check has become True and the wait_for has done its work, now we can do ours.
+                    # we could also do things based on the message content here, like so
+                    # if msg.content == "this is cool":
+                    #    return await ctx.send("wait_for is indeed a cool method")
+
+                    try:
+                        # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+
+                        choice = int(msg.content)
+                        choice -= 1  # Need to lower it by one for the right number to get
+                        try:
+                            num = key_list[choice]
+                        except IndexError:
+                            await ctx.send("That is not a valid number, exiting command")
+                            return
+                        if num in storage.keys():
+                            del storage[num]
+                            save_to_doc()
+                            await ctx.guild.get_channel(num).delete()
+                            await ctx.send("Channel deleted, roster closed")
+                            logging.info("Deleted channel and closed roster ID: " + str(num))
+                        else:
+                            await ctx.send("That is not an option")
+                        return
+                    except ValueError:
+                        await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error("Close error: " + str(e))
+            await ctx.send("Unable to close roster and delete channel: " + str(e))
+
+    # TODO: Create swap command to swap role easily
 
 
 def setup(bot: commands.Bot):

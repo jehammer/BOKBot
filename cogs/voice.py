@@ -33,11 +33,11 @@ class Voice(commands.Cog, name="Voice"):
             else:
                 await ctx.send("You are not in a voice channel, you must be to use voice commands.")
         except Exception as e:
-            print(e)
+            logging.error("Nut error: " + str(e))
 
     @commands.command()
     async def cat(self, ctx: commands.Context):
-        """Poptart Cats"""
+        """Pop tart Cats"""
         try:
             # If user is in a voice channel, connect to channel, play audio, then leave
             if ctx.author.voice:
@@ -51,7 +51,18 @@ class Voice(commands.Cog, name="Voice"):
             else:
                 await ctx.send("You are not in a voice channel, you must be to use voice commands.")
         except Exception as e:
-            print(e)
+            logging.error("Pop tart Error: " + str(e))
+
+    @commands.command()
+    async def dc(self, ctx: commands.Context):
+        """Force the bot to disconnect from a chat if it is in one"""
+        try:
+            if ctx.author.voice:
+                await ctx.guild.voice_client.disconnect()
+            else:
+                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
+        except Exception as e:
+            logging.error("DC error: " + str(e))
 
 
 def setup(bot: commands.Bot):
