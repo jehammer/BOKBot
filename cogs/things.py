@@ -94,7 +94,7 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def joke(self, ctx: commands.Context):
         """Tells a Joke"""
-        ran = random.randint(1, 3)  # Update to account for number of files
+        ran = random.randint(1, 11)  # Update to account for number of files
         grab = str(ran)
         grab += ".txt"
         with open('Jokes/' + grab, encoding="utf8") as l:
