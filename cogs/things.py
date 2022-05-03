@@ -40,6 +40,7 @@ def get_trial(cap):
             trial = "Kyne's Aegis"
         case 10:
             trial = "Rockgrove"
+        # TODO: Add in Dreadsail Reef as an option when High Isle releases
     if len(last4) < 4:
         last4.append(ran)
     else:
@@ -73,7 +74,7 @@ class Things(commands.Cog, name="Fun Things"):
     @commands.command()
     async def hmtrial(self, ctx: commands.Context):
         """Gives you a random veteran hm trial to do"""
-        trial = get_trial(3)
+        trial = get_trial(4)
         await ctx.send("Veteran " + trial + " HM")
 
     @commands.command()
