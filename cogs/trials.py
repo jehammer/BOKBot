@@ -446,8 +446,9 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("Trial Closed!")
             else:
                 await ctx.send("You do not have permission for that.")
-        except:
+        except Exception as e:
             await ctx.send("Trial not deleted! Something has gone wrong.")
+            logging.error("End Trial error: " + str(e))
 
     @commands.command()
     async def gather(self, ctx: commands.Context):

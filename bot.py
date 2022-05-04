@@ -16,9 +16,9 @@ bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 # bot.remove_command("help")
 
 
-#@bot.command()
-#async def help(ctx):
-#    embed = nextcord.Embed(title="BOKBot Help", description="Help command for BOKBot")
+# @bot.command()
+# async def help(ctx):
+#     embed = nextcord.Embed(title="BOKBot Help", description="Help command for BOKBot")
 
 
 # Events
@@ -45,6 +45,7 @@ async def on_command_error(ctx, error):
         await ctx.send("Something went wrong with the command. If needed please consult the guide "
                        "in <#932438565009379358>")
 
+
 async def change_playing():
     await bot.change_presence(activity=nextcord.Game(name="Several Godslayer Progs"))
     print(f"Status has been set")
@@ -68,6 +69,7 @@ async def on_ready():
     print(f"Logged in as: {bot.user.name}")
     await change_playing()  # Works in non-cog without self, requires self in cogs
     print("Bot is ready for use")
+
 
 @bot.command()
 async def shutdown(ctx: commands.Context):
