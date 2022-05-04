@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import nextcord
 from nextcord.ext import commands
 import os
@@ -44,9 +45,6 @@ async def on_command_error(ctx, error):
         await ctx.send("Something went wrong with the command. If needed please consult the guide "
                        "in <#932438565009379358>")
 
-
-# Commands
-
 async def change_playing():
     await bot.change_presence(activity=nextcord.Game(name="Several Godslayer Progs"))
     print(f"Status has been set")
@@ -67,12 +65,25 @@ def load_cogs():
 
 @bot.event
 async def on_ready():
-    load_cogs()
     print(f"Logged in as: {bot.user.name}")
     await change_playing()  # Works in non-cog without self, requires self in cogs
     print("Bot is ready for use")
 
+@bot.command()
+async def shutdown(ctx: commands.Context):
+    """Owner-Only shutdown command"""
+    try:
+        if ctx.message.author.id == 212634819190849536:
+            logging.info("Closing connection and shutting down")
+            await bot.close()
+        else:
+            await ctx.reply("You do not have permission to do this")
+    except Exception as e:
+        await ctx.send("Error shutting down")
+        logging.error("Shutdown error: " + str(e))
 
+
+load_cogs()  # Loading cogs outside on_ready enables cog files to have their own on_ready
 if __name__ == '__main__':
     with open('Token.txt') as f:
         token = f.readline()

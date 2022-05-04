@@ -117,6 +117,7 @@ class EsoTrial:
 def save_to_doc():
     """Saves the trials to a pickle"""
     try:
+        logging.info("Started pickling Trials")
         global storage
         db_file = open('trialStorage.pkl', 'wb')
         to_dump = []
@@ -125,6 +126,7 @@ def save_to_doc():
             to_dump.append([key, storage[key].get_data()])
         pickle.dump(to_dump, db_file)
         db_file.close()
+        logging.info("Finished pickling Trials")
     except Exception as e:
         logging.error("Error on saving pickle: " + str(e))
 
