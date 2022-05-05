@@ -463,7 +463,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 await ctx.send("You do not have permission for that.")
         except Exception as e:
-            await ctx.send("Idk something went wrong!")
+            await ctx.send("Unable to summon everyone")
             logging.error("Summon error: " + str(e))
 
     @commands.command()
@@ -927,8 +927,11 @@ class Trial(commands.Cog, name="Trials"):
                     total = ""
                     key_list = []
                     for i in storage.keys():
-                        channel_name = ctx.guild.get_channel(i).name
-                        total += str(counter) + ": " + channel_name + "\n"
+                        channel = ctx.guild.get_channel(i)
+                        if channel is not None:
+                            total += str(counter) + ": " + channel.name + "\n"
+                        else:
+                            total += str(counter) + ": " + str(i) + "\n"
                         counter += 1
                         key_list.append(i)
                     await ctx.reply("Enter a number from the list below to have the roster closed and "
@@ -936,12 +939,13 @@ class Trial(commands.Cog, name="Trials"):
                     await ctx.send(total)
 
                     #                        event = on_message without on_
-                    msg = await self.bot.wait_for(event='message', timeout=60.0)
+                    msg = await self.bot.wait_for(event='message', timeout=15.0)
                     # msg = nextcord.Message
                 except asyncio.TimeoutError:
                     # at this point, the check didn't become True, let's handle it.
                     await ctx.send(f"{ctx.author.mention}, bot has timed out")
                     return
+
                 else:
                     # at this point, the check has become True and the wait_for has done its work, now we can do ours.
                     # we could also do things based on the message content here, like so
@@ -950,7 +954,7 @@ class Trial(commands.Cog, name="Trials"):
 
                     try:
                         # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
-
+                        #   However, I already wrote it like this. Oh well.
                         choice = int(msg.content)
                         choice -= 1  # Need to lower it by one for the right number to get
                         try:
@@ -958,14 +962,35 @@ class Trial(commands.Cog, name="Trials"):
                         except IndexError:
                             await ctx.send("That is not a valid number, exiting command")
                             return
-                        if num in storage.keys():
-                            del storage[num]
-                            save_to_doc()
-                            await ctx.guild.get_channel(num).delete()
-                            await ctx.send("Channel deleted, roster closed")
-                            logging.info("Deleted channel and closed roster ID: " + str(num))
+                        try:
+                            channel = ctx.guild.get_channel(num)
+                            trial = storage.get(num)
+                            # Arma is likely to delete the channel but not the trial, best to account for that
+                            if channel is None:
+                                await ctx.send("Delete trial: " + trial.trial + " - " + str(num) + " (y/n)?")
+                            else:
+                                await ctx.send("Delete trial and channel: " + trial.trial + " - " + channel.name
+                                               + " (y/n)?")
+                            confirm = await self.bot.wait_for(event="message", timeout=15.0)
+                            confirm = confirm.content.lower()
+                        except asyncio.TimeoutError:
+                            await ctx.send(f"{ctx.author.mention}, bot has timed out")
+                            return
                         else:
-                            await ctx.send("That is not an option")
+                            # So long as it is a Y or a y, Delete the channel and the trial or just the trial
+                            if confirm == "y":
+                                if num in storage.keys():
+                                    del storage[num]
+                                    save_to_doc()
+                                    channel = ctx.guild.get_channel(num)
+                                    if channel is not None:
+                                        await ctx.guild.get_channel(num).delete()
+                                    await ctx.send("Channel deleted, roster closed")
+                                    logging.info("Deleted channel and closed roster ID: " + str(num))
+                                else:
+                                    await ctx.send("That is not an option")
+                            else:
+                                await ctx.send("Exiting from close command.")
                         return
                     except ValueError:
                         await ctx.send("The input was not a valid number!")
@@ -973,7 +998,7 @@ class Trial(commands.Cog, name="Trials"):
                 await ctx.send("You do not have permission to use this command")
         except Exception as e:
             logging.error("Close error: " + str(e))
-            await ctx.send("Unable to close roster and delete channel: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     # TODO: Create swap command to swap role easily
 

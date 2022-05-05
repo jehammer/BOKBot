@@ -1,17 +1,13 @@
 from nextcord.ext import commands
 import logging
 
+
 class Gif(commands.Cog, name="Gifs"):
     """Receives gif commands"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         logging.info("Gifs Cog loaded")
-
-    # @commands.command()
-    # async def gif(self, ctx: commands.Context):
-    #    """Checks for a response from the bot"""
-    #    await ctx.send("Here is a gif")
 
     @commands.command()
     async def arma(self, ctx: commands.Context):
@@ -35,7 +31,7 @@ class Gif(commands.Cog, name="Gifs"):
 
     @commands.command()
     async def drak(self, ctx: commands.Context):
-        """He will never forgive Fish for this"""
+        """He will never forgive you all for this"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
 
     @commands.command()
