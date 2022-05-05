@@ -422,7 +422,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command(name="listtrials")
     async def list_trials(self, ctx: commands.Context):
-        """For debugging purposes, prints out IDs of trials"""
+        """Owners way of checking the active trials list by id"""
         if ctx.message.author.id == 212634819190849536:
             msg = ""
             if len(storage) > 0:

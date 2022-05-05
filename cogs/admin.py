@@ -9,8 +9,10 @@ class Admin(commands.Cog, name="Admin"):
         self.bot = bot
         logging.info("Admin cog loaded")
 
+        # Needs to be bot.command() here
         @bot.command()
         async def servers(ctx):
+            """Check the servers the bot is active in, Owner only"""
             if ctx.message.author.id == 212634819190849536:
                 try:
                     all_servers = list(bot.guilds)

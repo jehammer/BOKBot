@@ -10,44 +10,6 @@ logging.basicConfig(level=logging.INFO)
 
 # Singular function to get random trials depending on what is currently doable by the guild.
 
-def get_trial(cap):
-    loop = True
-    last4 = []
-    while loop:
-        ran = random.randint(1, cap)
-        if ran not in last4:
-            loop = False
-    trial = ""
-    match ran:
-        case 1:
-            trial = "Hel Ra Citadel"
-        case 2:
-            trial = "Atherian Archive"
-        case 3:
-            trial = "Sanctum Ophidia"
-        case 4:
-            trial = "Maw of Lorkhaj"
-        case 5:
-            trial = "Sunspire"
-        case 6:
-            trial = "Asylum Sanctorium"
-        case 7:
-            trial = "Cloudrest"
-        case 8:
-            trial = "Halls of Fabrication"
-        case 9:
-            trial = "Kyne's Aegis"
-        case 10:
-            trial = "Rockgrove"
-        # TODO: Add in Dreadsail Reef as an option when High Isle releases
-    if len(last4) < 4:
-        last4.append(ran)
-    else:
-        last4.pop()
-        last4.append(ran)
-    logging.info("Status of last4: " + str(last4))
-    return trial
-
 
 class Things(commands.Cog, name="Fun Things"):
     """For Fun/Event Type Things"""
@@ -56,26 +18,6 @@ class Things(commands.Cog, name="Fun Things"):
         self.bot = bot
         logging.info("Things cog loaded")
         self.scheduled_good_morning.start()
-
-    # Get a trial randomly chosen
-    @commands.command()
-    async def ntrial(self, ctx: commands.Context):
-        """Gives you a random normal trial to do"""
-        trial = get_trial(10)
-        await ctx.send("Normal " + trial)
-        logging.info("Random normal generated: " + trial)
-
-    @commands.command()
-    async def vtrial(self, ctx: commands.Context):
-        """Gives you a random veteran trial to do"""
-        trial = get_trial(10)
-        await ctx.send("Veteran " + trial)
-
-    @commands.command()
-    async def hmtrial(self, ctx: commands.Context):
-        """Gives you a random veteran hm trial to do"""
-        trial = get_trial(4)
-        await ctx.send("Veteran " + trial + " HM")
 
     @commands.command()
     async def youtube(self, ctx: commands.Context):

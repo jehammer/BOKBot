@@ -46,7 +46,6 @@ async def on_member_remove(member):
     await channel.send(f"{member.name}#{user.discriminator} - {member.display_name} has left the server")
 
 
-
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
