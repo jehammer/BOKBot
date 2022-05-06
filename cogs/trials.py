@@ -11,7 +11,8 @@ storage = {}
 
 # TODO: Implement local time functionality for trial embeds
 
-# Special class to store trial in
+
+# Special class to store trial in'
 class EsoTrial:
     """Class to hold trial information"""
 
@@ -915,7 +916,7 @@ class Trial(commands.Cog, name="Trials"):
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
-                def check(m: nextcord.Message): # m = discord.Message.
+                def check(m: nextcord.Message):  # m = discord.Message.
                     return user == m.author
                 #  checking author and channel, you could add a line to check the content.
                 # and m.content == "xxx"
@@ -924,81 +925,85 @@ class Trial(commands.Cog, name="Trials"):
 
                 # Not using this but keeping it in comments for later development
                 run = True
-                try:
-                    counter = 1
-                    total = ""
-                    key_list = []
-                    for i in storage.keys():
-                        channel = ctx.guild.get_channel(i)
-                        if channel is not None:
-                            total += str(counter) + ": " + channel.name + "\n"
-                        else:
-                            total += str(counter) + ": " + str(i) + "\n"
-                        counter += 1
-                        key_list.append(i)
-                    await ctx.reply("Enter a number from the list below to have the roster closed and "
-                                    "the channel deleted")
-                    await ctx.send(total)
-
-                    #                        event = on_message without on_
-                    msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
-                    # msg = nextcord.Message
-                except asyncio.TimeoutError:
-                    # at this point, the check didn't become True, let's handle it.
-                    await ctx.send(f"{ctx.author.mention}, close has timed out")
-                    return
-
-                else:
-                    # at this point, the check has become True and the wait_for has done its work, now we can do ours.
-                    # we could also do things based on the message content here, like so
-                    # if msg.content == "this is cool":
-                    #    return await ctx.send("wait_for is indeed a cool method")
-
+                while run:
                     try:
-                        # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
-                        #   However, I already wrote it like this. Oh well.
-                        choice = int(msg.content)
-                        choice -= 1  # Need to lower it by one for the right number to get
-                        try:
-                            num = key_list[choice]
-                        except IndexError:
-                            await ctx.send("That is not a valid number, exiting command")
-                            return
-                        try:
-                            channel = ctx.guild.get_channel(num)
-                            trial = storage.get(num)
-                            # Arma is likely to delete the channel but not the trial, best to account for that
-                            if channel is None:
-                                await ctx.send("Delete trial: " + trial.trial + " - " + str(num) + " (y/n)?")
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
                             else:
-                                await ctx.send("Delete trial and channel: " + trial.trial + " - " + channel.name
-                                               + " (y/n)?")
-                            confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
-                            confirm = confirm.content.lower()
-                        except asyncio.TimeoutError:
-                            await ctx.send(f"{ctx.author.mention}, close has timed out")
-                            return
-                        else:
-                            # So long as it is a Y or a y, Delete the channel and the trial or just the trial
-                            if confirm == "y":
-                                if num in storage.keys():
-                                    del storage[num]
-                                    save_to_doc()
-                                    channel = ctx.guild.get_channel(num)
-                                    if channel is not None:
-                                        await ctx.guild.get_channel(num).delete()
-                                    await ctx.send("Channel deleted, roster closed")
-                                    logging.info("Deleted channel and closed roster ID: " + str(num))
-                                else:
-                                    await ctx.send("That is not an option")
-                            else:
-                                if confirm == 'n':
-                                    await ctx.send("Exiting from close command.")
-                                else:
-                                    await ctx.send("Invalid response, exiting from close command.")
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the roster closed and "
+                                        "the channel deleted")
+                        await ctx.send(total)
+
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, close has timed out")
                         return
-                    except ValueError:
-                        await ctx.send("The input was not a valid number!")
+
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        # we could also do things based on the message content here, like so
+                        # if msg.content == "this is cool":
+                        #    return await ctx.send("wait_for is indeed a cool method")
+
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    channel = ctx.guild.get_channel(num)
+                                    trial = storage.get(num)
+                                    # Arma is likely to delete the channel but not the trial, best to account for that
+                                    if channel is None:
+                                        await ctx.send("Delete trial: " + trial.trial + " - " + str(num) + " (y/n)?")
+                                    else:
+                                        await ctx.send("Delete trial and channel: " + trial.trial + " - " + channel.name
+                                                       + " (y/n)?")
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
+                                    confirm = confirm.content.lower()
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, close has timed out")
+                                    return
+                                else:
+                                    # So long as it is a Y or a y, Delete the channel and the trial or just the trial
+                                    if confirm == "y":
+                                        if num in storage.keys():
+                                            del storage[num]
+                                            save_to_doc()
+                                            channel = ctx.guild.get_channel(num)
+                                            if channel is not None:
+                                                await ctx.guild.get_channel(num).delete()
+                                            await ctx.send("Channel deleted, roster closed")
+                                            logging.info("Deleted channel and closed roster ID: " + str(num))
+                                            run = False
+                                        else:
+                                            await ctx.send("Unable to find trial.")
+                                    else:
+                                        if confirm == 'n':
+                                            await ctx.send("Returning to menu.")
+                                        else:
+                                            await ctx.send("Invalid response, returning to menu.")
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
             else:
                 await ctx.send("You do not have permission to use this command")
         except Exception as e:
