@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.INFO)
 # Dictionary to store different trial info
 storage = {}
 
+# TODO: Implement local time functionality for trial embeds
 
 # Special class to store trial in
 class EsoTrial:
@@ -443,6 +444,7 @@ class Trial(commands.Cog, name="Trials"):
             if user in role.members:
                 num = ctx.message.channel.id
                 del storage[num]
+                save_to_doc()
                 await ctx.send("Trial Closed!")
             else:
                 await ctx.send("You do not have permission for that.")
@@ -913,15 +915,15 @@ class Trial(commands.Cog, name="Trials"):
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
-                # def check(m: nextcord.Message):  # m = discord.Message.
-                # return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
+                def check(m: nextcord.Message): # m = discord.Message.
+                    return user == m.author
                 #  checking author and channel, you could add a line to check the content.
                 # and m.content == "xxx"
                 # the check won't become True until it detects (in the example case): xxx
                 # but that's not what we want here.
 
                 # Not using this but keeping it in comments for later development
-
+                run = True
                 try:
                     counter = 1
                     total = ""
@@ -939,11 +941,11 @@ class Trial(commands.Cog, name="Trials"):
                     await ctx.send(total)
 
                     #                        event = on_message without on_
-                    msg = await self.bot.wait_for(event='message', timeout=15.0)
+                    msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
                     # msg = nextcord.Message
                 except asyncio.TimeoutError:
                     # at this point, the check didn't become True, let's handle it.
-                    await ctx.send(f"{ctx.author.mention}, bot has timed out")
+                    await ctx.send(f"{ctx.author.mention}, close has timed out")
                     return
 
                 else:
@@ -971,10 +973,10 @@ class Trial(commands.Cog, name="Trials"):
                             else:
                                 await ctx.send("Delete trial and channel: " + trial.trial + " - " + channel.name
                                                + " (y/n)?")
-                            confirm = await self.bot.wait_for(event="message", timeout=15.0)
+                            confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
                             confirm = confirm.content.lower()
                         except asyncio.TimeoutError:
-                            await ctx.send(f"{ctx.author.mention}, bot has timed out")
+                            await ctx.send(f"{ctx.author.mention}, close has timed out")
                             return
                         else:
                             # So long as it is a Y or a y, Delete the channel and the trial or just the trial
@@ -990,7 +992,10 @@ class Trial(commands.Cog, name="Trials"):
                                 else:
                                     await ctx.send("That is not an option")
                             else:
-                                await ctx.send("Exiting from close command.")
+                                if confirm == 'n':
+                                    await ctx.send("Exiting from close command.")
+                                else:
+                                    await ctx.send("Invalid response, exiting from close command.")
                         return
                     except ValueError:
                         await ctx.send("The input was not a valid number!")
