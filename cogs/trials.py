@@ -1122,6 +1122,7 @@ class Trial(commands.Cog, name="Trials"):
             else:
                 trial_counter[ctx.author.id] = 0
                 await ctx.reply(f"Total runs for {ctx.author.display_name}: {trial_counter.get(ctx.author.id)}")
+                save_trial_count()
         except Exception as e:
             await ctx.send("Unable to check your trial runs")
             logging.error("Check Trial Count Error: " + str(e))
