@@ -8,6 +8,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Dictionary to store different trial info
 storage = {}
+trial_counter = {}
 
 # TODO: Implement local time functionality for trial embeds
 
@@ -116,6 +117,30 @@ class EsoTrial:
             logging.error("Fill_Spots error: " + str(e))
 
 
+def save_trial_count():
+    """Saves the dictionary that counts peoples trials in BOK"""
+    try:
+        logging.info("Started picking Trial Count")
+        global trial_counter
+        with open('trialCountStorage.pkl', 'wb') as file:
+            pickle.dump(trial_counter, file, protocol=pickle.HIGHEST_PROTOCOL)
+        logging.info("Finished picking Trial Count")
+    except IOError as e:
+        logging.error("Error on saving trial count pickle: " + str(e))
+
+
+def load_trial_count():
+    """Loads the dictionary that counts peoples trials in BOK"""
+    try:
+        logging.info("Started loading Trial Count")
+        global trial_counter
+        with open('trialCountStorage.pkl', 'rb') as file:
+            trial_counter = pickle.load(file)
+        logging.info("Finished loading Trial Count")
+    except IOError as e:
+        logging.error("Error on loading trial count pickle: " + str(e))
+
+
 def save_to_doc():
     """Saves the trials to a pickle"""
     try:
@@ -130,7 +155,7 @@ def save_to_doc():
         db_file.close()
         logging.info("Finished pickling Trials")
     except Exception as e:
-        logging.error("Error on saving pickle: " + str(e))
+        logging.error("Error on saving trials pickle: " + str(e))
 
 
 class Trial(commands.Cog, name="Trials"):
@@ -154,6 +179,7 @@ class Trial(commands.Cog, name="Trials"):
                                                    all_data[i][1][8], all_data[i][1][9])
 
             db_file.close()
+            load_trial_count()
             self.bot = bot
             logging.info("Loaded Trials and Trial Cog!")
         except Exception as e:
@@ -982,9 +1008,38 @@ class Trial(commands.Cog, name="Trials"):
                                     await ctx.send(f"{ctx.author.mention}, close has timed out")
                                     return
                                 else:
-                                    # So long as it is a Y or a y, Delete the channel and the trial or just the trial
+                                    # Verify that the trial did happen, and if so then add a +1 to each person's count
                                     if confirm == "y":
                                         if num in storage.keys():
+                                            # Todo: Finish this
+                                            try:
+                                                await ctx.send("Did the trial happen (y/n)?")
+                                                confirm = await self.bot.wait_for(event="message", check=check,
+                                                                                  timeout=15.0)
+                                                confirm = confirm.content.lower()
+
+                                                if confirm == "y":
+                                                    trial = storage.get(num)
+                                                    global trial_counter
+                                                    for i in trial.trial_dps:
+                                                        if i in trial_counter.keys():
+                                                            trial_counter[i] += 1
+                                                        else:
+                                                            trial_counter[i] = 1
+                                                    for i in trial.trial_healers:
+                                                        if i in trial_counter.keys():
+                                                            trial_counter[i] += 1
+                                                        else:
+                                                            trial_counter[i] = 1
+                                                    for i in trial.trial_tanks:
+                                                        if i in trial_counter.keys():
+                                                            trial_counter[i] += 1
+                                                        else:
+                                                            trial_counter[i] = 1
+                                                    save_trial_count()
+                                            except asyncio.TimeoutError:
+                                                await ctx.send(f"{ctx.author.mention}, close has timed out")
+                                                return
                                             del storage[num]
                                             save_to_doc()
                                             channel = ctx.guild.get_channel(num)
@@ -1011,6 +1066,65 @@ class Trial(commands.Cog, name="Trials"):
             await ctx.send("An error has occurred in the command.")
 
     # TODO: Create swap command to swap role easily
+
+    # TODO: Add new functions for officers to add 1 or remove 1 from a persons trial count, and one for people to check
+
+    @commands.command(name="increase")
+    async def increase_trial_count(self, ctx: commands.Context, member: nextcord.Member):
+        """Officer command to increase someone's trial count by 1"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                global trial_counter
+                if member.id in trial_counter.keys():
+                    trial_counter[member.id] += 1
+                    save_trial_count()
+                    await ctx.send(f"Trial count for {member.display_name} is now {trial_counter.get(member.id)}")
+                else:
+                    trial_counter[member.id] = 1
+                    save_trial_count()
+                    await ctx.send(f"Trial count for {member.display_name} is now {trial_counter.get(member.id)}")
+            else:
+                await ctx.send("You do not have the permissions for this.")
+        except Exception as e:
+            await ctx.send("Unable to increase trial count")
+            logging.error("Increase Trial Count Error: " + str(e))
+
+    @commands.command(name="decrease")
+    async def decrease_trial_count(self, ctx: commands.Context, member: nextcord.Member):
+        """Officer command to decrease someone's trial count by 1"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                global trial_counter
+                if member.id in trial_counter.keys():
+                    if trial_counter[member.id] == 0:
+                        await ctx.send("Trial Count cannot be less than 0")
+                    else:
+                        trial_counter[member.id] -= 1
+                        save_trial_count()
+                        await ctx.send(f"Trial count for {member.display_name} is now {trial_counter.get(member.id)}")
+                else:
+                    await ctx.send("You do not have the permissions for this.")
+        except Exception as e:
+            await ctx.send("Unable to decrease trial count")
+            logging.error("Decrease Trial Count Error: " + str(e))
+
+    @commands.command(name="count")
+    async def check_trial_count(self, ctx: commands.Context):
+        """Check how many BOK trials you have been in since the bot started counting"""
+        try:
+            global trial_counter
+            if ctx.author.id in trial_counter.keys():
+                await ctx.reply(f"Total runs for {ctx.author.display_name}: {trial_counter.get(ctx.author.id)}")
+            else:
+                trial_counter[ctx.author.id] = 0
+                await ctx.reply(f"Total runs for {ctx.author.display_name}: {trial_counter.get(ctx.author.id)}")
+        except Exception as e:
+            await ctx.send("Unable to check your trial runs")
+            logging.error("Check Trial Count Error: " + str(e))
 
 
 def setup(bot: commands.Bot):

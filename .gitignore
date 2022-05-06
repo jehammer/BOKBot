@@ -5,3 +5,4 @@ trialStorage.pkl
 .idea/
 venv/
 *.pyc
+trialCountStorage.pkl
