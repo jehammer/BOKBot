@@ -54,6 +54,24 @@ class Voice(commands.Cog, name="Voice"):
             logging.error("Pop tart Error: " + str(e))
 
     @commands.command()
+    async def bob(self, ctx: commands.Context):
+        """There is a certain thing to say"""
+        try:
+            # If user is in a voice channel, connect to channel, play audio, then leave
+            if ctx.author.voice:
+                channel = ctx.author.voice.channel
+                voice = await channel.connect()
+                source = FFmpegPCMAudio('Audio/Bob.wav')
+                voice.play(source)
+                while voice.is_playing():
+                    await asyncio.sleep(2)
+                await ctx.guild.voice_client.disconnect()
+            else:
+                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
+        except Exception as e:
+            logging.error("Bob Error: " + str(e))
+
+    @commands.command()
     async def dc(self, ctx: commands.Context):
         """Force the bot to disconnect from a chat if it is in one"""
         try:
