@@ -246,7 +246,7 @@ Goodnight BOK
         """Tells you when you joined the server"""
         try:
             user = ctx.message.author
-            await ctx.reply(f"You, {user.display_name} joined {ctx.guild.name} on {user.joined_at}")
+            await ctx.reply(f"You, {user.display_name}, joined {ctx.guild.name} on {user.joined_at}")
         except Exception as e:
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
