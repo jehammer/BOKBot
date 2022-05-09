@@ -191,8 +191,6 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def trial(self, ctx: commands.Context):
         """Creates a new trial and channel for BOK | format: !trial [leader],[trial],[date info]"""
-        # TODO: Have it create a new channel in the trial category. Info here:
-        #   https://stackoverflow.com/questions/64495718/discord-py-get-channel-id-from-new-created-channel
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
