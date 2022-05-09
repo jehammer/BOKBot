@@ -200,7 +200,7 @@ class Trial(commands.Cog, name="Trials"):
                 msg = msg[1]  # drop the !trial part
                 leader, trial, date = msg.split(",")
 
-                category = ctx.guild.get_channel(971469760632062012)#(874077147084505099)
+                category = ctx.guild.get_channel(874077147084505099)
                 new = re.sub('[^0-9]', '', date)  # Gotta get just the numbers for this part
                 new = int(new)
                 new_time = datetime.datetime.utcfromtimestamp(new)
