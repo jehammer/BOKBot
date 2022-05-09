@@ -72,6 +72,24 @@ class Voice(commands.Cog, name="Voice"):
             logging.error("Bob Error: " + str(e))
 
     @commands.command()
+    async def respect(self, ctx: commands.Context):
+        """You will respect it!"""
+        try:
+            # If user is in a voice channel, connect to channel, play audio, then leave
+            if ctx.author.voice:
+                channel = ctx.author.voice.channel
+                voice = await channel.connect()
+                source = FFmpegPCMAudio('Audio/Respect.wav')
+                voice.play(source)
+                while voice.is_playing():
+                    await asyncio.sleep(2)
+                await ctx.guild.voice_client.disconnect()
+            else:
+                await ctx.send("You are not in a voice channel, you must be to use voice commands.")
+        except Exception as e:
+            logging.error("Respect Error: " + str(e))
+
+    @commands.command()
     async def dc(self, ctx: commands.Context):
         """Force the bot to disconnect from a chat if it is in one"""
         try:

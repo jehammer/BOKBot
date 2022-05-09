@@ -1,3 +1,6 @@
+import calendar
+import datetime
+import re
 import nextcord
 from nextcord.ext import commands
 import pickle
@@ -10,18 +13,18 @@ logging.basicConfig(level=logging.INFO)
 storage = {}
 trial_counter = {}
 
-# TODO: Implement local time functionality for trial embeds
+
+# TODO: Implement default roles
 
 
 # Special class to store trial in'
 class EsoTrial:
     """Class to hold trial information"""
 
-    def __init__(self, trial, date, time, leader, trial_dps={}, trial_healers={}, trial_tanks={}, backup_dps={},
+    def __init__(self, trial, date, leader, trial_dps={}, trial_healers={}, trial_tanks={}, backup_dps={},
                  backup_healers={}, backup_tanks={}):
         self.trial = trial
         self.date = date
-        self.time = time
         self.leader = leader
         self.trial_dps = trial_dps
         self.trial_healers = trial_healers
@@ -31,7 +34,7 @@ class EsoTrial:
         self.backup_tanks = backup_tanks
 
     def get_data(self):
-        all_data = [self.trial, self.date, self.time, self.leader, self.trial_dps, self.trial_healers, self.trial_tanks,
+        all_data = [self.trial, self.date, self.leader, self.trial_dps, self.trial_healers, self.trial_tanks,
                     self.backup_dps, self.backup_healers, self.backup_tanks]
         return all_data
 
@@ -167,16 +170,16 @@ class Trial(commands.Cog, name="Trials"):
             db_file = open('trialStorage.pkl', 'rb')
             all_data = pickle.load(db_file)
             for i in range(len(all_data)):
-                # 0: trial, 1: date, 2: time, 3: leader, 4: trial_dps = {},
-                # 5: trial_healers = {}, 6: trial_tanks = {}, 7: backup_dps = {},
-                # 8: backup_healers = {}, 9: backup_tanks = {}
-                # This is disgusting. There has to be a better way to write this.
+                # 0: trial, 1: date, 2: leader, 3: trial_dps = {},
+                # 4: trial_healers = {}, 5: trial_tanks = {}, 6: backup_dps = {},
+                # 7: backup_healers = {}, 8: backup_tanks = {}
+                # This is disgusting. There has to be a better way to write this. I should move this into an on_ready
                 # It looks like this because the pickle file saves the object into a list, the list has to be unpacked
                 #   back into the EsoTrial object, with another list inside it that must be unpacked into the object
-                storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2],
-                                                   all_data[i][1][3], all_data[i][1][4], all_data[i][1][5],
-                                                   all_data[i][1][6], all_data[i][1][7],
-                                                   all_data[i][1][8], all_data[i][1][9])
+                storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1],
+                                                   all_data[i][1][2], all_data[i][1][3], all_data[i][1][4],
+                                                   all_data[i][1][5], all_data[i][1][6],
+                                                   all_data[i][1][7], all_data[i][1][8])
 
             db_file.close()
             load_trial_count()
@@ -187,7 +190,9 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def trial(self, ctx: commands.Context):
-        """Creates a new trial for BOK | format: !trial [leader],[trial],[date info],[time]"""
+        """Creates a new trial and channel for BOK | format: !trial [leader],[trial],[date info]"""
+        # TODO: Have it create a new channel in the trial category. Info here:
+        #   https://stackoverflow.com/questions/64495718/discord-py-get-channel-id-from-new-created-channel
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -195,11 +200,26 @@ class Trial(commands.Cog, name="Trials"):
                 msg = ctx.message.content
                 msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
                 msg = msg[1]  # drop the !trial part
-                leader, trial, date, time = msg.split(",")
+                leader, trial, date = msg.split(",")
 
-                ran = ctx.message.channel.id  # use the id of the text channel to make a channel-specific trial listing
+                category = ctx.guild.get_channel(971469760632062012)#(874077147084505099)
+                new = re.sub('[^0-9]', '', date)  # Gotta get just the numbers for this part
+                new = int(new)
+                new_time = datetime.datetime.utcfromtimestamp(new)
+                central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
+                weekday = calendar.day_name[central.weekday()]
+                new_name = trial + "-" + weekday
+                channel = await category.create_text_channel(new_name)
+
+                # create new trial and put it in storage for later use
+                new_trial = EsoTrial(trial, date, leader, trial_dps={}, trial_healers={},
+                                     trial_tanks={}, backup_dps={}, backup_healers={}, backup_tanks={})
+                storage[channel.id] = new_trial
+                save_to_doc()
+                logging.info("New Trial created: " + trial + " " + str(central))
+
                 embed = nextcord.Embed(
-                    title=trial + " " + date + " " + time,
+                    title=trial + " " + date,
                     description="I hope people sign up for this.",
                     color=nextcord.Color.blue()
                 )
@@ -208,18 +228,12 @@ class Trial(commands.Cog, name="Trials"):
                 embed.add_field(name="Healers", value='To Heal Us', inline=False)
                 embed.add_field(name="Tanks", value='To Be Stronk', inline=False)
                 embed.add_field(name="DPS", value='To Stand In Stupid', inline=False)
-                await ctx.send(embed=embed)
-
-                # create new trial and put it in storage for later use
-                new_trial = EsoTrial(trial, date, time, leader, trial_dps={}, trial_healers={},
-                                     trial_tanks={}, backup_dps={}, backup_healers={}, backup_tanks={})
-                storage[ran] = new_trial
-                save_to_doc()
-                logging.info("New Trial created: " + trial + " " + date + " " + time)
+                await channel.send(embed=embed)
+                await ctx.send("Channel and Roster created")
             else:
                 await ctx.send("You do not have permission to do this.")
         except Exception as e:
-            await ctx.send("Please use !help trial if you are having problems or notify Drak")
+            await ctx.send("Unable to complete the command.")
             logging.error("Trial creation error: " + str(e))
 
     @commands.command()
@@ -392,21 +406,81 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def fill(self, ctx: commands.Context):
         """For trial leaders to fill the roster from the backup roster"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                num = ctx.message.channel.id
-                trial = storage.get(num)
-                trial.fill_spots(num)
-                storage[num] = trial
-                save_to_doc()
-                await ctx.send("Spots filled!")
-            except Exception as e:
-                await ctx.send("Unable to fill the roster")
-                logging.error("Fill error: " + str(e))
-        else:
-            await ctx.send("You must be a Storm Bringer to fill a roster.")
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
+
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the roster closed and "
+                                        "the channel deleted")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, fill has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    channel = ctx.guild.get_channel(num)
+                                    trial = storage.get(num)
+                                    await ctx.send("Fill Trial: " + trial.trial + " - " + channel.name + " (y/n)?")
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
+                                    confirm = confirm.content.lower()
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, fill has timed out")
+                                    return
+                                else:
+                                    # Verify that the trial did happen, and if so then add a +1 to each person's count
+                                    if confirm == "y":
+                                        trial.fill_spots(num)
+                                        storage[num] = trial
+                                        save_to_doc()
+                                        await ctx.send("Spots filled!")
+                                        run = False
+                                    else:
+                                        if confirm == 'n':
+                                            await ctx.send("Returning to menu.")
+                                        else:
+                                            await ctx.send("Invalid response, returning to menu.")
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error("Fill error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     @commands.command()
     async def status(self, ctx: commands.Context):
@@ -424,6 +498,7 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def msg(self, ctx: commands.Context):
         """!msg [message] to modify your message in the embed"""
+        # TODO: Made found check in this to not go through all elif
         trial = storage.get(ctx.message.channel.id)
         found = True
         msg = ctx.message.content
@@ -538,40 +613,133 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def remove(self, ctx: commands.Context):
         """Removes someone from the roster"""
-
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
-                found = False
-                worked = True
-                msg = ctx.message.content
-                msg = msg.split(" ", 2)
-                num = int(msg[1])  # stores the channel id for the trial
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
 
-                # reusing msg because there is no way this will be confusing down the line. It stores the persons id
-                msg = int(msg[2])
-                trial = storage.get(num)
-                if msg in trial.trial_dps.keys() or msg in trial.backup_dps.keys():
-                    trial.remove_dps(msg)
-                    found = True
-                if msg in trial.trial_healers.keys() or msg in trial.backup_healers.keys():
-                    trial.remove_healer(msg)
-                    found = True
-                if msg in trial.trial_tanks.keys() or msg in trial.backup_tanks.keys():
-                    trial.remove_tank(msg)
-                else:
-                    if not found:
-                        worked = False
-                        await ctx.send("Person not found, remember to copy the persons ID number.")
-                if worked:
-                    # How to get the display name of a user, when using the bot gets the code angry at you
-                    removed = ctx.channel.guild.get_member(msg).display_name
-                    await ctx.reply("Removed " + removed)
-                    storage[num] = trial
-                    save_to_doc()
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to select the roster")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, remove has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    trial = storage.get(num)
+                                    roster = []
+                                    counter = 1
+                                    total = ""
+                                    # Print out everyone and put them in a list to get from
+                                    for i in trial.trial_dps.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i).display_name}\n"
+                                        counter += 1
+                                    for i in trial.trial_healers.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i)}\n"
+                                        counter += 1
+                                    for i in trial.trial_tanks.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i)}\n"
+                                        counter += 1
+                                    for i in trial.backup_dps.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i)}\n"
+                                        counter += 1
+                                    for i in trial.backup_healers.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i)}\n"
+                                        counter += 1
+                                    for i in trial.backup_tanks.keys():
+                                        roster.append(i)
+                                        total += f"{counter}: {ctx.guild.get_member(i)}\n"
+                                        counter += 1
+                                    await ctx.send(total)
+                                    await ctx.send("Enter the number of who you want to remove.")
+                                    choice = await self.bot.wait_for(event="message", check=check, timeout=30.0)
+                                    choice = int(choice.content)
+                                    choice -= 1
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, remove has timed out")
+                                    return
+                                else:
+                                    try:
+                                        person = roster[choice]
+                                        await ctx.send(f"Remove: {ctx.guild.get_member(person).display_name} (y/n)?")
+                                        confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
+                                        confirm = confirm.content.lower()
+                                    except asyncio.TimeoutError:
+                                        await ctx.send(f"{ctx.author.mention}, remove has timed out")
+                                        return
+                                    else:
+                                        if confirm == "y":
+                                            worked = True
+                                            if person in trial.trial_dps.keys() or person in trial.backup_dps.keys():
+                                                trial.remove_dps(person)
+                                                found = True
+                                            if person in trial.trial_healers.keys() or \
+                                                    person in trial.backup_healers.keys() and not found:
+                                                trial.remove_healer(person)
+                                                found = True
+                                            if person in trial.trial_tanks.keys() or \
+                                                    person in trial.backup_tanks.keys() and not found:
+                                                trial.remove_tank(person)
+                                            else:
+                                                if not found:
+                                                    worked = False
+                                                    await ctx.send("Person not found.")
+                                            if worked:
+                                                await ctx.send(f"Removed "
+                                                               f"{ctx.channel.guild.get_member(person).display_name}")
+                                                storage[num] = trial
+                                                save_to_doc()
+                                            run = False
+                                        else:
+                                            if confirm == 'n':
+                                                await ctx.send("Returning to menu.")
+                                            else:
+                                                await ctx.send("Invalid response, returning to menu.")
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
         except Exception as e:
             logging.error("Remove error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     @commands.command()
     async def add(self, ctx: commands.Context, p_type, member: nextcord.Member):
@@ -605,93 +773,235 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Add user error: " + str(e))
 
     @commands.command()
-    async def leader(self, ctx: commands.Context, leader):
+    async def leader(self, ctx: commands.Context):
         """Replaces the leader of a trial"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                num = ctx.message.channel.id
-                trial = storage.get(num)
-                old_leader = trial.leader
-                trial.leader = leader
-                storage[num] = trial
-                save_to_doc()
-                await ctx.send("Trial leader has been changed from " + old_leader + " to " + trial.leader)
-            except Exception as e:
-                logging.error("Leader replacement error: " + str(e))
-                await ctx.send("Unable to replace leader")
-        else:
-            await ctx.send("You do not have permission to do this")
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
+
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the leader changed")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, leader replace has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    trial = storage.get(num)
+                                    await ctx.send("Enter the new leader for Trial: " + trial.trial)
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=30.0)
+                                    leader = confirm.content
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, leader replace has timed out")
+                                    return
+                                else:
+                                    old_leader = trial.leader
+                                    trial.leader = leader
+                                    storage[num] = trial
+                                    save_to_doc()
+                                    await ctx.send(
+                                        "Trial leader has been changed from " + old_leader + " to " + trial.leader)
+                                    run = False
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error("Leader change error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     @commands.command(name="changetrial")
     async def change_trial(self, ctx: commands.Context):
         """Replaces the trial of a trial"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                num = ctx.message.channel.id
-                msg = ctx.message.content
-                msg = msg.split(" ", 1)
-                msg = msg[1]
-                trial = storage.get(num)
-                old_trial = trial.trial
-                trial.trial = msg
-                storage[num] = trial
-                save_to_doc()
-                await ctx.send("Trial has been changed from " + old_trial + " to " + trial.trial)
-            except Exception as e:
-                logging.error("Trial replacement error: " + str(e))
-                await ctx.send("Unable to change trial")
-        else:
-            await ctx.send("You do not have permission to do this")
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
 
-    @commands.command(name="date")
-    async def change_date(self, ctx: commands.Context):
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the trial changed")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, trial change has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    channel = ctx.guild.get_channel(num)
+                                    trial = storage.get(num)
+                                    await ctx.send("Enter the new Trial: " + trial.trial)
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=30.0)
+                                    new_trial = confirm.content
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, trial change has timed out")
+                                    return
+                                else:
+                                    old_trial = trial.trial
+                                    trial.trial = new_trial
+                                    storage[num] = trial
+                                    save_to_doc()
+                                    await ctx.send(
+                                        "Trial has been changed from " + old_trial + " to " + trial.trial)
+                                    new_name = trial.trial + "-" + trial.date
+                                    await channel.edit(name=new_name)
+                                    run = False
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error("Change Trial change error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
+
+    @commands.command(name="datetime")
+    async def change_date_time(self, ctx: commands.Context):
         """Replaces the date of a trial"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                num = ctx.message.channel.id
-                msg = ctx.message.content
-                msg = msg.split(" ", 1)
-                msg = msg[1]
-                trial = storage.get(num)
-                old_date = trial.date
-                trial.date = msg
-                storage[num] = trial
-                save_to_doc()
-                await ctx.send("Trial date has been changed from " + old_date + " to " + trial.date)
-            except Exception as e:
-                logging.error("Trial date replacement error: " + str(e))
-                await ctx.send("unable to change date")
-        else:
-            await ctx.send("You do not have permission to do this")
 
-    @commands.command()
-    async def time(self, ctx: commands.Context):
-        """Replaces the time of a trial"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                num = ctx.message.channel.id
-                msg = ctx.message.content
-                msg = msg.split(" ", 1)
-                msg = msg[1]
-                trial = storage.get(num)
-                old_time = trial.time
-                trial.time = msg
-                storage[num] = trial
-                save_to_doc()
-                await ctx.send("Trial time has been changed from " + old_time + " to " + trial.time)
-            except Exception as e:
-                logging.error("Trial time replacement error: " + str(e))
-                await ctx.send("Unable to change time")
-        else:
-            await ctx.send("You do not have permission to do this")
+        # TODO: Test this
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
+
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the trial date changed")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, date change has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    channel = ctx.guild.get_channel(num)
+                                    trial = storage.get(num)
+                                    await ctx.send("Enter the new date for Trial: " + trial.trial)
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=30.0)
+                                    new_date = confirm.content
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, date change has timed out")
+                                    return
+                                else:
+                                    # Verify that the trial did happen, and if so then add a +1 to each person's count
+                                    old_date = trial.date
+                                    trial.date = new_date
+                                    storage[num] = trial
+                                    save_to_doc()
+                                    await ctx.send(
+                                        "Trial has been changed from " + old_date + " to " + trial.date)
+
+                                    new = re.sub('[^0-9]', '', new_date)
+                                    new = int(new)
+                                    new_time = datetime.datetime.utcfromtimestamp(new)
+                                    central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
+                                    weekday = calendar.day_name[central.weekday()]
+                                    new_name = trial.trial + "-" + weekday
+                                    await channel.edit(name=new_name)
+                                    run = False
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error("Change Trial change error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     @commands.command()
     async def clean(self, ctx: commands.Context, num):
@@ -718,7 +1028,7 @@ class Trial(commands.Cog, name="Trials"):
             tank_count = 0
             guild = self.bot.get_guild(guild_id)
             embed = nextcord.Embed(
-                title=trial.trial + " " + trial.date + " " + trial.time,
+                title=trial.trial + " " + trial.date,
                 description="This battle will be legendary!",
                 color=nextcord.Color.green()
             )
@@ -944,6 +1254,7 @@ class Trial(commands.Cog, name="Trials"):
             if user in role.members:
                 def check(m: nextcord.Message):  # m = discord.Message.
                     return user == m.author
+
                 #  checking author and channel, you could add a line to check the content.
                 # and m.content == "xxx"
                 # the check won't become True until it detects (in the example case): xxx
@@ -1011,7 +1322,6 @@ class Trial(commands.Cog, name="Trials"):
                                     # Verify that the trial did happen, and if so then add a +1 to each person's count
                                     if confirm == "y":
                                         if num in storage.keys():
-                                            # Todo: Finish this
                                             try:
                                                 await ctx.send("Did the trial happen (y/n)?")
                                                 confirm = await self.bot.wait_for(event="message", check=check,
@@ -1067,8 +1377,6 @@ class Trial(commands.Cog, name="Trials"):
 
     # TODO: Create swap command to swap role easily
 
-    # TODO: Add new functions for officers to add 1 or remove 1 from a persons trial count, and one for people to check
-
     @commands.command(name="increase")
     async def increase_trial_count(self, ctx: commands.Context, member: nextcord.Member):
         """Officer command to increase someone's trial count by 1"""
@@ -1118,10 +1426,12 @@ class Trial(commands.Cog, name="Trials"):
         try:
             global trial_counter
             if ctx.author.id in trial_counter.keys():
-                await ctx.reply(f"Total runs for {ctx.author.display_name}: {trial_counter.get(ctx.author.id)}")
+                await ctx.reply(f"Total runs for {ctx.author.display_name} with BOK: {trial_counter.get(ctx.author.id)}"
+                                )
             else:
                 trial_counter[ctx.author.id] = 0
-                await ctx.reply(f"Total runs for {ctx.author.display_name}: {trial_counter.get(ctx.author.id)}")
+                await ctx.reply(f"Total runs for {ctx.author.display_name} with BOK: {trial_counter.get(ctx.author.id)}"
+                                )
                 save_trial_count()
         except Exception as e:
             await ctx.send("Unable to check your trial runs")
