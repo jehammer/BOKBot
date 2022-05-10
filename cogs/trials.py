@@ -6,6 +6,7 @@ from nextcord.ext import commands
 import pickle
 import logging
 import asyncio
+from pytz import timezone
 
 logging.basicConfig(level=logging.INFO)
 
@@ -204,7 +205,7 @@ class Trial(commands.Cog, name="Trials"):
                 new = re.sub('[^0-9]', '', date)  # Gotta get just the numbers for this part
                 new = int(new)
                 new_time = datetime.datetime.utcfromtimestamp(new)
-                central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
+                central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
                 weekday = calendar.day_name[central.weekday()]
                 new_name = trial + "-" + weekday
                 channel = await category.create_text_channel(new_name)
