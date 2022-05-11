@@ -798,6 +798,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def add(self, ctx: commands.Context, p_type, member: nextcord.Member):
+        """Officer command to manually add someone to a roster"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")  # check if user has perms
             user = ctx.message.author
