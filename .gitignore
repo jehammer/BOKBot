@@ -6,3 +6,4 @@ trialStorage.pkl
 venv/
 *.pyc
 trialCountStorage.pkl
+DefaultRolesStorage.pkl

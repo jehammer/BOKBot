@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 # Dictionary to store different trial info
 storage = {}
 trial_counter = {}
+default_role = {}
 
 
 # TODO: Implement default roles
@@ -162,6 +163,30 @@ def save_to_doc():
         logging.error("Error on saving trials pickle: " + str(e))
 
 
+def save_default_roles():
+    """Saves the default roles dictionary to a pickle"""
+    try:
+        logging.info("Started pickling Default Roles")
+        global default_role
+        with open('DefaultRolesStorage.pkl', 'wb') as file:
+            pickle.dump(default_role, file, protocol=pickle.HIGHEST_PROTOCOL)
+        logging.info("Finished pickling Default Roles")
+    except IOError as e:
+        logging.error("Error on saving default roles pickle: " + str(e))
+
+
+def load_default_roles():
+    """Loads the dictionary that holds peoples default roles"""
+    try:
+        logging.info("Started loading Default Roles pickle")
+        global default_role
+        with open('DefaultRolesStorage.pkl', 'rb') as file:
+            default_role = pickle.load(file)
+        logging.info("Finished loading Default Roles pickle")
+    except IOError as e:
+        logging.error("Error on loading Default Role pickle: " + str(e))
+
+
 class Trial(commands.Cog, name="Trials"):
     """Receives trial commands"""
 
@@ -184,6 +209,7 @@ class Trial(commands.Cog, name="Trials"):
 
             db_file.close()
             load_trial_count()
+            load_default_roles()
             self.bot = bot
             logging.info("Loaded Trials and Trial Cog!")
         except Exception as e:
@@ -237,134 +263,195 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def su(self, ctx: commands.Context):
-        """Use !su [role] [optional message]"""
-        worked = True
-        global storage
+        """Use !su [optional role] and/or [optional message]. Remember to set your default!"""
         try:
-            try:
-
-                # Get user ID and add them into the roster
-
-                num = ctx.message.channel.id
-                user_id = ctx.message.author.id
-                trial = storage.get(num)
-                if user_id in trial.trial_dps.keys():
-                    await ctx.send("You are already signed up as DPS!")
-                    worked = False
-                elif user_id in trial.backup_dps.keys():
-                    await ctx.send("You are already signed up as backup DPS!")
-                    worked = False
-                elif user_id in trial.trial_healers.keys():
-                    await ctx.send("You are already signed up as a Healer!")
-                    worked = False
-                elif user_id in trial.backup_healers.keys():
-                    await ctx.send("You are already signed up as a backup Healer!")
-                    worked = False
-                elif user_id in trial.trial_tanks.keys():
-                    await ctx.send("You are already signed up as a Tank!")
-                    worked = False
-                elif user_id in trial.backup_tanks.keys():
-                    await ctx.send("You are already signed up as a backup Tank!")
-                    worked = False
-                else:
-                    # Works if there is the optional message
-                    msg = ctx.message.content
-                    msg = msg.split(" ", 2)  # Split into 2 parts of a list
-                    if msg[1].lower() == "dps":
-                        trial.add_dps(user_id, msg[2])
-                    elif msg[1].lower() == "healer":
-                        trial.add_healer(user_id, msg[2])
-                    elif msg[1].lower() == "tank":
-                        trial.add_tank(user_id, msg[2])
+            msg = ctx.message.content
+            global storage
+            global default_role
+            single = False  # A variable to check if someone just used !su
+            worked = False
+            msg = msg.split(" ", 2)
+            if len(msg) == 1:
+                single = True
+            channel = ctx.message.channel.id
+            user_id = ctx.message.author.id
+            trial = storage.get(channel)
+            # Check if the user is already in one of the rosters
+            if user_id in trial.trial_dps.keys():
+                await ctx.send("You are already signed up as DPS!")
+                return
+            elif user_id in trial.backup_dps.keys():
+                await ctx.send("You are already signed up as backup DPS!")
+                return
+            elif user_id in trial.trial_healers.keys():
+                await ctx.send("You are already signed up as a Healer!")
+                return
+            elif user_id in trial.backup_healers.keys():
+                await ctx.send("You are already signed up as a backup Healer!")
+                return
+            elif user_id in trial.trial_tanks.keys():
+                await ctx.send("You are already signed up as a Tank!")
+                return
+            elif user_id in trial.backup_tanks.keys():
+                await ctx.send("You are already signed up as a backup Tank!")
+                return
+            if not single:
+                role = msg[1].lower()
+                if role == "dps" or role == "healer" or role == "tank":
+                    # Check if there is an optional message or not
+                    if len(msg) == 3:
+                        # The message has a SU, a Role, and a message. Now to grab the right role
+                        if role == "dps":
+                            trial.add_dps(user_id, msg[2])
+                            worked = True
+                        elif role == "healer":
+                            trial.add_healer(user_id, msg[2])
+                            worked = True
+                        elif role == "tank":
+                            trial.add_tank(user_id, msg[2])
+                            worked = True
                     else:
-                        await ctx.send("Please type it as !su [type] [optional message]")
-                        worked = False
-            except:  # TODO: work a way around the lack of an optional message without throwing an error
-                # Works without optional message.
-                msg = ctx.message.content
-                msg = msg.split(" ", 1)  # Split into 2 parts of a list
-                num = ctx.message.channel.id
-                user_id = ctx.message.author.id
-                trial = storage.get(num)
-                if msg[1].lower() == "dps":
-                    trial.add_dps(user_id)
-                elif msg[1].lower() == "healer":
-                    trial.add_healer(user_id)
-                elif msg[1].lower() == "tank":
-                    trial.add_tank(user_id)
+                        # The message has a SU and a Role
+                        if role == "dps":
+                            trial.add_dps(user_id)
+                            worked = True
+                        elif role == "healer":
+                            trial.add_healer(user_id)
+                            worked = True
+                        elif role == "tank":
+                            trial.add_tank(user_id)
+                            worked = True
                 else:
-                    await ctx.send("Please type it as !su [type] [optional message]")
-                    worked = False
+                    # No role, need to grab default
+                    if len(msg) == 3:
+                        msg = msg[1] + " " + msg[2]  # merge together the message if needed
+                    role = default_role.get(user_id)
+                    if role == "dps":
+                        trial.add_dps(user_id, msg)
+                        worked = True
+                    elif role == "healer":
+                        trial.add_healer(user_id, msg)
+                        worked = True
+                    elif role == "tank":
+                        trial.add_tank(user_id, msg)
+                        worked = True
+            else:
+                # User just called !su, no message, no role
+                role = default_role.get(user_id)
+                if role == "dps":
+                    trial.add_dps(user_id)
+                    worked = True
+                elif role == "healer":
+                    trial.add_healer(user_id)
+                    worked = True
+                elif role == "tank":
+                    trial.add_tank(user_id)
+                    worked = True
             if worked:
-                # Update trial
-                storage[num] = trial
-                await ctx.send(ctx.message.author.mention + " Added!")
+                storage[channel] = trial
                 save_to_doc()
+                await ctx.reply("Added!")
+            else:
+                await ctx.reply("Unable to sign up. Remember to check <#932438565009379358> if you are stuck!")
         except Exception as e:
-            await ctx.send("Please type it as !su [type] [optional message]. If you did this please notify Drak")
+            await ctx.send("Unable to sign up.")
             logging.error("SU error:" + str(e))
 
     @commands.command()
     async def bu(self, ctx: commands.Context):
-        """Use !bu [role] [optional message]"""
-        worked = True
+        """Use !bu [optional role] and/or [optional message]. Remember to set your default!"""
         try:
-            try:
-                num = ctx.message.channel.id
-                trial = storage.get(num)
-                user_id = ctx.message.author.id
-                if user_id in trial.trial_dps.keys():
-                    await ctx.send("You are already signed up as DPS!")
-                    worked = False
-                elif user_id in trial.backup_dps.keys():
-                    await ctx.send("You are already signed up as backup DPS!")
-                    worked = False
-                elif user_id in trial.trial_healers.keys():
-                    await ctx.send("You are already signed up as a Healer!")
-                    worked = False
-                elif user_id in trial.backup_healers.keys():
-                    await ctx.send("You are already signed up as a backup Healer!")
-                    worked = False
-                elif user_id in trial.trial_tanks.keys():
-                    await ctx.send("You are already signed up as a Tank!")
-                    worked = False
-                elif user_id in trial.backup_tanks.keys():
-                    await ctx.send("You are already signed up as a backup Tank!")
-                    worked = False
-                else:
-                    msg = ctx.message.content
-                    msg = msg.split(" ", 2)  # Split into 2 parts of a list
-                    if msg[1].lower() == "dps":
-                        trial.add_backup_dps(user_id, msg[2])
-                    elif msg[1].lower() == "healer":
-                        trial.add_backup_healer(user_id, msg[2])
-                    elif msg[1].lower() == "tank":
-                        trial.add_backup_tank(user_id, msg[2])
+            msg = ctx.message.content
+            global storage
+            global default_role
+            single = False  # A variable to check if someone just used !su
+            worked = False
+            msg = msg.split(" ", 2)
+            if len(msg) == 1:
+                single = True
+            channel = ctx.message.channel.id
+            user_id = ctx.message.author.id
+            trial = storage.get(channel)
+            # Check if the user is already in one of the rosters
+            if user_id in trial.trial_dps.keys():
+                await ctx.send("You are already signed up as DPS!")
+                return
+            elif user_id in trial.backup_dps.keys():
+                await ctx.send("You are already signed up as backup DPS!")
+                return
+            elif user_id in trial.trial_healers.keys():
+                await ctx.send("You are already signed up as a Healer!")
+                return
+            elif user_id in trial.backup_healers.keys():
+                await ctx.send("You are already signed up as a backup Healer!")
+                return
+            elif user_id in trial.trial_tanks.keys():
+                await ctx.send("You are already signed up as a Tank!")
+                return
+            elif user_id in trial.backup_tanks.keys():
+                await ctx.send("You are already signed up as a backup Tank!")
+                return
+            if not single:
+                role = msg[1].lower()
+                if role == "dps" or role == "healer" or role == "tank":
+                    # Check if there is an optional message or not
+                    if len(msg) == 3:
+                        # The message has a SU, a Role, and a message. Now to grab the right role
+                        if role == "dps":
+                            trial.add_backup_dps(user_id, msg[2])
+                            worked = True
+                        elif role == "healer":
+                            trial.add_backup_healer(user_id, msg[2])
+                            worked = True
+                        elif role == "tank":
+                            trial.add_backup_tank(user_id, msg[2])
+                            worked = True
                     else:
-                        await ctx.send("Please type it as !bu [type] [optional message]")
-                        worked = False
-            except:  # Another area where I need to handle this better
-                msg = ctx.message.content
-                msg = msg.split(" ", 2)  # Split into 2 parts of a list
-                num = ctx.message.channel.id
-                trial = storage.get(num)
-                user_id = ctx.message.author.id
-                if msg[1].lower() == "dps":
-                    trial.add_backup_dps(user_id)
-                elif msg[1].lower() == "healer":
-                    trial.add_backup_healer(user_id)
-                elif msg[1].lower() == "tank":
-                    trial.add_backup_tank(user_id)
+                        # The message has a SU and a Role
+                        if role == "dps":
+                            trial.add_backup_dps(user_id)
+                            worked = True
+                        elif role == "healer":
+                            trial.add_backup_healer(user_id)
+                            worked = True
+                        elif role == "tank":
+                            trial.add_backup_tank(user_id)
+                            worked = True
                 else:
-                    await ctx.send("Please type it as !bu [type] [optional message]")
-                    worked = False
+                    # No role, need to grab default
+                    if len(msg) == 3:
+                        msg = msg[1] + " " + msg[2]  # merge together the message if needed
+                    role = default_role.get(user_id)
+                    if role == "dps":
+                        trial.add_backup_dps(user_id, msg)
+                        worked = True
+                    elif role == "healer":
+                        trial.add_backup_healer(user_id, msg)
+                        worked = True
+                    elif role == "tank":
+                        trial.add_backup_tank(user_id, msg)
+                        worked = True
+            else:
+                # User just called !bu, no message, no role
+                role = default_role.get(user_id)
+                if role == "dps":
+                    trial.add_backup_dps(user_id)
+                    worked = True
+                elif role == "healer":
+                    trial.add_backup_healer(user_id)
+                    worked = True
+                elif role == "tank":
+                    trial.add_backup_tank(user_id)
+                    worked = True
             if worked:
-                # Update trial
-                storage[num] = trial
+                storage[channel] = trial
                 save_to_doc()
-                await ctx.send(ctx.author.mention + " Added for Backup!")
+                await ctx.reply("Added for Backup!")
+            else:
+                await ctx.reply("Unable to sign up as backup. Remember to check <#932438565009379358> if you are stuck!"
+                                )
         except Exception as e:
-            await ctx.send("Please type it as !bu [type] [optional message]. If you did this please notify Drak")
+            await ctx.send("Unable to sign up as backup")
             logging.error("BU error:" + str(e))
 
     @commands.command()
@@ -497,7 +584,6 @@ class Trial(commands.Cog, name="Trials"):
     @commands.command()
     async def msg(self, ctx: commands.Context):
         """!msg [message] to modify your message in the embed"""
-        # TODO: Made found check in this to not go through all elif
         trial = storage.get(ctx.message.channel.id)
         found = True
         msg = ctx.message.content
@@ -591,13 +677,13 @@ class Trial(commands.Cog, name="Trials"):
                 db_file = open('trialStorage.pkl', 'rb')
                 all_data = pickle.load(db_file)
                 for i in range(len(all_data)):
-                    # 0: trial, 1: date, 2: time, 3: leader, 4: trial_dps = {},
-                    # 5: trial_healers = {}, 6: trial_tanks = {}, 7: backup_dps = {},
-                    # 8: backup_healers = {}, 9: backup_tanks = {}
+                    # 0: trial, 1: timestamp, 2: leader, 3: trial_dps = {},
+                    # 4: trial_healers = {}, 5: trial_tanks = {}, 6: backup_dps = {},
+                    # 7: backup_healers = {}, 8: backup_tanks = {}
                     storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2],
                                                        all_data[i][1][3],
                                                        all_data[i][1][4], all_data[i][1][5], all_data[i][1][6],
-                                                       all_data[i][1][7], all_data[i][1][8], all_data[i][1][9])
+                                                       all_data[i][1][7], all_data[i][1][8])
 
                 db_file.close()
                 await ctx.send("Loaded!")
@@ -705,6 +791,7 @@ class Trial(commands.Cog, name="Trials"):
                                     else:
                                         if confirm == "y":
                                             worked = True
+                                            found = False
                                             if person in trial.trial_dps.keys() or person in trial.backup_dps.keys():
                                                 trial.remove_dps(person)
                                                 found = True
@@ -922,7 +1009,6 @@ class Trial(commands.Cog, name="Trials"):
     async def change_date_time(self, ctx: commands.Context):
         """Replaces the date of a trial"""
 
-        # TODO: Test this
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -1374,8 +1460,6 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Close error: " + str(e))
             await ctx.send("An error has occurred in the command.")
 
-    # TODO: Create swap command to swap role easily
-
     @commands.command(name="increase")
     async def increase_trial_count(self, ctx: commands.Context, member: nextcord.Member):
         """Officer command to increase someone's trial count by 1"""
@@ -1435,6 +1519,56 @@ class Trial(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send("Unable to check your trial runs")
             logging.error("Check Trial Count Error: " + str(e))
+
+    @commands.command(name="default")
+    async def set_default_role(self, ctx: commands.Context, role="check"):
+        """Set or check your default role to dps, healer, or tank when using !su. !default [optional: role]"""
+        try:
+            if role.lower() == "dps" or role.lower() == "healer" or role.lower() == "tank":
+                global default_role
+                default_role[ctx.message.author.id] = role.lower()
+                save_default_roles()
+                await ctx.reply(f"{ctx.message.author.display_name} default role has been set to {role}")
+            elif role.lower() == "check":
+                if ctx.message.author.id in default_role.keys():
+                    await ctx.reply(f"{ctx.message.author.display_name} defaults to "
+                                    f"{default_role.get(ctx.message.author.id)}")
+                else:
+                    await ctx.reply("You do not have a default role. Use !default [role] to assign one.")
+            else:
+                await ctx.reply("Please specify the correct role. dps, healer, or tank.")
+        except Exception as e:
+            await ctx.send("Unable to set default role")
+            logging.error("Default Role Set Error: " + str(e))
+
+    @commands.command(name="setdef")
+    async def admin_set_default_role(self, ctx: commands.Context, m: nextcord.Member, role="check"):
+        """Officer way of manually assigning default roles"""
+        try:
+            officer = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in officer.members:
+                global default_role
+                if role.lower() == "dps" or role.lower() == "healer" or role.lower() == "tank":
+                    default_role[m.id] = role.lower()
+                    save_default_roles()
+                    await ctx.reply(f"{m.display_name} default role has been set to {role}")
+
+                elif role.lower() == "check":
+                    if m.id in default_role.keys():
+                        await ctx.reply(f"{m.display_name} defaults to {default_role.get(m.id)}")
+                    else:
+                        await ctx.reply("You do not have a default role. Use !default [role] to assign one.")
+
+                else:
+                    await ctx.reply("Please specify the correct role. dps, healer, or tank.")
+            else:
+                await ctx.reply("You do not have permission to do this")
+        except Exception as e:
+            await ctx.send("Unable to set default role")
+            logging.error("Default Role Set Error: " + str(e))
+
+    # TODO: Create swap command to swap role easily
 
 
 def setup(bot: commands.Bot):

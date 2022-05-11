@@ -17,6 +17,8 @@ class Voice(commands.Cog, name="Voice"):
         self.bot = bot
         logging.info("Voice cog loaded")
 
+        # TODO: Convert these to check if the author is in voice, and if not then have it default to general voice
+
     @commands.command()
     async def nut(self, ctx: commands.Context):
         """Nut hard"""
