@@ -608,37 +608,6 @@ class Trial(commands.Cog, name="Trials"):
         if found:
             await ctx.send("Updated!")
 
-    @commands.command(name="listtrials")
-    async def list_trials(self, ctx: commands.Context):
-        """Owners way of checking the active trials list by id"""
-        if ctx.message.author.id == 212634819190849536:
-            msg = ""
-            if len(storage) > 0:
-                for i in storage:
-                    msg += str(i) + "\n"
-            else:
-                msg = "None"
-            await ctx.send(msg)
-        else:
-            await ctx.send("You do not have permission.")
-
-    @commands.command()
-    async def end(self, ctx: commands.Context):
-        """For raid leads, ends the trial."""
-        try:
-            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            user = ctx.message.author
-            if user in role.members:
-                num = ctx.message.channel.id
-                del storage[num]
-                save_to_doc()
-                await ctx.send("Trial Closed!")
-            else:
-                await ctx.send("You do not have permission for that.")
-        except Exception as e:
-            await ctx.send("Trial not deleted! Something has gone wrong.")
-            logging.error("End Trial error: " + str(e))
-
     @commands.command()
     async def gather(self, ctx: commands.Context):
         """for raid leads, notifies everyone to come."""
@@ -1313,22 +1282,6 @@ class Trial(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send("Error printing roster")
             logging.error("Summon error: " + str(e))
-
-    @commands.command()
-    async def check(self, ctx: commands.Context, num):
-        """To see the info of an orphan"""
-        if ctx.message.author.id == 212634819190849536:
-            try:
-                num = int(num)
-                primary_embed, backup_embed = await self.print_roster(num, ctx.guild.id)
-
-                await ctx.send(embed=primary_embed)
-                await ctx.send(embed=backup_embed)
-
-            except Exception as e:
-                logging.error("Check Error: " + str(e))
-        else:
-            await ctx.send("You do not have permission to do that.")
 
     @commands.command()
     async def close(self, ctx: commands.Context):
