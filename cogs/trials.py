@@ -366,7 +366,7 @@ class Trial(commands.Cog, name="Trials"):
             msg = ctx.message.content
             global storage
             global default_role
-            single = False  # A variable to check if someone just used !su
+            single = False  # A variable to check if someone just used !bu
             worked = False
             msg = msg.split(" ", 2)
             if len(msg) == 1:
@@ -398,7 +398,7 @@ class Trial(commands.Cog, name="Trials"):
                 if role == "dps" or role == "healer" or role == "tank":
                     # Check if there is an optional message or not
                     if len(msg) == 3:
-                        # The message has a SU, a Role, and a message. Now to grab the right role
+                        # The message has a BU, a Role, and a message. Now to grab the right role
                         if role == "dps":
                             trial.add_backup_dps(user_id, msg[2])
                             worked = True
@@ -409,7 +409,7 @@ class Trial(commands.Cog, name="Trials"):
                             trial.add_backup_tank(user_id, msg[2])
                             worked = True
                     else:
-                        # The message has a SU and a Role
+                        # The message has a BU and a Role
                         if role == "dps":
                             trial.add_backup_dps(user_id)
                             worked = True
