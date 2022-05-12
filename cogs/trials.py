@@ -325,6 +325,8 @@ class Trial(commands.Cog, name="Trials"):
                     # No role, need to grab default
                     if len(msg) == 3:
                         msg = msg[1] + " " + msg[2]  # merge together the message if needed
+                    else:
+                        msg = msg[1]
                     role = default_role.get(user_id)
                     if role == "dps":
                         trial.add_dps(user_id, msg)
@@ -421,6 +423,8 @@ class Trial(commands.Cog, name="Trials"):
                     # No role, need to grab default
                     if len(msg) == 3:
                         msg = msg[1] + " " + msg[2]  # merge together the message if needed
+                    else:
+                        msg = msg[1]
                     role = default_role.get(user_id)
                     if role == "dps":
                         trial.add_backup_dps(user_id, msg)
