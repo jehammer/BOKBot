@@ -16,9 +16,6 @@ trial_counter = {}
 default_role = {}
 
 
-# TODO: Implement default roles
-
-
 # Special class to store trial in'
 class EsoTrial:
     """Class to hold trial information"""
