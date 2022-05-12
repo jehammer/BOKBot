@@ -225,6 +225,9 @@ class Trial(commands.Cog, name="Trials"):
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
+                def suffix(d):
+                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
                 msg = ctx.message.content
                 msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
                 msg = msg[1]  # drop the !trial part
@@ -236,7 +239,8 @@ class Trial(commands.Cog, name="Trials"):
                 new_time = datetime.datetime.utcfromtimestamp(new)
                 central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
                 weekday = calendar.day_name[central.weekday()]
-                new_name = trial + "-" + weekday
+                day = central.day
+                new_name = trial.trial + "-" + weekday + "-" + str(day) + suffix(day)
                 channel = await category.create_text_channel(new_name)
 
                 # create new trial and put it in storage for later use
@@ -993,6 +997,9 @@ class Trial(commands.Cog, name="Trials"):
                 def check(m: nextcord.Message):  # m = discord.Message.
                     return user == m.author
 
+                def suffix(d):
+                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
                 run = True
                 while run:
                     try:
@@ -1052,7 +1059,8 @@ class Trial(commands.Cog, name="Trials"):
                                     new_time = datetime.datetime.utcfromtimestamp(new)
                                     central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
                                     weekday = calendar.day_name[central.weekday()]
-                                    new_name = trial.trial + "-" + weekday
+                                    day = central.day
+                                    new_name = trial.trial + "-" + weekday + "-" + str(day) + suffix(day)
                                     await channel.edit(name=new_name)
                                     run = False
                             except IndexError:
