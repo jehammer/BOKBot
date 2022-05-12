@@ -160,6 +160,27 @@ def save_to_doc():
         logging.error("Error on saving trials pickle: " + str(e))
 
 
+def load_trials():
+    """Loads trials from the pickle"""
+    try:
+        global storage
+        db_file = open('trialStorage.pkl', 'rb')
+        all_data = pickle.load(db_file)
+        for i in range(len(all_data)):
+            # 0: trial, 1: date, 2: leader, 3: trial_dps = {},
+            # 4: trial_healers = {}, 5: trial_tanks = {}, 6: backup_dps = {},
+            # 7: backup_healers = {}, 8: backup_tanks = {}
+            # It looks like this because the pickle file saves the object into a list, the list has to be unpacked
+            #   back into the EsoTrial object, with another list inside it that must be unpacked into the object
+            #   I dare not touch this again, lest I invoke the anger of the Gods.
+            storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2], all_data[i][1][3],
+                                               all_data[i][1][4], all_data[i][1][5], all_data[i][1][6], all_data[i][1][7],
+                                               all_data[i][1][8])
+        db_file.close()
+    except IOError as e:
+        logging.error("Load Trials Error: " + str(e))
+
+
 def save_default_roles():
     """Saves the default roles dictionary to a pickle"""
     try:
@@ -189,22 +210,7 @@ class Trial(commands.Cog, name="Trials"):
 
     def __init__(self, bot: commands.Bot):
         try:
-            global storage
-            db_file = open('trialStorage.pkl', 'rb')
-            all_data = pickle.load(db_file)
-            for i in range(len(all_data)):
-                # 0: trial, 1: date, 2: leader, 3: trial_dps = {},
-                # 4: trial_healers = {}, 5: trial_tanks = {}, 6: backup_dps = {},
-                # 7: backup_healers = {}, 8: backup_tanks = {}
-                # This is disgusting. There has to be a better way to write this. I should move this into an on_ready
-                # It looks like this because the pickle file saves the object into a list, the list has to be unpacked
-                #   back into the EsoTrial object, with another list inside it that must be unpacked into the object
-                storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1],
-                                                   all_data[i][1][2], all_data[i][1][3], all_data[i][1][4],
-                                                   all_data[i][1][5], all_data[i][1][6],
-                                                   all_data[i][1][7], all_data[i][1][8])
-
-            db_file.close()
+            load_trials()
             load_trial_count()
             load_default_roles()
             self.bot = bot

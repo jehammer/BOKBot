@@ -94,7 +94,7 @@ async def shutdown(ctx: commands.Context):
         logging.error("Shutdown error: " + str(e))
 
 
-load_cogs()  # Loading cogs outside on_ready enables cog files to have their own on_ready
+load_cogs()
 if __name__ == '__main__':
     with open('Token.txt') as f:
         token = f.readline()
