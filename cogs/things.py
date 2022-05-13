@@ -261,6 +261,23 @@ Goodnight BOK
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
 
+    @commands.command()
+    async def azure(self, ctx: commands.context):
+        """Something he said"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Azure error: " + str(e))
+
+    @commands.command()
+    async def context(self, ctx: commands.context):
+        """Lissa says this is context for !azure"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767399981158500/Context.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Azure error: " + str(e))
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
