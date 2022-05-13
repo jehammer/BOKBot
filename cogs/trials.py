@@ -588,12 +588,12 @@ class Trial(commands.Cog, name="Trials"):
                 trial.remove_dps(user_id)
                 worked = True
 
-            if user_id in trial.trial_healers.keys() or \
+            elif user_id in trial.trial_healers.keys() or \
                     user_id in trial.backup_healers.keys():
                 trial.remove_healer(user_id)
                 worked = True
 
-            if user_id in trial.trial_tanks.keys() or \
+            elif user_id in trial.trial_tanks.keys() or \
                     user_id in trial.backup_tanks.keys():
                 trial.remove_tank(user_id)
                 worked = True
