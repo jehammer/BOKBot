@@ -7,6 +7,7 @@ import pickle
 import logging
 import asyncio
 from pytz import timezone
+from enum import Enum
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,6 +15,13 @@ logging.basicConfig(level=logging.INFO)
 storage = {}
 trial_counter = {}
 default_role = {}
+
+
+class Role(Enum):
+    DPS = "dps"
+    HEALER = "healer"
+    TANK = "tank"
+    NONE = "none"
 
 
 # Special class to store trial in'
@@ -173,9 +181,9 @@ def load_trials():
             # It looks like this because the pickle file saves the object into a list, the list has to be unpacked
             #   back into the EsoTrial object, with another list inside it that must be unpacked into the object
             #   I dare not touch this again, lest I invoke the anger of the Gods.
-            storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2], all_data[i][1][3],
-                                               all_data[i][1][4], all_data[i][1][5], all_data[i][1][6], all_data[i][1][7],
-                                               all_data[i][1][8])
+            storage[all_data[i][0]] = EsoTrial(all_data[i][1][0], all_data[i][1][1], all_data[i][1][2],
+                                               all_data[i][1][3], all_data[i][1][4], all_data[i][1][5],
+                                               all_data[i][1][6], all_data[i][1][7], all_data[i][1][8])
         db_file.close()
     except IOError as e:
         logging.error("Load Trials Error: " + str(e))
@@ -277,31 +285,60 @@ class Trial(commands.Cog, name="Trials"):
             global default_role
             single = False  # A variable to check if someone just used !su
             worked = False
+            swapped = False
+            slotted = Role.NONE
+            msg_change = False
+            og_msg = ""
             msg = msg.split(" ", 2)
             if len(msg) == 1:
                 single = True
             channel = ctx.message.channel.id
             user_id = ctx.message.author.id
             trial = storage.get(channel)
-            # Check if the user is already in one of the rosters
             if user_id in trial.trial_dps.keys():
-                await ctx.send("You are already signed up as DPS!")
-                return
+                og_msg = trial.trial_dps.get(user_id)
+                slotted = Role.DPS
+                trial.remove_dps(user_id)
+                swapped = True
+
             elif user_id in trial.backup_dps.keys():
-                await ctx.send("You are already signed up as backup DPS!")
-                return
+                og_msg = trial.backup_dps.get(user_id)
+                trial.remove_dps(user_id)
+                slotted = Role.DPS
+                swapped = True
+
             elif user_id in trial.trial_healers.keys():
-                await ctx.send("You are already signed up as a Healer!")
-                return
+                og_msg = trial.trial_healers.get(user_id)
+                trial.remove_healer(user_id)
+                slotted = Role.HEALER
+                swapped = True
+
             elif user_id in trial.backup_healers.keys():
-                await ctx.send("You are already signed up as a backup Healer!")
-                return
+                og_msg = trial.backup_healers.get(user_id)
+                trial.remove_healer(user_id)
+                slotted = Role.HEALER
+                swapped = True
+
             elif user_id in trial.trial_tanks.keys():
-                await ctx.send("You are already signed up as a Tank!")
-                return
+                og_msg = trial.trial_tanks.get(user_id)
+                trial.remove_tank(user_id)
+                slotted = Role.TANK
+                swapped = True
+
             elif user_id in trial.backup_tanks.keys():
-                await ctx.send("You are already signed up as a backup Tank!")
-                return
+                og_msg = trial.backup_tanks.get(user_id)
+                trial.remove_tank(user_id)
+                slotted = Role.TANK
+                swapped = True
+
+            # Just along check to verify it is not any of the defaults or empty first dps then healer then tank
+            if slotted != Role.NONE and og_msg != "" and og_msg != "could be sadistic" and og_msg != "will be sadistic" \
+                    and og_msg != "will be soft mommy dom" and og_msg != "could be soft mommy dom" \
+                    and og_msg != "will be masochistic" and og_msg != "could be masochistic":
+                msg_change = True
+                # Now that we have determined that the original message is not default, need to adjust accordingly
+                #   in non-role change situations. IE: just calling !su or !bu to swap which roster they are on
+
             if not single:
                 role = msg[1].lower()
                 if role == "dps" or role == "healer" or role == "tank":
@@ -320,13 +357,22 @@ class Trial(commands.Cog, name="Trials"):
                     else:
                         # The message has a SU and a Role
                         if role == "dps":
-                            trial.add_dps(user_id)
+                            if slotted == Role.DPS and msg_change:
+                                trial.add_dps(user_id, og_msg)
+                            else:
+                                trial.add_dps(user_id)
                             worked = True
                         elif role == "healer":
-                            trial.add_healer(user_id)
+                            if slotted == Role.HEALER and msg_change:
+                                trial.add_healer(user_id, og_msg)
+                            else:
+                                trial.add_healer(user_id)
                             worked = True
                         elif role == "tank":
-                            trial.add_tank(user_id)
+                            if slotted == Role.TANK and msg_change:
+                                trial.add_tank(user_id, og_msg)
+                            else:
+                                trial.add_tank(user_id)
                             worked = True
                 else:
                     # No role, need to grab default
@@ -348,18 +394,31 @@ class Trial(commands.Cog, name="Trials"):
                 # User just called !su, no message, no role
                 role = default_role.get(user_id)
                 if role == "dps":
-                    trial.add_dps(user_id)
+                    if slotted == Role.DPS and msg_change:
+                        trial.add_dps(user_id, og_msg)
+                    else:
+                        trial.add_dps(user_id)
                     worked = True
                 elif role == "healer":
-                    trial.add_healer(user_id)
+                    if slotted == Role.HEALER and msg_change:
+                        trial.add_healer(user_id, og_msg)
+                    else:
+                        trial.add_healer(user_id)
                     worked = True
                 elif role == "tank":
-                    trial.add_tank(user_id)
+                    if slotted == Role.TANK and msg_change:
+                        trial.add_tank(user_id, og_msg)
+                    else:
+                        trial.add_tank(user_id)
                     worked = True
             if worked:
+                # Check if the user is already in one of the rosters
                 storage[channel] = trial
                 save_to_doc()
-                await ctx.reply("Added!")
+                if swapped:
+                    await ctx.reply("Swapped!")
+                else:
+                    await ctx.reply("Added!")
             else:
                 await ctx.reply("Unable to sign up. Remember to check <#932438565009379358> if you are stuck!")
         except Exception as e:
@@ -375,6 +434,10 @@ class Trial(commands.Cog, name="Trials"):
             global default_role
             single = False  # A variable to check if someone just used !bu
             worked = False
+            swapped = False
+            slotted = Role.NONE
+            msg_change = False
+            og_msg = ""
             msg = msg.split(" ", 2)
             if len(msg) == 1:
                 single = True
@@ -383,29 +446,55 @@ class Trial(commands.Cog, name="Trials"):
             trial = storage.get(channel)
             # Check if the user is already in one of the rosters
             if user_id in trial.trial_dps.keys():
-                await ctx.send("You are already signed up as DPS!")
-                return
+                og_msg = trial.trial_dps.get(user_id)
+                slotted = Role.DPS
+                trial.remove_dps(user_id)
+                swapped = True
+
             elif user_id in trial.backup_dps.keys():
-                await ctx.send("You are already signed up as backup DPS!")
-                return
+                og_msg = trial.backup_dps.get(user_id)
+                trial.remove_dps(user_id)
+                slotted = Role.DPS
+                swapped = True
+
             elif user_id in trial.trial_healers.keys():
-                await ctx.send("You are already signed up as a Healer!")
-                return
+                og_msg = trial.trial_healers.get(user_id)
+                trial.remove_healer(user_id)
+                slotted = Role.HEALER
+                swapped = True
+
             elif user_id in trial.backup_healers.keys():
-                await ctx.send("You are already signed up as a backup Healer!")
-                return
+                og_msg = trial.backup_healers.get(user_id)
+                trial.remove_healer(user_id)
+                slotted = Role.HEALER
+                swapped = True
+
             elif user_id in trial.trial_tanks.keys():
-                await ctx.send("You are already signed up as a Tank!")
-                return
+                og_msg = trial.trial_tanks.get(user_id)
+                trial.remove_tank(user_id)
+                slotted = Role.TANK
+                swapped = True
+
             elif user_id in trial.backup_tanks.keys():
-                await ctx.send("You are already signed up as a backup Tank!")
-                return
+                og_msg = trial.backup_tanks.get(user_id)
+                trial.remove_tank(user_id)
+                slotted = Role.TANK
+                swapped = True
+
+            # Just a long check to verify it is not any of the defaults or empty first dps then healer then tank
+            if slotted != Role.NONE and og_msg != "" and og_msg != "could be sadistic" and og_msg != "will be sadistic" \
+                    and og_msg != "will be soft mommy dom" and og_msg != "could be soft mommy dom" \
+                    and og_msg != "will be masochistic" and og_msg != "could be masochistic":
+                msg_change = True
+                # Now that we have determined that the original message is not default, need to adjust accordingly
+                #   in non-role change situations. IE: just calling !su or !bu to swap which roster they are on
+
             if not single:
                 role = msg[1].lower()
                 if role == "dps" or role == "healer" or role == "tank":
                     # Check if there is an optional message or not
                     if len(msg) == 3:
-                        # The message has a BU, a Role, and a message. Now to grab the right role
+                        # The message has a SU, a Role, and a message. Now to grab the right role
                         if role == "dps":
                             trial.add_backup_dps(user_id, msg[2])
                             worked = True
@@ -416,15 +505,24 @@ class Trial(commands.Cog, name="Trials"):
                             trial.add_backup_tank(user_id, msg[2])
                             worked = True
                     else:
-                        # The message has a BU and a Role
+                        # The message has a SU and a Role
                         if role == "dps":
-                            trial.add_backup_dps(user_id)
+                            if slotted == Role.DPS and msg_change:
+                                trial.add_backup_dps(user_id, og_msg)
+                            else:
+                                trial.add_backup_dps(user_id)
                             worked = True
                         elif role == "healer":
-                            trial.add_backup_healer(user_id)
+                            if slotted == Role.HEALER and msg_change:
+                                trial.add_backup_healer(user_id, og_msg)
+                            else:
+                                trial.add_backup_healer(user_id)
                             worked = True
                         elif role == "tank":
-                            trial.add_backup_tank(user_id)
+                            if slotted == Role.TANK and msg_change:
+                                trial.add_backup_tank(user_id, og_msg)
+                            else:
+                                trial.add_backup_tank(user_id)
                             worked = True
                 else:
                     # No role, need to grab default
@@ -443,21 +541,33 @@ class Trial(commands.Cog, name="Trials"):
                         trial.add_backup_tank(user_id, msg)
                         worked = True
             else:
-                # User just called !bu, no message, no role
+                # User just called !su, no message, no role
                 role = default_role.get(user_id)
                 if role == "dps":
-                    trial.add_backup_dps(user_id)
+                    if slotted == Role.DPS and msg_change:
+                        trial.add_backup_dps(user_id, og_msg)
+                    else:
+                        trial.add_backup_dps(user_id)
                     worked = True
                 elif role == "healer":
-                    trial.add_backup_healer(user_id)
+                    if slotted == Role.HEALER and msg_change:
+                        trial.add_backup_healer(user_id, og_msg)
+                    else:
+                        trial.add_backup_healer(user_id)
                     worked = True
                 elif role == "tank":
-                    trial.add_backup_tank(user_id)
+                    if slotted == Role.TANK and msg_change:
+                        trial.add_backup_tank(user_id, og_msg)
+                    else:
+                        trial.add_backup_tank(user_id)
                     worked = True
             if worked:
                 storage[channel] = trial
                 save_to_doc()
-                await ctx.reply("Added for Backup!")
+                if swapped:
+                    await ctx.reply("Swapped!")
+                else:
+                    await ctx.reply("Added for backup!")
             else:
                 await ctx.reply("Unable to sign up as backup. Remember to check <#932438565009379358> if you are stuck!"
                                 )
@@ -1467,7 +1577,9 @@ class Trial(commands.Cog, name="Trials"):
                         save_trial_count()
                         await ctx.send(f"Trial count for {member.display_name} is now {trial_counter.get(member.id)}")
                 else:
-                    await ctx.send("You do not have the permissions for this.")
+                    await ctx.send("User has no trials recorded.")
+            else:
+                await ctx.send("You do not have the permissions for this.")
         except Exception as e:
             await ctx.send("Unable to decrease trial count")
             logging.error("Decrease Trial Count Error: " + str(e))
@@ -1536,8 +1648,6 @@ class Trial(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send("Unable to set default role")
             logging.error("Default Role Set Error: " + str(e))
-
-    # TODO: Create swap command to swap role easily
 
 
 def setup(bot: commands.Bot):

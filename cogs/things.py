@@ -45,6 +45,16 @@ class Things(commands.Cog, name="Fun Things"):
         await ctx.send(message)
 
     @commands.command()
+    async def otter(self, ctx: commands.Context):
+        """Adder"""
+        await ctx.send('Adder')
+
+    @commands.command()
+    async def adder(self, ctx: commands.Context):
+        """Otter"""
+        await ctx.send('Otter')
+
+    @commands.command()
     async def vka(self, ctx: commands.Context):
         """Something you wanna see for vKA"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837688141856768/congaline.png')
