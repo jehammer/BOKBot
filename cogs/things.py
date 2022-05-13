@@ -277,7 +277,7 @@ Goodnight BOK
             await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767399981158500/Context.png')
         except Exception as e:
             await ctx.send("Unable to send image")
-            logging.error("Azure error: " + str(e))
+            logging.error("Context error: " + str(e))
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
