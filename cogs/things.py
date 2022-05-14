@@ -283,7 +283,7 @@ Goodnight BOK
     async def atios(self, ctx: commands.context):
         """His big secret ability"""
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974851874312310794/Atios.png')
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974855284772188200/Atios.png')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Atios error: " + str(e))
