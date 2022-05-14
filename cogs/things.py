@@ -279,6 +279,15 @@ Goodnight BOK
             await ctx.send("Unable to send image")
             logging.error("Context error: " + str(e))
 
+    @commands.command()
+    async def atios(self, ctx: commands.context):
+        """His big secret ability"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974851874312310794/Atios.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Atios error: " + str(e))
+
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
 #        """An automated task to remind Arma to do stuff"""
