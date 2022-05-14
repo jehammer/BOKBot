@@ -288,6 +288,16 @@ Goodnight BOK
             await ctx.send("Unable to send image")
             logging.error("Atios error: " + str(e))
 
+    @commands.command()
+    async def regret(self, ctx:commands.context):
+        """A quick moment of regret from Atios"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882271981088778/ctx_lissa.png')
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882282190037002/Share.gif')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Regret error: " + str(e))
+
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
 #        """An automated task to remind Arma to do stuff"""
