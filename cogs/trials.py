@@ -264,10 +264,10 @@ class Trial(commands.Cog, name="Trials"):
                     color=nextcord.Color.blue()
                 )
                 embed.set_footer(text="Remember to spay or neuter your support!")
-                embed.set_author(name=leader)
-                embed.add_field(name="Healers", value='To Heal Us', inline=False)
-                embed.add_field(name="Tanks", value='To Be Stronk', inline=False)
-                embed.add_field(name="DPS", value='To Stand In Stupid', inline=False)
+                embed.set_author(name="Raid Lead: " + leader)
+                embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+                embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+                embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
                 await channel.send(embed=embed)
                 await ctx.send("Channel and Roster created")
             else:
@@ -694,10 +694,9 @@ class Trial(commands.Cog, name="Trials"):
         """Prints out a list of all who are signed up as main and backups"""
         try:
             num = ctx.message.channel.id
-            primary_embed, backup_embed = await self.print_roster(num, ctx.guild.id)
+            primary_embed = await self.print_roster(num, ctx.guild.id)
 
             await ctx.send(embed=primary_embed)
-            await ctx.send(embed=backup_embed)
         except Exception as e:
             logging.error("Status check error: " + str(e))
             await ctx.send("Unable to send status, have Drak check the bot.")
@@ -1200,6 +1199,8 @@ class Trial(commands.Cog, name="Trials"):
             await ctx.send("You do not have permission to do that.")
 
     async def print_roster(self, num, guild_id):
+        # TODO: Remove backup roster print and titles, leave emotes and messages and stuff
+        #   Move backup roster to print at very end under Backups title, but leave it as inline with the rest
         try:
             global storage
             trial = storage.get(num)
@@ -1207,19 +1208,16 @@ class Trial(commands.Cog, name="Trials"):
             healer_count = 0
             tank_count = 0
             guild = self.bot.get_guild(guild_id)
+            names = ""
             embed = nextcord.Embed(
                 title=trial.trial + " " + trial.date,
-                description="This battle will be legendary!",
                 color=nextcord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
-            embed.set_author(name=trial.leader)
+            embed.set_author(name="Raid Lead: " + trial.leader)
 
             # HEALERS
-            names = ""
-            if len(trial.trial_healers) == 0:
-                names = "None"
-            else:
+            if not len(trial.trial_healers) == 0:
                 to_remove = []
                 for i in trial.trial_healers:
                     member_name = guild.get_member(i)
@@ -1237,12 +1235,8 @@ class Trial(commands.Cog, name="Trials"):
                         trial.remove_healer(i)
                     save_to_doc()
 
-            embed.add_field(name="Healers", value=names, inline=False)
             # TANKS
-            names = ""
-            if len(trial.trial_tanks) == 0:
-                names = "None"
-            else:
+            if not len(trial.trial_tanks) == 0:
                 to_remove = []
                 tanks = trial.trial_tanks
                 for i in tanks:
@@ -1259,13 +1253,8 @@ class Trial(commands.Cog, name="Trials"):
                     for i in to_remove:
                         trial.remove_tank(i)
                     save_to_doc()
-            embed.add_field(name="Tanks", value=names, inline=False)
-
             # DPS
-            names = ""
-            if len(trial.trial_dps) == 0:
-                names = "None"
-            else:
+            if not len(trial.trial_dps) == 0:
                 to_remove = []
                 dps = trial.trial_dps
                 for i in dps:
@@ -1283,26 +1272,20 @@ class Trial(commands.Cog, name="Trials"):
                         trial.remove_dps(i)
                     save_to_doc()
 
-            embed.add_field(name="DPS", value=names, inline=False)
+            if not names == "":
+                embed.add_field(name="Roster", value=names, inline=False)
 
-            names = "Healers: " + str(healer_count) + " \nTanks: " + str(tank_count) + " \nDPS: " + str(dps_count)
-            embed.add_field(name="Total", value=names, inline=False)
+                names = "Healers: " + str(healer_count) + " \nTanks: " + str(tank_count) + " \nDPS: " + str(dps_count)
+                embed.add_field(name="Total", value=names, inline=False)
+
+            names = ""
 
             # Show Backup/Overflow Roster
             dps_count = 0
             healer_count = 0
             tank_count = 0
-            embed2 = nextcord.Embed(
-                title="Backups",
-                # description = " ",
-                color=nextcord.Color.orange()
-            )
-            embed2.set_footer(text="Remember to beep when backing up that dump truck")
             # BACKUP HEALERS
-            names = ""
-            if len(trial.backup_healers) == 0:
-                names = "None"
-            else:
+            if not len(trial.backup_healers) == 0:
                 to_remove = []
                 backup_healers = trial.backup_healers
                 for i in backup_healers:
@@ -1320,13 +1303,9 @@ class Trial(commands.Cog, name="Trials"):
                         trial.remove_healer(i)
                     save_to_doc()
 
-            embed2.add_field(name="Healers", value=names, inline=False)
-
             # BACKUP TANKS
-            names = ""
-            if len(trial.backup_tanks) == 0:
+            if not len(trial.backup_tanks) == 0:
                 names = "None"
-            else:
                 to_remove = []
                 tanks = trial.backup_tanks
                 for i in tanks:
@@ -1343,14 +1322,8 @@ class Trial(commands.Cog, name="Trials"):
                     for i in to_remove:
                         trial.remove_tank(i)
                     save_to_doc()
-
-            embed2.add_field(name="Tanks", value=names, inline=False)
-
             # BACKUP DPS
-            names = ""
-            if len(trial.backup_dps) == 0:
-                names = "None"
-            else:
+            if not len(trial.backup_dps) == 0:
                 to_remove = []
                 dps = trial.backup_dps
                 for i in dps:
@@ -1368,12 +1341,13 @@ class Trial(commands.Cog, name="Trials"):
                         trial.remove_dps(i)
                     save_to_doc()
 
-            embed2.add_field(name="DPS", value=names, inline=False)
+            if not names == "":
+                embed.add_field(name="Backups", value=names, inline=False)
 
-            names = "Healers: " + str(healer_count) + "\nTanks: " + str(tank_count) + "\nDPS: " + str(dps_count)
-            embed2.add_field(name="Total", value=names, inline=False)
+                names = "Healers: " + str(healer_count) + "\nTanks: " + str(tank_count) + "\nDPS: " + str(dps_count)
+                embed.add_field(name="Total Backups", value=names, inline=False)
 
-            return embed, embed2
+            return embed
         except Exception as e:
             logging.error("Print roster error: " + str(e))
 
