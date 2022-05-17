@@ -89,6 +89,11 @@ class Gif(commands.Cog, name="Gifs"):
         """Pretty Fly for a Fly Guy"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/974769151774195733/Fly.gif')
 
+    @commands.command()
+    async def lost(self, ctx: commands.Context):
+        """Then he was lost!"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Gif(bot))
