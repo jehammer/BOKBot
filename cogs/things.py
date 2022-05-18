@@ -298,6 +298,16 @@ Goodnight BOK
             await ctx.send("Unable to send image")
             logging.error("Regret error: " + str(e))
 
+    @commands.command()
+    async def nave(self, ctx: commands.context):
+        """Its Name is"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976489973937213480/nave.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Nave error: " + str(e))
+
+
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
 #        """An automated task to remind Arma to do stuff"""

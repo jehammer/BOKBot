@@ -1461,7 +1461,7 @@ class Trial(commands.Cog, name="Trials"):
                                     if confirm == "y":
                                         if num in storage.keys():
                                             try:
-                                                await ctx.send("Did the trial happen (y/n)?")
+                                                await ctx.send("Increase everyone's Trial Count (y/n)?")
                                                 confirm = await self.bot.wait_for(event="message", check=check,
                                                                                   timeout=15.0)
                                                 confirm = confirm.content.lower()
