@@ -36,8 +36,8 @@ class Gif(commands.Cog, name="Gifs"):
 
     @commands.command()
     async def fishing(self, ctx: commands.Context):
-        """Fish does what he does"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730137450553355/Fishing.gif')
+        """Glub Glub"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976527850524016650/Fishing.gif')
 
     @commands.command()
     async def dance(self, ctx: commands.Context):
