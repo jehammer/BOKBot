@@ -248,7 +248,7 @@ class Trial(commands.Cog, name="Trials"):
                 central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
                 weekday = calendar.day_name[central.weekday()]
                 day = central.day
-                new_name = trial.trial + "-" + weekday + "-" + str(day) + suffix(day)
+                new_name = trial + "-" + weekday + "-" + str(day) + suffix(day)
                 channel = await category.create_text_channel(new_name)
 
                 # create new trial and put it in storage for later use
