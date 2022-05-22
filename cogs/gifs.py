@@ -75,8 +75,8 @@ class Gif(commands.Cog, name="Gifs"):
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932432680178569276/Gabe.gif')
 
     @commands.command()
-    async def creed(self, ctx: commands.Context):
-        """Creed did a thing"""
+    async def maja(self, ctx: commands.Context):
+        """How she be after we kick her butt"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
 
     @commands.command()
