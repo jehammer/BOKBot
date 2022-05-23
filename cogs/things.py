@@ -1,5 +1,3 @@
-import asyncio
-import nextcord
 from nextcord.ext import commands, tasks
 import random
 import logging
@@ -111,28 +109,6 @@ class Things(commands.Cog, name="Fun Things"):
                        "\nNo Cap: An expression of authenticity."
                        "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
                        "\nBussin: Same as Baller")
-
-    @commands.command(name="getarma")
-    async def get_arma(self, ctx: commands.Context):
-        """Gets Arma with a series of DMs and pings in case he forgets again"""
-        role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-        user = ctx.message.author
-        if user in role.members:
-            try:
-                arma = ctx.message.guild.get_member(152077378317844480)
-                if arma:
-                    for i in range(4):
-                        await arma.send("It is time for your regularly scheduled event")
-                        await ctx.send(arma.mention + " it is time for you to get on!")
-                        await asyncio.sleep(.5)
-
-                else:
-                    await ctx.send("Cannot find Arma")
-            except Exception as e:
-                await ctx.send("I cannot call Arma")
-                logging.error("Call Arma error: " + str(e))
-        else:
-            await ctx.send("You do not have permission to use this command.")
 
     @commands.command(name="twitch")
     async def get_twitch_url(self, ctx: commands.context):
@@ -265,47 +241,48 @@ Goodnight BOK
     async def azure(self, ctx: commands.context):
         """Something he said"""
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
+                case 2:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976489973937213480/nave.png')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Azure error: " + str(e))
 
     @commands.command()
-    async def context(self, ctx: commands.context):
-        """Lissa says this is context for !azure"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767399981158500/Context.png')
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Context error: " + str(e))
-
-    @commands.command()
     async def atios(self, ctx: commands.context):
         """His big secret ability"""
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974855284772188200/Atios.png')
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974855284772188200/Atios.png')
+                case 2:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882271981088778/ctx_lissa.png')
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882282190037002/Share.gif')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Atios error: " + str(e))
 
     @commands.command()
-    async def regret(self, ctx:commands.context):
-        """A quick moment of regret from Atios"""
+    async def char(self, ctx: commands.context):
+        """He got something"""
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882271981088778/ctx_lissa.png')
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882282190037002/Share.gif')
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767399981158500/Context.png')
         except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Regret error: " + str(e))
+            await ctx.send("Unable to send image.")
+            logging.error("Char error: " + str(e))
 
-    @commands.command()
-    async def nave(self, ctx: commands.context):
-        """Its Name is"""
+    @commands.command(name="gnight")
+    async def goodnight_fly(self, ctx: commands.context):
+        """Fly lives upside down."""
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976489973937213480/nave.png')
+            await ctx.send("Goodnight Fly!")
         except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Nave error: " + str(e))
+            await ctx.send("I cannot say goodnight!")
+            logging.error("Gnight error: " + str(e))
 
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
