@@ -256,12 +256,16 @@ Goodnight BOK
     async def azure(self, ctx: commands.context):
         """Something he said"""
         try:
-            ran = random.randint(1, 2)
+            ran = random.randint(1, 4)
             match ran:
                 case 1:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
                 case 2:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976489973937213480/nave.png')
+                case 3:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/979226645271552040/Suck_Butt.png')
+                case 4:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/978509287498350642/More_Azure.png')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Azure error: " + str(e))

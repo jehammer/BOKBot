@@ -94,6 +94,11 @@ class Gif(commands.Cog, name="Gifs"):
         """Then he was lost!"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
 
+    @commands.command()
+    async def dungeons(self, ctx: commands.Context):
+        """DUNGEONS"""
+        await ctx.send('https://images-ext-1.discordapp.net/external/6E1zJYhVfv1WR1d4SNz1jPmLk0ZgOxTZ8GFrWO5M0G8/https/media.tenor.com/J1z4eDRIgl0AAAPo/dungeons.mp4')
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Gif(bot))
