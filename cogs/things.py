@@ -2,11 +2,25 @@ from nextcord.ext import commands, tasks
 import random
 import logging
 import datetime
+import asyncpraw as praw
 
 logging.basicConfig(level=logging.INFO)
 
+client_id = ""
+client_secret = ""
 
-# Singular function to get random trials depending on what is currently doable by the guild.
+
+def load_client_data():
+    try:
+        global client_id
+        global client_secret
+        with open('Client.txt') as f:
+            client_id = f.readline().strip('\n')
+            client_secret = f.readline().strip('\n')
+        print(client_id)
+        print(client_secret)
+    except Exception as e:
+        logging.error("Unable to load client data: " + str(e))
 
 
 class Things(commands.Cog, name="Fun Things"):
@@ -15,6 +29,7 @@ class Things(commands.Cog, name="Fun Things"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         logging.info("Things cog loaded")
+        load_client_data()
         self.scheduled_good_morning.start()
 
     @commands.command()
@@ -284,6 +299,39 @@ Goodnight BOK
             await ctx.send("I cannot say goodnight!")
             logging.error("Gnight error: " + str(e))
 
+    @commands.command(name="reddit")
+    async def get_random_from_reddit(self, ctx: commands.context):
+        """Gets a random copypasta from reddit."""
+        try:
+            global client_id
+            global client_secret
+            await ctx.send("Loading a random post...")
+            reddit = praw.Reddit(client_id=client_id,
+                                 client_secret=client_secret,
+                                 user_agent='Linux:BOKBot:v2.0 by u/Drakidor')
+            subreddit = await reddit.subreddit('elderscrollsonline')
+            posts = [submission async for submission in subreddit.top()]
+            ran = random.randint(1, len(posts))
+            post = posts[ran]
+            await ctx.send("A random hot post from r/elderscrollsonline for you!")
+            await ctx.send(post.title)
+            if post.url:
+                await ctx.send(post.url)
+            if post.selftext:
+                await ctx.send(post.selftext)
+            await ctx.send(f"https://www.reddit.com{post.permalink}")
+        except Exception as e:
+            await ctx.send("I was unable to complete the command.")
+            logging.error("Reddit error: " + str(e))
+
+    @commands.command(name="wrap")
+    async def create_bubblewrap(self, ctx: commands.context):
+        """For all your popping needs"""
+        message = f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||"
+        await ctx.send(message)
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):

@@ -7,3 +7,4 @@ venv/
 *.pyc
 trialCountStorage.pkl
 DefaultRolesStorage.pkl
+Client.txt

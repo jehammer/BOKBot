@@ -33,6 +33,7 @@ def get_zone():
             zone = "Gates Of Oblivion - Blackwood, Fargrave, Deadlands"
         case 10:
             zone = "Gold Coast, Hew's Bane, Murkmire"
+        # TODO: Add in High Isle zone
     if len(last4) < 4:
         last4.append(ran)
     else:
