@@ -47,6 +47,7 @@ class Gif(commands.Cog, name="Gifs"):
     @commands.command()
     async def logz(self, ctx: commands.Context):
         """Actual gif of him"""
+        await ctx.send("LISTEN HERE SHITHEADS!")
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
 
     @commands.command()
