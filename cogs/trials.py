@@ -1166,7 +1166,7 @@ class Trial(commands.Cog, name="Trials"):
                                     new = re.sub('[^0-9]', '', new_date)
                                     new = int(new)
                                     new_time = datetime.datetime.utcfromtimestamp(new)
-                                    central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None)
+                                    central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
                                     weekday = calendar.day_name[central.weekday()]
                                     day = central.day
                                     new_name = trial.trial + "-" + weekday + "-" + str(day) + suffix(day)
@@ -1182,25 +1182,7 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Change Trial change error: " + str(e))
             await ctx.send("An error has occurred in the command.")
 
-    @commands.command()
-    async def clean(self, ctx: commands.Context, num):
-        """For Drak when someone doesn't end a trial"""
-        if ctx.message.author.id == 212634819190849536:
-            try:
-                num = int(num)
-                global storage
-                del storage[num]
-                save_to_doc()
-                await ctx.send("The butt has been wiped.")
-            except Exception as e:
-                await ctx.send("Unable to wipe the butt, the wipes are dry.")
-                logging.error("Clean error: " + str(e))
-        else:
-            await ctx.send("You do not have permission to do that.")
-
     async def print_roster(self, num, guild_id):
-        # TODO: Remove backup roster print and titles, leave emotes and messages and stuff
-        #   Move backup roster to print at very end under Backups title, but leave it as inline with the rest
         try:
             global storage
             trial = storage.get(num)
