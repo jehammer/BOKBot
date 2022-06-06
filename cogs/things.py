@@ -30,10 +30,19 @@ class Things(commands.Cog, name="Fun Things"):
         load_client_data()
         self.scheduled_good_morning.start()
 
-    @commands.command()
-    async def lissa(self, ctx: commands.Context):
-        """Lissa Does A Padme"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138276855818/Lissa.gif')
+    @commands.command(name="lissa")
+    async def get_lissa_moment(self, ctx: commands.Context):
+        """Get yourself a random Lissa moment"""
+        try:
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138276855818/Lissa.gif')
+                case 2:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/983464338922811392/unknown.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Lissa error: " + str(e))
 
     @commands.command()
     async def rng(self, ctx: commands.Context):
