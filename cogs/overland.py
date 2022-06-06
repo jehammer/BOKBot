@@ -8,7 +8,7 @@ def get_zone():
     loop = True
     last4 = []
     while loop:
-        ran = random.randint(1, 10)
+        ran = random.randint(1, 11)
         if ran not in last4:
             loop = False
     zone = ""
@@ -33,7 +33,8 @@ def get_zone():
             zone = "Gates Of Oblivion - Blackwood, Fargrave, Deadlands"
         case 10:
             zone = "Gold Coast, Hew's Bane, Murkmire"
-        # TODO: Add in High Isle zone
+        case 11:
+            zone = "Legacy of The Bretons - High Isle"
     if len(last4) < 4:
         last4.append(ran)
     else:
@@ -61,18 +62,19 @@ def get_trial(cap):
         case 4:
             trial = "Maw of Lorkhaj"
         case 5:
-            trial = "Sunspire"
+            trial = "Halls of Fabrication"
         case 6:
             trial = "Asylum Sanctorium"
         case 7:
             trial = "Cloudrest"
         case 8:
-            trial = "Halls of Fabrication"
+            trial = "Sunspire"
         case 9:
             trial = "Kyne's Aegis"
         case 10:
             trial = "Rockgrove"
-        # TODO: Add in Dreadsail Reef as an option when High Isle releases
+        case 11:
+            trial = "Dreadsail Reef"
     if len(last4) < 4:
         last4.append(ran)
     else:
@@ -117,14 +119,14 @@ class Overland(commands.Cog, name="Events"):
     @commands.command()
     async def ntrial(self, ctx: commands.Context):
         """Gives you a random normal trial to do"""
-        trial = get_trial(10)
+        trial = get_trial(11)
         await ctx.send("Normal " + trial)
         logging.info("Random normal generated: " + trial)
 
     @commands.command()
     async def vtrial(self, ctx: commands.Context):
         """Gives you a random veteran trial to do"""
-        trial = get_trial(10)
+        trial = get_trial(11)
         await ctx.send("Veteran " + trial)
 
     @commands.command()

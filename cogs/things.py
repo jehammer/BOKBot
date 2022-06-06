@@ -17,8 +17,6 @@ def load_client_data():
         with open('Client.txt') as f:
             client_id = f.readline().strip('\n')
             client_secret = f.readline().strip('\n')
-        print(client_id)
-        print(client_secret)
     except Exception as e:
         logging.error("Unable to load client data: " + str(e))
 
@@ -31,6 +29,87 @@ class Things(commands.Cog, name="Fun Things"):
         logging.info("Things cog loaded")
         load_client_data()
         self.scheduled_good_morning.start()
+
+    @commands.command()
+    async def lissa(self, ctx: commands.Context):
+        """Lissa Does A Padme"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138276855818/Lissa.gif')
+
+    @commands.command()
+    async def rng(self, ctx: commands.Context):
+        """RNG In vAA HM"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
+
+    @commands.command()
+    async def vundees(self, ctx: commands.Context):
+        """Vundees Splooges"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
+
+    @commands.command()
+    async def fishing(self, ctx: commands.Context):
+        """Glub Glub"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976527850524016650/Fishing.gif')
+
+    @commands.command()
+    async def dance(self, ctx: commands.Context):
+        """Jaeger does his thing"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730135919628328/Dance.gif')
+
+    @commands.command()
+    async def logz(self, ctx: commands.Context):
+        """Actual gif of him"""
+        await ctx.send("LISTEN HERE SHITHEADS!")
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
+
+    @commands.command()
+    async def f(self, ctx: commands.Context):
+        """F"""
+        await ctx.send('https://tenor.com/view/keyboard-hyperx-rgb-hyperx-family-hyperx-gaming-gif-17743649')
+
+    @commands.command()
+    async def jabs(self, ctx: commands.Context):
+        """The Templars do be like that"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837712196173824/jabs.gif')
+
+    @commands.command()
+    async def facepalm(self, ctx: commands.Context):
+        """Arma every other second"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/912569604973404160/Facepalm.gif')
+
+    @commands.command()
+    async def hummus(self, ctx: commands.Context):
+        """It's what Drak likes"""
+        await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
+
+    @commands.command()
+    async def gabe(self, ctx: commands.Context):
+        """Gabe did a thing"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932432680178569276/Gabe.gif')
+
+    @commands.command()
+    async def maja(self, ctx: commands.Context):
+        """How she be after we kick her butt"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
+
+    @commands.command()
+    async def arty(self, ctx: commands.Context):
+        """For Arty!"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/939988909352431666/For_Arty.gif')
+
+    @commands.command()
+    async def fly(self, ctx: commands.Context):
+        """Pretty Fly for a Fly Guy"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/974769151774195733/Fly.gif')
+
+    @commands.command()
+    async def lost(self, ctx: commands.Context):
+        """Then he was lost!"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
+
+    @commands.command()
+    async def dungeons(self, ctx: commands.Context):
+        """DUNGEONS"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/983363613425278997/dungeons.gif')
 
     @commands.command()
     async def youtube(self, ctx: commands.Context):
@@ -104,8 +183,8 @@ class Things(commands.Cog, name="Fun Things"):
         await ctx.send('https://youtu.be/0YgW-05_y3A')
 
     @commands.command()
-    async def drakrez(self, ctx: commands.Context):
-        """When he gets the highest rezzes instead of someone else"""
+    async def rezparse(self, ctx: commands.Context):
+        """When drak gets the highest rezzes instead of someone else"""
         await ctx.send('https://youtu.be/uRbLz8COzHg')
 
     @commands.command()
@@ -256,7 +335,7 @@ Goodnight BOK
     async def azure(self, ctx: commands.context):
         """Something he said"""
         try:
-            ran = random.randint(1, 4)
+            ran = random.randint(1, 5)
             match ran:
                 case 1:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
@@ -266,6 +345,8 @@ Goodnight BOK
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/979226645271552040/Suck_Butt.png')
                 case 4:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/978509287498350642/More_Azure.png')
+                case 5:
+                    await ctx.send("https://media.discordapp.net/attachments/911730032286785536/981993091202445322/unknown.png")
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Azure error: " + str(e))
@@ -274,13 +355,15 @@ Goodnight BOK
     async def atios(self, ctx: commands.context):
         """His big secret ability"""
         try:
-            ran = random.randint(1, 2)
+            ran = random.randint(1, 3)
             match ran:
                 case 1:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974855284772188200/Atios.png')
                 case 2:
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882271981088778/ctx_lissa.png')
                     await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882282190037002/Share.gif')
+                case 3:
+                    await ctx.send("https://media.discordapp.net/attachments/911730032286785536/981757956511117322/unknown.png")
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Atios error: " + str(e))
@@ -336,6 +419,73 @@ Goodnight BOK
                   f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
                   f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||"
         await ctx.send(message)
+
+    @commands.command(name="arma")
+    async def get_arma_moment(self, ctx: commands.Context):
+        """Arma Moments"""
+        try:
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
+                case 2:
+                    await ctx.send('https://youtu.be/SQ9oCUNNbxc')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Arma error: " + str(e))
+
+    @commands.command(name="drak")
+    async def get_drak_moment(self, ctx: commands.Context):
+        """Drak Moments"""
+        try:
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
+                case 2:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/982005217069498378/unknown.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Drak error: " + str(e))
+
+    @commands.command(name="abbr")
+    async def dm_trial_abbreviations(self, ctx: commands.Context):
+        """DMs the User the Trial abbreviations"""
+        message = f"n - Normal\n" \
+                  f"v - Veteran\n" \
+                  f"+[#] - How many Minis are up for the Arena type Trials\n" \
+                  f"hm - Hard Mode\n" \
+                  f"hrc - Hel Ra Citadel\n" \
+                  f"aa - Atherian Archive\n" \
+                  f"so - Sanctum Ophidia\n" \
+                  f"mol - Maw of Lorkhaj\n" \
+                  f"hof - Halls of Fabrication\n" \
+                  f"as - Asylum Sanctorium\n" \
+                  f"cr - Cloud Rest\n" \
+                  f"ss - Sunspire\n" \
+                  f"ka - Kyne's Aegis\n" \
+                  f"rg - Rockgrove\n" \
+                  f"dsr - Dreadsail Reef"
+        author = ctx.author
+        await author.send(message)
+
+    @commands.command(name="synn")
+    async def synn_toes(self, ctx: commands.Context):
+        """Sent these babies for free"""
+        try:
+            await ctx.send("https://cdn.discordapp.com/attachments/911730032286785536/983462009871937566/synn.gif")
+        except Exception as e:
+            await ctx.send("Unable to send gif")
+            logging.error("Synn error: " + str(e))
+
+    @commands.command(name="Klix")
+    async def klixse(self, ctx: commands.Context):
+        """Sometimes I wonder if anyone here is sane."""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/983171690056024114/Klix.png")
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Klix error: " + str(e))
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):

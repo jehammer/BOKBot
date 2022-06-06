@@ -50,8 +50,9 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
     else:
-        await ctx.send("Something went wrong with the command. If needed please consult the guide "
+        await ctx.send("Unable to complete the command. If needed please consult the guide "
                        "in <#932438565009379358>")
+        logging.error(str(error))
 
 
 async def change_playing():

@@ -25,8 +25,8 @@ class Roles(commands.Cog, name="Roles"):
                       f"your default when using `!su` or `!bu`. The options you have are DPS, Tank, or Healer.\n" \
                       f"The BOKBot Guide channel will have more examples for you to look at if needed. " \
                       f"If you need some help contact Drakador, he will be more than happy to lend a hand!\n" \
-                      f"Some quick examples of the commands above would be: `!role ebonheart` and `!default dps`"
-
+                      f"Some quick examples of the commands above would be: `!role ebonheart` and `!default dps`\n" \
+                      f"If you ever need some help with Trial abbreviations, just use `!abbr` for a quick DM!"
             await user.send(message)
         except Exception as e:
             await ctx.send("Unable to grant role, please notify a Storm Bringer")

@@ -699,7 +699,7 @@ class Trial(commands.Cog, name="Trials"):
             await ctx.send(embed=primary_embed)
         except Exception as e:
             logging.error("Status check error: " + str(e))
-            await ctx.send("Unable to send status, have Drak check the bot.")
+            await ctx.send("Unable to send status.")
 
     @commands.command()
     async def msg(self, ctx: commands.Context):
@@ -752,7 +752,7 @@ class Trial(commands.Cog, name="Trials"):
                 save_to_doc()
                 await ctx.send("Saved!")
             except Exception as e:
-                await ctx.send("Issue saving. Have Drak try to fix.")
+                await ctx.send("Issue saving.")
                 print("Error when saving data: " + str(e))
         else:
             await ctx.send("You do not have permission to do that.")
