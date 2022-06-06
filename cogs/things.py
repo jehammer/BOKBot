@@ -491,7 +491,7 @@ Goodnight BOK
     async def klixse(self, ctx: commands.Context):
         """Sometimes I wonder if anyone here is sane."""
         try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/983171690056024114/Klix.png")
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/983465520898646026/klixse.png")
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Klix error: " + str(e))
