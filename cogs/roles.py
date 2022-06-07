@@ -123,7 +123,7 @@ class Roles(commands.Cog, name="Roles"):
                     await user.add_roles(role)
                     await user.send(req + " role granted")
             else:
-                await ctx.send("Role not found. use !roles to see which roles you can request.")
+                await ctx.send("Role not found. use `!roles` to see which roles you can request.")
         except Exception as e:
             await ctx.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Role error: " + str(e))
