@@ -327,8 +327,25 @@ Goodnight BOK
 
     @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
     async def scheduled_good_morning(self):
-        channel = self.bot.get_guild(574095793414209556).get_channel(574095793414209558)
-        await channel.send("Good Morning!")
+        try:
+            guild = self.bot.get_guild(574095793414209556)
+            channel = guild.get_channel(574095793414209558)
+            await channel.send("Good Morning!")
+            try:
+                today = datetime.datetime.today()
+                today_month = today.month
+                today_day = today.day
+                for member in guild.members:
+                    joined = member.joined_at
+                    joined_month = joined.month
+                    joined_day = joined.day
+                    if today_month == joined_month and today_day == joined_day:
+                        await channel.send(f"{member.mention} Happy Anniversary of joining BOK!")
+            except Exception as e:
+                await channel.send("Unable to get the Anniversaries.")
+                logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
+        except Exception as e:
+            logging.error(f"Good Morning Task Error: {str(e)}")
 
     @commands.command()
     async def joined(self, ctx: commands.context):
