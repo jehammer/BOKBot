@@ -504,7 +504,7 @@ Goodnight BOK
             await ctx.send("Unable to send gif")
             logging.error("Synn error: " + str(e))
 
-    @commands.command(name="Klix")
+    @commands.command(name="klix")
     async def klixse(self, ctx: commands.Context):
         """Sometimes I wonder if anyone here is sane."""
         try:
@@ -512,6 +512,15 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Klix error: " + str(e))
+
+    @commands.command(name="mommy")
+    async def mommy(self, ctx: commands.Context):
+        """You know you like it, you dirty little gamer"""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/985284353359749190/mommy.png")
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error(f"Mommy error: {str(e)}")
 
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
