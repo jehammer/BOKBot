@@ -110,8 +110,8 @@ class Admin(commands.Cog, name="Admin"):
                     "To use the report function send me a message in DMs using `!report [message]`")
             else:
                 # Is sent in a DM
-                guild = self.bot.get_guild(852458276003774485)  # TODO: CHANGE THIS FOR BOK
-                channel = guild.get_channel(942870073629110313)
+                guild = self.bot.get_guild(574095793414209556)
+                channel = guild.get_channel(985054618985840662)
                 message = ctx.message.content
                 message = message.split(' ', 1)
                 message = message[1]
@@ -143,8 +143,8 @@ class Admin(commands.Cog, name="Admin"):
                 await ctx.reply("To update the report send me a message in DMs using `!update [message]`")
             else:
                 # Is sent in a DM
-                guild = self.bot.get_guild(852458276003774485)  # TODO: CHANGE THIS FOR BOK
-                channel = guild.get_channel(942870073629110313)
+                guild = self.bot.get_guild(574095793414209556)
+                channel = guild.get_channel(985054618985840662)
                 message = ctx.message.content
                 message = message.split(' ', 1)
                 message = message[1]
