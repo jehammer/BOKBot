@@ -522,6 +522,15 @@ Goodnight BOK
             await ctx.send("Unable to send image")
             logging.error(f"Mommy error: {str(e)}")
 
+    @commands.command(name="r34")
+    async def a_very_funny_prank(self, ctx: commands.Context):
+        """Links to all the R34 that Drak has found for you dirty people"""
+        try:
+            await ctx.send("https://cdn.discordapp.com/attachments/911730032286785536/985383946718150716/yes.png")
+        except Exception as e:
+            await ctx.send("Unable to send the stuff")
+            logging.error(f"R34 error: {str(e)}")
+
 #    @tasks.loop(time=datetime.time(12, 0, 0, 0))
 #    async def arma_reminder(self, bot):
 #        """An automated task to remind Arma to do stuff"""
