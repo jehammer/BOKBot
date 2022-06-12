@@ -335,11 +335,13 @@ Goodnight BOK
                 today = datetime.datetime.today()
                 today_month = today.month
                 today_day = today.day
+                today_year = today.year
                 for member in guild.members:
                     joined = member.joined_at
                     joined_month = joined.month
                     joined_day = joined.day
-                    if today_month == joined_month and today_day == joined_day:
+                    joined_year = joined.year
+                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
                         await channel.send(f"{member.mention} Happy Anniversary of joining BOK!")
             except Exception as e:
                 await channel.send("Unable to get the Anniversaries.")
