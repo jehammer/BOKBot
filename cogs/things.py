@@ -533,8 +533,8 @@ Goodnight BOK
             await ctx.send("Unable to send the stuff")
             logging.error(f"R34 error: {str(e)}")
 
-    @commands.command(aliases=["unbi", "unbiased"])
-    async def unbiased(self, ctx: commands.Context):
+    @commands.command(name="unbiased", aliases=["unbi"])
+    async def unbiased_moment(self, ctx: commands.Context):
         """Something Totally Unbiased"""
         try:
             await ctx.send("https://media.discordapp.net/attachments/911730032286785536/986022565560602654/unknown.png")
