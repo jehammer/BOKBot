@@ -354,7 +354,6 @@ Goodnight BOK
     @commands.command()
     async def joined(self, ctx: commands.context, m: nextcord.Member = None):
         """Tells you when you joined the server in M-D-Y Format"""
-        # TODO: Finish this
         try:
             def suffix(d):
                 return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
