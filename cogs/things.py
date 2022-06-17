@@ -1,8 +1,10 @@
+import nextcord
 from nextcord.ext import commands, tasks
 import random
 import logging
 import datetime
 import asyncpraw as praw
+import calendar
 
 logging.basicConfig(level=logging.INFO)
 
@@ -350,11 +352,21 @@ Goodnight BOK
             logging.error(f"Good Morning Task Error: {str(e)}")
 
     @commands.command()
-    async def joined(self, ctx: commands.context):
-        """Tells you when you joined the server"""
+    async def joined(self, ctx: commands.context, m: nextcord.Member = None):
+        """Tells you when you joined the server in M-D-Y Format"""
+        # TODO: Finish this
         try:
-            user = ctx.message.author
-            await ctx.reply(f"You, {user.display_name}, joined {ctx.guild.name} on {user.joined_at}")
+            def suffix(d):
+                return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+            if m is None:
+                user = ctx.message.author
+                await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
+                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}"
+                                f"{suffix(user.joined_at.day)} {user.joined_at.year}")
+            else:
+                await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
+                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}"
+                                f"{suffix(m.joined_at.day)} {m.joined_at.year}")
         except Exception as e:
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
