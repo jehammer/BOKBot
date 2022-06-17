@@ -1287,7 +1287,6 @@ class Trial(commands.Cog, name="Trials"):
 
             # BACKUP TANKS
             if not len(trial.backup_tanks) == 0:
-                names = "None"
                 to_remove = []
                 tanks = trial.backup_tanks
                 for i in tanks:
