@@ -51,10 +51,19 @@ class Things(commands.Cog, name="Fun Things"):
         """RNG In vAA HM"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
 
-    @commands.command()
-    async def vundees(self, ctx: commands.Context):
-        """Vundees Splooges"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
+    @commands.command(name="vundees")
+    async def vundees_moment(self, ctx: commands.Context):
+        """Get yourself a random Vundees moment"""
+        try:
+            ran = random.randint(1, 2)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
+                case 2:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/987806807181365299/Suk_Balls.png')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Vundees error: " + str(e))
 
     @commands.command()
     async def fishing(self, ctx: commands.Context):
@@ -553,16 +562,23 @@ Goodnight BOK
             await ctx.send("Unable to send the image")
             logging.error(f"Unbiased error: {str(e)}")
 
-#    @tasks.loop(time=datetime.time(12, 0, 0, 0))
-#    async def arma_reminder(self, bot):
-#        """An automated task to remind Arma to do stuff"""
-#        # Check if it is Monday at Noon
-#        if datetime.today().weekday() == 0:
-#            guild = bot.get_guild(id=574095793414209556)
-#            arma = guild.get_member(152077378317844480)
-#            if arma:
-#                await arma.send("Reminder to go and look at Guild Traders")
+    @commands.command(name="bever")
+    async def bever_moment(self, ctx: commands.Context):
+        """Something Totally Unbiased"""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/987806807386894336/Bever.png")
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Bever error: {str(e)}")
 
+    @commands.command(name="reef")
+    async def reef_image(self, ctx: commands.Context):
+        """Helpful image for DSR"""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/990441515979505714/Reef.png")
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Reef error: {str(e)}")
 
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))

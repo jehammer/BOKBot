@@ -728,21 +728,85 @@ class Trial(commands.Cog, name="Trials"):
         if found:
             await ctx.send("Updated!")
 
-    @commands.command()
-    async def gather(self, ctx: commands.Context):
-        """for raid leads, notifies everyone to come."""
+    @commands.command(name="call")
+    async def send_message_to_everyone(self, ctx: commands.Context):
+        """For Raid Leads. A way to send a ping to everyone in a roster."""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
-                num = ctx.message.channel.id
-                await self.call_everyone(num, ctx)
-                await ctx.send("It is time to do the thing!")
+                def check(m: nextcord.Message):  # m = discord.Message.
+                    return user == m.author
+                run = True
+                while run:
+                    try:
+                        counter = 1
+                        total = ""
+                        key_list = []
+                        for i in storage.keys():
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += str(counter) + ": " + channel.name + "\n"
+                            else:
+                                total += str(counter) + ": " + str(i) + "\n"
+                            counter += 1
+                            key_list.append(i)
+                        total += "0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to gather or ping everyone")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for(event='message', check=check, timeout=15.0)
+                        # msg = nextcord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, call has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            # Since the bot uses python 3.10, dictionaries are indexed by the order of insertion.
+                            #   However, I already wrote it like this. Oh well.
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                num = key_list[choice]
+                                try:
+                                    await ctx.send("Enter the message to send, or cancel to exit.")
+                                    confirm = await self.bot.wait_for(event="message", check=check, timeout=30.0)
+                                    msg = confirm.content
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, call has timed out")
+                                    return
+                                else:
+                                    if msg == "cancel":
+                                        await ctx.send("Exiting command")
+                                        return
+                                    else:
+                                        confirmation_message = f"Send this message:\n{msg}\n\ny/n?"
+                                        await ctx.send(confirmation_message)
+                                        confirm = await self.bot.wait_for(event="message", check=check, timeout=15.0)
+                                        confirm = confirm.content
+                                        if confirm.lower() == "y":
+                                            await self.call_everyone(num, ctx, msg)
+                                            run = False
+                                            await ctx.send("Message sent.")
+                                        elif confirm.lower() == "n":
+                                            await ctx.send("Returning to start of section.")
+                                        else:
+                                            await ctx.send("Not a valid input, returning to start of section.")
+
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
             else:
-                await ctx.send("You do not have permission for that.")
+                await ctx.send("You do not have permission to use this command")
         except Exception as e:
-            await ctx.send("Unable to summon everyone")
-            logging.error("Summon error: " + str(e))
+            logging.error("Call error: " + str(e))
+            await ctx.send("An error has occurred in the command.")
 
     @commands.command()
     async def save(self, ctx: commands.Context):
@@ -1030,6 +1094,9 @@ class Trial(commands.Cog, name="Trials"):
                 def check(m: nextcord.Message):  # m = discord.Message.
                     return user == m.author
 
+                def suffix(d):
+                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
                 run = True
                 while run:
                     try:
@@ -1080,9 +1147,14 @@ class Trial(commands.Cog, name="Trials"):
                                     trial.trial = new_trial
                                     storage[num] = trial
                                     save_to_doc()
-                                    await ctx.send(
-                                        "Trial has been changed from " + old_trial + " to " + trial.trial)
-                                    new_name = trial.trial + "-" + trial.date
+                                    await ctx.send("Trial has been changed from " + old_trial + " to " + trial.trial)
+                                    new = re.sub('[^0-9]', '', trial.date)  # Gotta get just the numbers for this part
+                                    new = int(new)
+                                    time = datetime.datetime.utcfromtimestamp(new)
+                                    central = time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
+                                    weekday = calendar.day_name[central.weekday()]
+                                    day = central.day
+                                    new_name = trial.trial + "-" + weekday + "-" + str(day) + suffix(day)
                                     await channel.edit(name=new_name)
                                     run = False
                             except IndexError:
@@ -1160,8 +1232,7 @@ class Trial(commands.Cog, name="Trials"):
                                     trial.date = new_date
                                     storage[num] = trial
                                     save_to_doc()
-                                    await ctx.send(
-                                        "Trial has been changed from " + old_date + " to " + trial.date)
+                                    await ctx.send("Trial has been changed from " + old_date + " to " + trial.date)
 
                                     new = re.sub('[^0-9]', '', new_date)
                                     new = int(new)
@@ -1332,7 +1403,7 @@ class Trial(commands.Cog, name="Trials"):
         except Exception as e:
             logging.error("Print roster error: " + str(e))
 
-    async def call_everyone(self, num, ctx):
+    async def call_everyone(self, num, ctx, msg):
         try:
             trial = storage.get(num)
             names = "\nHealers \n"
@@ -1359,7 +1430,8 @@ class Trial(commands.Cog, name="Trials"):
             if len(trial.trial_dps) == 0:
                 names += "None" + "\n"
 
-            await ctx.send(names)
+            channel = ctx.guild.get_channel(num)
+            await channel.send(f"A MESSAGE FOR:\n{names}\n{msg}")
         except Exception as e:
             await ctx.send("Error printing roster")
             logging.error("Summon error: " + str(e))
@@ -1560,17 +1632,24 @@ class Trial(commands.Cog, name="Trials"):
     async def set_default_role(self, ctx: commands.Context, role="check"):
         """Set or check your default role to dps, healer, or tank when using !su. !default [optional: role]"""
         try:
-            if role.lower() == "dps" or role.lower() == "healer" or role.lower() == "tank":
-                global default_role
+            role = role.lower()
+            global default_role
+            if role == "dps" or role == "healer" or role == "tank":
                 default_role[ctx.message.author.id] = role.lower()
                 save_default_roles()
                 await ctx.reply(f"{ctx.message.author.display_name} default role has been set to {role}")
-            elif role.lower() == "check":
+            elif role == "check":
                 if ctx.message.author.id in default_role.keys():
                     await ctx.reply(f"{ctx.message.author.display_name} defaults to "
                                     f"{default_role.get(ctx.message.author.id)}")
                 else:
                     await ctx.reply("You do not have a default role. Use !default [role] to assign one.")
+            elif role == "simp":
+                default_role[ctx.message.author.id] == "healer"
+                save_default_roles()
+                role = nextcord.utils.get(ctx.guild.roles, name="Simp")
+                await ctx.message.author.add_roles(role)
+                await ctx.reply("Thank you, soft mommy dom, for you are now a simp.")
             else:
                 await ctx.reply("Please specify the correct role. dps, healer, or tank.")
         except Exception as e:
