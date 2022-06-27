@@ -781,7 +781,7 @@ class Trial(commands.Cog, name="Trials"):
                                     await ctx.send(f"{ctx.author.mention}, call has timed out")
                                     return
                                 else:
-                                    if msg == "cancel":
+                                    if msg.lower() == "cancel":
                                         await ctx.send("Exiting command")
                                         return
                                     else:
