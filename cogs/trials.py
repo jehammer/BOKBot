@@ -810,7 +810,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def save(self, ctx: commands.Context):
-        """Saves roster data to storage"""
+        """For Officers: Saves roster data to storage"""
         if ctx.message.author.id == 212634819190849536:
             try:
                 save_to_doc()
@@ -823,7 +823,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def load(self, ctx: commands.Context):
-        """Loads the trials from storage into the bot"""
+        """For Officers: Loads the trials from storage into the bot"""
         if ctx.message.author.id == 212634819190849536:
             try:
                 global storage
@@ -850,7 +850,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def remove(self, ctx: commands.Context):
-        """Removes someone from the roster"""
+        """For Officers: Removes someone from the roster"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -1014,7 +1014,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command()
     async def leader(self, ctx: commands.Context):
-        """Replaces the leader of a trial"""
+        """For Officers: Replaces the leader of a trial"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -1086,7 +1086,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command(name="changetrial")
     async def change_trial(self, ctx: commands.Context):
-        """Replaces the trial of a trial"""
+        """For Officers: Replaces the trial of a trial"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
@@ -1169,7 +1169,7 @@ class Trial(commands.Cog, name="Trials"):
 
     @commands.command(name="datetime")
     async def change_date_time(self, ctx: commands.Context):
-        """Replaces the date of a trial"""
+        """For Officers: Replaces the date of a trial"""
 
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")

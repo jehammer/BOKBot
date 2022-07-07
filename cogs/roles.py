@@ -16,7 +16,10 @@ class Roles(commands.Cog, name="Roles"):
             user = ctx.message.author
             role = nextcord.utils.get(ctx.guild.roles, name="Kynes Founded")
             await user.add_roles(role)
-
+        except Exception as e:
+            await ctx.send("Unable to grant role, please notify a Storm Bringer")
+            logging.error("Agree error: " + str(e))
+        try:
             message = f"Welcome to Breath Of Kynareth! I am here to guide you on the basics of BOKBot!\n" \
                       f"You can find more information in <#932438565009379358> for what to do. But lets get the basics out.\n" \
                       f"To start, you can set discord server roles and default roster role in <#933596721630548059> by using the `!role [role]` " \
@@ -29,8 +32,8 @@ class Roles(commands.Cog, name="Roles"):
                       f"If you ever need some help with Trial abbreviations, just use `!abbr` for a quick DM!"
             await user.send(message)
         except Exception as e:
-            await ctx.send("Unable to grant role, please notify a Storm Bringer")
-            logging.error("Agree error: " + str(e))
+            await ctx.send("I was unable to send you the DM. Please enable DMs for this server and try again.")
+            logging.error("Agree DM error: " + str(e))
 
     @commands.command()
     async def role(self, ctx: commands.Context):
