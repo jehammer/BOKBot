@@ -19,6 +19,7 @@ class Roles(commands.Cog, name="Roles"):
         except Exception as e:
             await ctx.send("Unable to grant role, please notify a Storm Bringer")
             logging.error("Agree error: " + str(e))
+            return
         try:
             message = f"Welcome to Breath Of Kynareth! I am here to guide you on the basics of BOKBot!\n" \
                       f"You can find more information in <#932438565009379358> for what to do. But lets get the basics out.\n" \
