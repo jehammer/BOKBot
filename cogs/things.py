@@ -5,11 +5,45 @@ import logging
 import datetime
 import asyncpraw as praw
 import calendar
+from pytz import timezone
+import pickle
 
 logging.basicConfig(level=logging.INFO)
 
 client_id = ""
 client_secret = ""
+turn = ""
+
+
+def load_trial_turn():
+    try:
+        logging.info("Loading Turn")
+        global turn
+        db_file = open('turnStorage.pkl', 'rb')
+        turn = pickle.load(db_file)
+        db_file.close()
+        logging.info("Finished loading Turn")
+    except FileNotFoundError:
+        logging.info("First time Turn Pickling")
+        turn = "Saturday"  # call !turn to check which turn it is and manually change it if needed
+        db_file = open('turnStorage.pkl', 'wb')
+        pickle.dump(turn, db_file)
+        db_file.close()
+        logging.info("Finished pickling Turn")
+    except Exception as e:
+        logging.error(f"Unable to load trial turn: {str(e)}")
+
+
+def save_trial_turn():
+    try:
+        logging.info("Pickling Turn")
+        global turn
+        db_file = open('turnStorage.pkl', 'wb')
+        pickle.dump(turn, db_file)
+        db_file.close()
+        logging.info("Finished pickling Turn")
+    except Exception as e:
+        logging.error(f"Unable to save trial turn: {str(e)}")
 
 
 def load_client_data():
@@ -30,7 +64,9 @@ class Things(commands.Cog, name="Fun Things"):
         self.bot = bot
         logging.info("Things cog loaded")
         load_client_data()
+        load_trial_turn()
         self.scheduled_good_morning.start()
+        self.scheduled_trial_reminder.start()
 
     @commands.command(name="lissa")
     async def get_lissa_moment(self, ctx: commands.Context):
@@ -579,6 +615,53 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the image")
             logging.error(f"Reef error: {str(e)}")
+
+    @tasks.loop(time=datetime.time(17, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
+    async def scheduled_trial_reminder(self):
+        try:
+            time = datetime.datetime.now()
+            central = time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
+            weekday = calendar.day_name[central.weekday()]
+
+            if weekday.lower() == "thursday":
+                guild = self.bot.get_guild(574095793414209556)
+                channel = guild.get_channel(908210533927370784)
+                role = nextcord.utils.get(guild.roles, name="Storm Bringers")
+                global turn
+                await channel.send(f"{role.mention} this is your weekly reminder to post the rosters for next week.\n"
+                                   f"This week we will run on: {turn}")
+                if turn.lower() == "thursday":
+                    turn = "Saturday"
+                    save_trial_turn()
+                else:
+                    turn = "Thursday"
+                    save_trial_turn()
+        except Exception as e:
+            logging.error(f"Good Morning Task Error: {str(e)}")
+
+    @commands.command(name="turn")
+    async def trial_turn_check_update(self, ctx: commands.Context, turn_check="check"):
+        """Officer way to adjust the week check"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                global turn
+                if turn_check == "check":
+                    await ctx.send(f"BOK will be running next week on: {turn}")
+                elif turn_check.lower() != "thursday" and turn_check.lower() != "saturday":
+                    await ctx.send(f"BOK currently only allows turns on Thursday and Saturday, any other day we wish to run"
+                                   f" can be setup as normal. No need to worry there.")
+                else:
+                    turn = turn_check
+                    save_trial_turn()
+                    await ctx.send(f"I will remind you on Thursday that our next run will be setup for: {turn}")
+            else:
+                await ctx.send(f"You do not have permission to do this.")
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Turn error: {str(e)}")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))
