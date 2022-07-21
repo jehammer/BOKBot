@@ -311,6 +311,7 @@ class Trial(commands.Cog, name="Trials"):
             prog_role = nextcord.utils.get(ctx.message.author.guild.roles, name=prog_role_name)
             bot_role = nextcord.utils.get(ctx.message.author.guild.roles, name="DrakApp")
             recruit_role = nextcord.utils.get(ctx.message.author.guild.roles, name="Recruits")
+            founded_role = nextcord.utils.get(ctx.message.author.guild.roles, name="Kynes Founded")
             user = ctx.message.author
             if user in role.members:
                 def suffix(d):
@@ -332,6 +333,7 @@ class Trial(commands.Cog, name="Trials"):
                 channel = await category.create_text_channel(new_name)
                 await channel.set_permissions(bot_role, view_channel=True)
                 await channel.set_permissions(recruit_role, view_channel=False)
+                await channel.set_permissions(founded_role, view_channel=False)
                 await channel.set_permissions(prog_role, view_channel=True)
                 await channel.set_permissions(role, view_channel=True)
 
@@ -1768,14 +1770,17 @@ class Trial(commands.Cog, name="Trials"):
             logging.error("Default Role Set Error: " + str(e))
 
     @commands.command(name="progrole")
-    async def change_prog_role_name(self, ctx: commands.Context, new_prog_role_name):
+    async def change_prog_role_name(self, ctx: commands.Context):
         """Officer way to adjust the week check"""
         try:
             role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
             user = ctx.message.author
             if user in role.members:
                 global prog_role_name
-                prog_role_name = new_prog_role_name
+                msg = ctx.message.content
+                msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
+                msg = msg[1]
+                prog_role_name = msg
                 save_prog_name()
                 await ctx.send("Prog role updated.")
             else:
