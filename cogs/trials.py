@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 storage = {}
 trial_counter = {}
 default_role = {}
+prog_role_name = ""
 
 
 class Role(Enum):
@@ -134,7 +135,7 @@ def save_trial_count():
         global trial_counter
         with open('trialCountStorage.pkl', 'wb') as file:
             pickle.dump(trial_counter, file, protocol=pickle.HIGHEST_PROTOCOL)
-        logging.info("Finished picking Trial Count")
+        logging.info("Finished pickling Trial Count")
     except IOError as e:
         logging.error("Error on saving trial count pickle: " + str(e))
 
@@ -149,6 +150,30 @@ def load_trial_count():
         logging.info("Finished loading Trial Count")
     except IOError as e:
         logging.error("Error on loading trial count pickle: " + str(e))
+
+
+def save_prog_name():
+    """Saves the prog role name to a pickle"""
+    try:
+        logging.info("Saving prog role name")
+        global prog_role_name
+        with open('progRoleName.pkl', 'wb') as file:
+            pickle.dump(prog_role_name, file, protocol=pickle.HIGHEST_PROTOCOL)
+        logging.info("Finished pickling prog role name")
+    except IOError as e:
+        logging.error("Error on saving prog role name pickle: " + str(e))
+
+
+def load_prog_name():
+    """Loads the prog role name"""
+    try:
+        logging.info("Started loading prog role name")
+        global prog_role_name
+        with open('progRoleName.pkl', 'rb') as file:
+            prog_role_name = pickle.load(file)
+        logging.info("Finished loading prog role name")
+    except IOError as e:
+        logging.error("Error on loading prog role name pickle: " + str(e))
 
 
 def save_to_doc():
@@ -221,6 +246,7 @@ class Trial(commands.Cog, name="Trials"):
             load_trials()
             load_trial_count()
             load_default_roles()
+            load_prog_name()
             self.bot = bot
             logging.info("Loaded Trials and Trial Cog!")
         except Exception as e:
@@ -250,6 +276,64 @@ class Trial(commands.Cog, name="Trials"):
                 day = central.day
                 new_name = trial + "-" + weekday + "-" + str(day) + suffix(day)
                 channel = await category.create_text_channel(new_name)
+
+                # create new trial and put it in storage for later use
+                new_trial = EsoTrial(trial, date, leader, trial_dps={}, trial_healers={},
+                                     trial_tanks={}, backup_dps={}, backup_healers={}, backup_tanks={})
+                storage[channel.id] = new_trial
+                save_to_doc()
+                logging.info("New Trial created: " + trial + " " + str(central))
+
+                embed = nextcord.Embed(
+                    title=trial + " " + date,
+                    description="I hope people sign up for this.",
+                    color=nextcord.Color.blue()
+                )
+                embed.set_footer(text="Remember to spay or neuter your support!")
+                embed.set_author(name="Raid Lead: " + leader)
+                embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+                embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+                embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
+                await channel.send(embed=embed)
+                await ctx.send("Channel and Roster created")
+            else:
+                await ctx.send("You do not have permission to do this.")
+        except Exception as e:
+            await ctx.send("Unable to complete the command.")
+            logging.error("Trial creation error: " + str(e))
+
+    @commands.command(name="prog")
+    async def create_prog_channel(self, ctx: commands.Context):
+        """Creates a new prog-role only channel | format: !trial [leader],[trial],[date info]"""
+        try:
+            global prog_role_name
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            prog_role = nextcord.utils.get(ctx.message.author.guild.roles, name=prog_role_name)
+            bot_role = nextcord.utils.get(ctx.message.author.guild.roles, name="DrakApp")
+            recruit_role = nextcord.utils.get(ctx.message.author.guild.roles, name="Recruits")
+            user = ctx.message.author
+            if user in role.members:
+                def suffix(d):
+                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
+                msg = ctx.message.content
+                msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
+                msg = msg[1]  # drop the !trial part
+                leader, trial, date = msg.split(",")
+
+                category = ctx.guild.get_channel(874077147084505099)
+                new = re.sub('[^0-9]', '', date)  # Gotta get just the numbers for this part
+                new = int(new)
+                new_time = datetime.datetime.utcfromtimestamp(new)
+                central = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
+                weekday = calendar.day_name[central.weekday()]
+                day = central.day
+                new_name = f"prog-{weekday}-{str(day)}{str(suffix(day))}"
+                channel = await category.create_text_channel(new_name)
+                await channel.set_permissions(bot_role, view_channel=True)
+                await channel.set_permissions(recruit_role, view_channel=False)
+                await channel.set_permissions(prog_role, view_channel=True)
+                await channel.set_permissions(role, view_channel=True)
 
                 # create new trial and put it in storage for later use
                 new_trial = EsoTrial(trial, date, leader, trial_dps={}, trial_healers={},
@@ -1682,6 +1766,23 @@ class Trial(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send("Unable to set default role")
             logging.error("Default Role Set Error: " + str(e))
+
+    @commands.command(name="progrole")
+    async def change_prog_role_name(self, ctx: commands.Context, new_prog_role_name):
+        """Officer way to adjust the week check"""
+        try:
+            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                global prog_role_name
+                prog_role_name = new_prog_role_name
+                save_prog_name()
+                await ctx.send("Prog role updated.")
+            else:
+                await ctx.send(f"You do not have permission to do this.")
+        except Exception as e:
+            await ctx.send("Unable to update prog role name")
+            logging.error(f"Turn error: {str(e)}")
 
 
 def setup(bot: commands.Bot):

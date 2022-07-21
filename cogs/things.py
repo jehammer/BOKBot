@@ -589,7 +589,7 @@ Goodnight BOK
             await ctx.send("Unable to send the stuff")
             logging.error(f"R34 error: {str(e)}")
 
-    @commands.command(name="unbiased", aliases=["unbi"])
+    @commands.command(name="unbiased", aliases=["unbi", "unb"])
     async def unbiased_moment(self, ctx: commands.Context):
         """Something Totally Unbiased"""
         try:
@@ -600,7 +600,7 @@ Goodnight BOK
 
     @commands.command(name="bever")
     async def bever_moment(self, ctx: commands.Context):
-        """Something Totally Unbiased"""
+        """Bever stuff"""
         try:
             await ctx.send("https://media.discordapp.net/attachments/911730032286785536/987806807386894336/Bever.png")
         except Exception as e:
@@ -659,8 +659,26 @@ Goodnight BOK
             else:
                 await ctx.send(f"You do not have permission to do this.")
         except Exception as e:
-            await ctx.send("Unable to send the image")
+            await ctx.send("Unable to change turn")
             logging.error(f"Turn error: {str(e)}")
+
+    @commands.command(name="vas", aliases=["nas", "as"])
+    async def as_gif(self, ctx: commands.Context):
+        """Kite gif for AS"""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/913342788907716628/vAS.gif")
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"AS Gif error: {str(e)}")
+
+    @commands.command(name="wiped", aliases=["wipe"])
+    async def wipe_meme(self, ctx: commands.Context):
+        """Funny thing for when you wipe"""
+        try:
+            await ctx.send("https://cdn.discordapp.com/attachments/911730032286785536/999758223110320168/Wipe.png")
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Wipe error: {str(e)}")
 
 
 def setup(bot: commands.Bot):
