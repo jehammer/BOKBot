@@ -5,45 +5,13 @@ import logging
 import datetime
 import asyncpraw as praw
 import calendar
-from pytz import timezone
-import pickle
+
+# For using Aliases: (name="ex", aliases=["al1", "al2"])
 
 logging.basicConfig(level=logging.INFO)
 
 client_id = ""
 client_secret = ""
-turn = ""
-
-
-def load_trial_turn():
-    try:
-        logging.info("Loading Turn")
-        global turn
-        db_file = open('turnStorage.pkl', 'rb')
-        turn = pickle.load(db_file)
-        db_file.close()
-        logging.info("Finished loading Turn")
-    except FileNotFoundError:
-        logging.info("First time Turn Pickling")
-        turn = "Saturday"  # call !turn to check which turn it is and manually change it if needed
-        db_file = open('turnStorage.pkl', 'wb')
-        pickle.dump(turn, db_file)
-        db_file.close()
-        logging.info("Finished pickling Turn")
-    except Exception as e:
-        logging.error(f"Unable to load trial turn: {str(e)}")
-
-
-def save_trial_turn():
-    try:
-        logging.info("Pickling Turn")
-        global turn
-        db_file = open('turnStorage.pkl', 'wb')
-        pickle.dump(turn, db_file)
-        db_file.close()
-        logging.info("Finished pickling Turn")
-    except Exception as e:
-        logging.error(f"Unable to save trial turn: {str(e)}")
 
 
 def load_client_data():
@@ -64,23 +32,8 @@ class Things(commands.Cog, name="Fun Things"):
         self.bot = bot
         logging.info("Things cog loaded")
         load_client_data()
-        load_trial_turn()
         self.scheduled_good_morning.start()
         self.scheduled_trial_reminder.start()
-
-    @commands.command(name="lissa")
-    async def get_lissa_moment(self, ctx: commands.Context):
-        """Get yourself a random Lissa moment"""
-        try:
-            ran = random.randint(1, 2)
-            match ran:
-                case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138276855818/Lissa.gif')
-                case 2:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/983464338922811392/unknown.png')
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Lissa error: " + str(e))
 
     @commands.command()
     async def rng(self, ctx: commands.Context):
@@ -94,9 +47,11 @@ class Things(commands.Cog, name="Fun Things"):
             ran = random.randint(1, 2)
             match ran:
                 case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
+                    await ctx.send(
+                        'https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
                 case 2:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/987806807181365299/Suk_Balls.png')
+                    await ctx.send(
+                        'https://media.discordapp.net/attachments/911730032286785536/987806807181365299/Suk_Balls.png')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Vundees error: " + str(e))
@@ -221,12 +176,6 @@ class Things(commands.Cog, name="Fun Things"):
     async def thepull(self, ctx: commands.Context):
         """Drak got the thing"""
         await ctx.send('https://youtu.be/Cnf9lRtLSYk')
-
-    @commands.command()
-    async def fisted(self, ctx: commands.Context):
-        """It happens to all of us"""
-        await ctx.send(
-            'https://media.discordapp.net/attachments/911730032286785536/932434215058944000/Slash_Fisted.PNG')
 
     @commands.command()
     async def chainz(self, ctx: commands.Context):
@@ -402,6 +351,7 @@ Goodnight BOK
         try:
             def suffix(d):
                 return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
             if m is None:
                 user = ctx.message.author
                 await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
@@ -414,52 +364,6 @@ Goodnight BOK
         except Exception as e:
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
-
-    @commands.command()
-    async def azure(self, ctx: commands.context):
-        """Something he said"""
-        try:
-            ran = random.randint(1, 5)
-            match ran:
-                case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767389352804412/Azure.png')
-                case 2:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976489973937213480/nave.png')
-                case 3:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/979226645271552040/Suck_Butt.png')
-                case 4:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/978509287498350642/More_Azure.png')
-                case 5:
-                    await ctx.send("https://media.discordapp.net/attachments/911730032286785536/981993091202445322/unknown.png")
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Azure error: " + str(e))
-
-    @commands.command()
-    async def atios(self, ctx: commands.context):
-        """His big secret ability"""
-        try:
-            ran = random.randint(1, 3)
-            match ran:
-                case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974855284772188200/Atios.png')
-                case 2:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882271981088778/ctx_lissa.png')
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974882282190037002/Share.gif')
-                case 3:
-                    await ctx.send("https://media.discordapp.net/attachments/911730032286785536/981757956511117322/unknown.png")
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Atios error: " + str(e))
-
-    @commands.command()
-    async def char(self, ctx: commands.context):
-        """He got something"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/974767399981158500/Context.png')
-        except Exception as e:
-            await ctx.send("Unable to send image.")
-            logging.error("Char error: " + str(e))
 
     @commands.command(name="gnight")
     async def goodnight_fly(self, ctx: commands.context):
@@ -498,9 +402,9 @@ Goodnight BOK
     @commands.command(name="wrap")
     async def create_bubblewrap(self, ctx: commands.context):
         """For all your popping needs"""
-        message = f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
-                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
-                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n"\
+        message = f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
                   f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||"
         await ctx.send(message)
 
@@ -511,7 +415,8 @@ Goodnight BOK
             ran = random.randint(1, 2)
             match ran:
                 case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
+                    await ctx.send(
+                        'https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
                 case 2:
                     await ctx.send('https://youtu.be/SQ9oCUNNbxc')
         except Exception as e:
@@ -525,9 +430,11 @@ Goodnight BOK
             ran = random.randint(1, 2)
             match ran:
                 case 1:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
+                    await ctx.send(
+                        'https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
                 case 2:
-                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/982005217069498378/unknown.png')
+                    await ctx.send(
+                        'https://media.discordapp.net/attachments/911730032286785536/982005217069498378/unknown.png')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Drak error: " + str(e))
@@ -553,24 +460,6 @@ Goodnight BOK
         author = ctx.author
         await author.send(message)
 
-    @commands.command(name="synn")
-    async def synn_toes(self, ctx: commands.Context):
-        """Sent these babies for free"""
-        try:
-            await ctx.send("https://cdn.discordapp.com/attachments/911730032286785536/983462009871937566/synn.gif")
-        except Exception as e:
-            await ctx.send("Unable to send gif")
-            logging.error("Synn error: " + str(e))
-
-    @commands.command(name="klix")
-    async def klixse(self, ctx: commands.Context):
-        """Sometimes I wonder if anyone here is sane."""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/983465520898646026/klixse.png")
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Klix error: " + str(e))
-
     @commands.command(name="mommy")
     async def mommy(self, ctx: commands.Context):
         """You know you like it, you dirty little gamer"""
@@ -589,15 +478,6 @@ Goodnight BOK
             await ctx.send("Unable to send the stuff")
             logging.error(f"R34 error: {str(e)}")
 
-    @commands.command(name="unbiased", aliases=["unbi", "unb"])
-    async def unbiased_moment(self, ctx: commands.Context):
-        """Something Totally Unbiased"""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/986022565560602654/unknown.png")
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Unbiased error: {str(e)}")
-
     @commands.command(name="bever")
     async def bever_moment(self, ctx: commands.Context):
         """Bever stuff"""
@@ -615,52 +495,6 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the image")
             logging.error(f"Reef error: {str(e)}")
-
-    @tasks.loop(time=datetime.time(17, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
-    async def scheduled_trial_reminder(self):
-        try:
-            time = datetime.datetime.now()
-            central = time.replace(tzinfo=datetime.timezone.utc).astimezone(tz=timezone('US/Central'))
-            weekday = calendar.day_name[central.weekday()]
-
-            if weekday.lower() == "thursday":
-                guild = self.bot.get_guild(574095793414209556)
-                channel = guild.get_channel(908210533927370784)
-                role = nextcord.utils.get(guild.roles, name="Storm Bringers")
-                global turn
-                await channel.send(f"{role.mention} this is your weekly reminder to post the rosters for next week.\n"
-                                   f"This week we will run on: {turn}")
-                if turn.lower() == "thursday":
-                    turn = "Saturday"
-                    save_trial_turn()
-                else:
-                    turn = "Thursday"
-                    save_trial_turn()
-        except Exception as e:
-            logging.error(f"Good Morning Task Error: {str(e)}")
-
-    @commands.command(name="turn")
-    async def trial_turn_check_update(self, ctx: commands.Context, turn_check="check"):
-        """Officer way to adjust the week check"""
-        try:
-            role = nextcord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
-            user = ctx.message.author
-            if user in role.members:
-                global turn
-                if turn_check == "check":
-                    await ctx.send(f"BOK will be running next week on: {turn}")
-                elif turn_check.lower() != "thursday" and turn_check.lower() != "saturday":
-                    await ctx.send(f"BOK currently only allows turns on Thursday and Saturday, any other day we wish to run"
-                                   f" can be setup as normal. No need to worry there.")
-                else:
-                    turn = turn_check
-                    save_trial_turn()
-                    await ctx.send(f"I will remind you on Thursday that our next run will be setup for: {turn}")
-            else:
-                await ctx.send(f"You do not have permission to do this.")
-        except Exception as e:
-            await ctx.send("Unable to change turn")
-            logging.error(f"Turn error: {str(e)}")
 
     @commands.command(name="vas", aliases=["nas", "as"])
     async def as_gif(self, ctx: commands.Context):
