@@ -33,7 +33,6 @@ class Things(commands.Cog, name="Fun Things"):
         logging.info("Things cog loaded")
         load_client_data()
         self.scheduled_good_morning.start()
-        self.scheduled_trial_reminder.start()
 
     @commands.command()
     async def rng(self, ctx: commands.Context):
