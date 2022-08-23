@@ -66,12 +66,6 @@ class Things(commands.Cog, name="Fun Things"):
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730135919628328/Dance.gif')
 
     @commands.command()
-    async def logz(self, ctx: commands.Context):
-        """Actual gif of him"""
-        await ctx.send("LISTEN HERE SHITHEADS!")
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
-
-    @commands.command()
     async def f(self, ctx: commands.Context):
         """F"""
         await ctx.send('https://tenor.com/view/keyboard-hyperx-rgb-hyperx-family-hyperx-gaming-gif-17743649')
@@ -90,11 +84,6 @@ class Things(commands.Cog, name="Fun Things"):
     async def hummus(self, ctx: commands.Context):
         """It's what Drak likes"""
         await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
-
-    @commands.command()
-    async def gabe(self, ctx: commands.Context):
-        """Gabe did a thing"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932432680178569276/Gabe.gif')
 
     @commands.command()
     async def maja(self, ctx: commands.Context):
