@@ -502,6 +502,12 @@ Goodnight BOK
             await ctx.send("Unable to send the image")
             logging.error(f"Wipe error: {str(e)}")
 
+    @commands.command()
+    async def logz(self, ctx: commands.Context):
+        """Actual gif of him"""
+        await ctx.send("LISTEN HERE SHITHEADS!")
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))
