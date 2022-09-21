@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-intents = nextcord.Intents.default()
+intents = nextcord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 

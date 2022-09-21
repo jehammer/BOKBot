@@ -508,6 +508,22 @@ Goodnight BOK
         await ctx.send("LISTEN HERE SHITHEADS!")
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
 
+    @commands.command(name="sr")
+    async def send_message_into_chat(self, ctx: commands.Context):
+        """Just a fun little thing"""
+        try:
+            if ctx.message.author.id == 212634819190849536:
+                msg = ctx.message.content
+                msg = msg.split(" ", 2)
+                guild = self.bot.get_guild(574095793414209556)
+                channel = guild.get_channel(int(msg[1]))
+                await channel.send(msg[2])
+            else:
+                await ctx.send(f"You do not have permission to do this.")
+        except Exception as e:
+            await ctx.send("Unable to send the message")
+            logging.error("sr error:" + str(e))
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Things(bot))
