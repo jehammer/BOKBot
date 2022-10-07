@@ -41,16 +41,9 @@ class Things(commands.Cog, name="Fun Things"):
 
     @commands.command(name="vundees")
     async def vundees_moment(self, ctx: commands.Context):
-        """Get yourself a random Vundees moment"""
+        """He splooged."""
         try:
-            ran = random.randint(1, 2)
-            match ran:
-                case 1:
-                    await ctx.send(
-                        'https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
-                case 2:
-                    await ctx.send(
-                        'https://media.discordapp.net/attachments/911730032286785536/987806807181365299/Suk_Balls.png')
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Vundees error: " + str(e))
@@ -89,16 +82,6 @@ class Things(commands.Cog, name="Fun Things"):
     async def maja(self, ctx: commands.Context):
         """How she be after we kick her butt"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
-
-    @commands.command()
-    async def arty(self, ctx: commands.Context):
-        """For Arty!"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/939988909352431666/For_Arty.gif')
-
-    @commands.command()
-    async def fly(self, ctx: commands.Context):
-        """Pretty Fly for a Fly Guy"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/974769151774195733/Fly.gif')
 
     @commands.command()
     async def lost(self, ctx: commands.Context):
@@ -278,7 +261,7 @@ And there were there were three little pvpers sitting on chairs
 And two little kittens, and even two chickens
 And even a Leah, asking for pizza at 1 AM
 And a blacksmith and a clothier and a bowl full of alchemy
-And a quiet old guild-mom who was whispering “hush”
+And a quiet old guild master who was whispering “hush”
 
 Goodnight room
 Goodnight moon
@@ -296,7 +279,7 @@ Goodnight blacksmith
 And goodnight clothier
 Goodnight nobody
 Goodnight alchemy
-And goodnight to the guild-mom whispering “hush”
+And goodnight to the guild master whispering “hush”
 Goodnight stars
 Goodnight air
 Goodnight noises everywhere
@@ -352,15 +335,6 @@ Goodnight BOK
         except Exception as e:
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
-
-    @commands.command(name="gnight")
-    async def goodnight_fly(self, ctx: commands.context):
-        """Fly lives upside down."""
-        try:
-            await ctx.send("Goodnight Fly!")
-        except Exception as e:
-            await ctx.send("I cannot say goodnight!")
-            logging.error("Gnight error: " + str(e))
 
     @commands.command(name="reddit")
     async def get_random_from_reddit(self, ctx: commands.context):
