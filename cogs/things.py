@@ -148,10 +148,14 @@ class Things(commands.Cog, name="Fun Things"):
         """Drak got the thing"""
         await ctx.send('https://youtu.be/Cnf9lRtLSYk')
 
-    @commands.command()
+    @commands.command(name="chainz",  aliases=["chains"])
     async def chainz(self, ctx: commands.Context):
         """He always loses it"""
-        await ctx.send('New phone who dis?')
+        try:
+            await ctx.send('https://tenor.com/view/e40-tellmewhentogo-gif-21713338')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"Chainz error: {str(e)}")
 
     @commands.command()
     async def pizza(self, ctx: commands.Context):
@@ -479,8 +483,21 @@ Goodnight BOK
     @commands.command()
     async def logz(self, ctx: commands.Context):
         """Actual gif of him"""
-        await ctx.send("LISTEN HERE SHITHEADS!")
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
+        try:
+            await ctx.send("LISTEN HERE SHITHEADS!")
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730138935349308/Logz.gif')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"Logz error: {str(e)}")
+
+    @commands.command(name="phone")
+    async def phone(self, ctx: commands.Context):
+        """You got a new one"""
+        try:
+            await ctx.send("New phone who dis?")
+        except Exception as e:
+            await ctx.send("Unable to send the message")
+            logging.error(f"Phone error: {str(e)}")
 
     @commands.command(name="sr")
     async def send_message_into_chat(self, ctx: commands.Context):
