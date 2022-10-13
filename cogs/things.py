@@ -499,6 +499,15 @@ Goodnight BOK
             await ctx.send("Unable to send the message")
             logging.error(f"Phone error: {str(e)}")
 
+    @commands.command(name="auddy")
+    async def auddy_moment(self, ctx: commands.Context):
+        """It tickled the snoot"""
+        try:
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/911730135034646558/Auddy.gif")
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"Auddy error: {str(e)}")
+
     @commands.command(name="sr")
     async def send_message_into_chat(self, ctx: commands.Context):
         """Just a fun little thing"""
