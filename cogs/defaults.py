@@ -3,12 +3,12 @@ from discord.ext import commands
 import logging
 from pymongo import MongoClient
 
-from bot import bot
+from bot import mongo
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # Connect and get values from MongoDB
-client = MongoClient(bot.config['mongo'])
+client = mongo
 database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
 defaults = database.defaults
 

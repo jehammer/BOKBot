@@ -4,10 +4,10 @@ import logging
 from pymongo import MongoClient
 import asyncio
 
-from bot import bot
+from bot import mongo
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
-client = MongoClient(bot.config['mongo'])
+client = client = mongo
 database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
 reps = database.reports
 
