@@ -1,4 +1,4 @@
-from nextcord.ext import commands
+from discord.ext import commands
 import random
 import logging
 
@@ -136,5 +136,5 @@ class Overland(commands.Cog, name="Events"):
         await ctx.send("Veteran " + trial + " HM")
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Overland(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Overland(bot))

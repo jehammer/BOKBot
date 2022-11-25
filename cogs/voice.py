@@ -1,11 +1,11 @@
 import asyncio
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 import logging
-from nextcord import FFmpegPCMAudio
-from nextcord.utils import get
+from discord import FFmpegPCMAudio
+from discord.utils import get
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,7 +15,6 @@ class Voice(commands.Cog, name="Voice"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        logging.info("Voice cog loaded")
 
         # TODO: Convert these to check if the author is in voice, and if not then have it default to general voice
 
@@ -121,5 +120,5 @@ class Voice(commands.Cog, name="Voice"):
             logging.error("DC error: " + str(e))
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Voice(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Voice(bot))

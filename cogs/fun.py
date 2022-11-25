@@ -1,197 +1,21 @@
-import nextcord
-from nextcord.ext import commands, tasks
+import discord
+from discord.ext import commands, tasks
 import random
 import logging
 import datetime
-import asyncpraw as praw
 import calendar
 
 # For using Aliases: (name="ex", aliases=["al1", "al2"])
 
-logging.basicConfig(level=logging.INFO)
-
-client_id = ""
-client_secret = ""
+logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
-def load_client_data():
-    try:
-        global client_id
-        global client_secret
-        with open('Client.txt') as f:
-            client_id = f.readline().strip('\n')
-            client_secret = f.readline().strip('\n')
-    except Exception as e:
-        logging.error("Unable to load client data: " + str(e))
-
-
-class Things(commands.Cog, name="Fun Things"):
+class Fun(commands.Cog, name="Fun Things"):
     """For Fun/Event Type Things"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        logging.info("Things cog loaded")
-        load_client_data()
         self.scheduled_good_morning.start()
-
-    @commands.command()
-    async def rng(self, ctx: commands.Context):
-        """RNG In vAA HM"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
-
-    @commands.command(name="vundees")
-    async def vundees_moment(self, ctx: commands.Context):
-        """He splooged."""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Vundees error: " + str(e))
-
-    @commands.command()
-    async def fishing(self, ctx: commands.Context):
-        """Glub Glub"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976527850524016650/Fishing.gif')
-
-    @commands.command()
-    async def dance(self, ctx: commands.Context):
-        """Jaeger does his thing"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730135919628328/Dance.gif')
-
-    @commands.command()
-    async def f(self, ctx: commands.Context):
-        """F"""
-        await ctx.send('https://tenor.com/view/keyboard-hyperx-rgb-hyperx-family-hyperx-gaming-gif-17743649')
-
-    @commands.command()
-    async def jabs(self, ctx: commands.Context):
-        """The Templars do be like that"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837712196173824/jabs.gif')
-
-    @commands.command()
-    async def facepalm(self, ctx: commands.Context):
-        """Arma every other second"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/912569604973404160/Facepalm.gif')
-
-    @commands.command()
-    async def hummus(self, ctx: commands.Context):
-        """It's what Drak likes"""
-        await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
-
-    @commands.command()
-    async def maja(self, ctx: commands.Context):
-        """How she be after we kick her butt"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
-
-    @commands.command()
-    async def lost(self, ctx: commands.Context):
-        """Then he was lost!"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
-
-    @commands.command()
-    async def dungeons(self, ctx: commands.Context):
-        """DUNGEONS"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/983363613425278997/dungeons.gif')
-
-    @commands.command()
-    async def youtube(self, ctx: commands.Context):
-        """Links you to the BOK Trials Playlist"""
-        await ctx.send('https://youtube.com/playlist?list=PL-z7L6gs44NMN_fDzsZY-3RRwaxHzxCBQ')
-
-    @commands.command()
-    async def lore(self, ctx: commands.Context):
-        """Shows a random lore tidbit"""
-        ran = random.randint(1, 10)  # Update to account for number of files
-        grab = str(ran)
-        grab += ".txt"
-        with open('Lore/' + grab, ) as l:
-            message = l.read()
-        await ctx.send(message)
-
-    @commands.command()
-    async def joke(self, ctx: commands.Context):
-        """Tells a Joke"""
-        ran = random.randint(1, 11)  # Update to account for number of files
-        grab = str(ran)
-        grab += ".txt"
-        with open('Jokes/' + grab, encoding="utf8") as l:
-            message = l.read()
-        await ctx.send(message)
-
-    @commands.command()
-    async def otter(self, ctx: commands.Context):
-        """Adder"""
-        await ctx.send('Adder')
-
-    @commands.command()
-    async def adder(self, ctx: commands.Context):
-        """Otter"""
-        await ctx.send('Otter')
-
-    @commands.command()
-    async def vka(self, ctx: commands.Context):
-        """Something you wanna see for vKA"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837688141856768/congaline.png')
-
-    @commands.command()
-    async def lewd(self, ctx: commands.Context):
-        """Be wary, very lewd option"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911776421473550346/interlocking.gif')
-
-    @commands.command()
-    async def bokemon(self, ctx: commands.Context):
-        """A link to a perfect song"""
-        await ctx.send('https://youtu.be/OZrs7Blmank')
-
-    @commands.command()
-    async def thepull(self, ctx: commands.Context):
-        """Drak got the thing"""
-        await ctx.send('https://youtu.be/Cnf9lRtLSYk')
-
-    @commands.command(name="chainz",  aliases=["chains"])
-    async def chainz(self, ctx: commands.Context):
-        """He always loses it"""
-        try:
-            await ctx.send('https://tenor.com/view/e40-tellmewhentogo-gif-21713338')
-        except Exception as e:
-            await ctx.send("Unable to send the gif")
-            logging.error(f"Chainz error: {str(e)}")
-
-    @commands.command()
-    async def pizza(self, ctx: commands.Context):
-        """Pizza Pizza"""
-        await ctx.send('https://youtu.be/0YgW-05_y3A')
-
-    @commands.command()
-    async def rezparse(self, ctx: commands.Context):
-        """When drak gets the highest rezzes instead of someone else"""
-        await ctx.send('https://youtu.be/uRbLz8COzHg')
-
-    @commands.command()
-    async def philosophy(self, ctx: commands.Context):
-        """The philosophy of Drak"""
-        await ctx.send(
-            "All Healers are soft mommy doms \nAll Tanks are masochists \nAll DPS are sadistic \n - Drak the Wise, "
-            "who ponders his orb.")
-
-    @commands.command()
-    async def translate(self, ctx: commands.Context):
-        """For the Boomers to understand Drak"""
-
-        await ctx.send("Pog/Poggers: A triumphant cry of celebration. \nBased: The opposite of cringe. "
-                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice"
-                       "\nNo Cap: An expression of authenticity."
-                       "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
-                       "\nBussin: Same as Baller")
-
-    @commands.command(name="twitch")
-    async def get_twitch_url(self, ctx: commands.context):
-        """Share Draks Twitch URL"""
-        try:
-            await ctx.send("https://www.twitch.tv/drakadorx")
-        except Exception as e:
-            await ctx.send("Unable to send link.")
-            logging.error("Print Twitch Error: " + str(e))
 
     @commands.command(name="8ball")
     async def magic_eight_ball(self, ctx: commands.context):
@@ -251,6 +75,218 @@ class Things(commands.Cog, name="Fun Things"):
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
 
+    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
+    async def scheduled_good_morning(self):
+        try:
+            guild = self.bot.config['guild']
+            channel = self.bot.config['morning_channel']
+            await channel.send(self.bot.config['morning'])
+            try:
+                today = datetime.datetime.today()
+                today_month = today.month
+                today_day = today.day
+                today_year = today.year
+                for member in guild.members:
+                    joined = member.joined_at
+                    joined_month = joined.month
+                    joined_day = joined.day
+                    joined_year = joined.year
+                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
+                        await channel.send(f"{member.mention} Happy Anniversary!")
+            except Exception as e:
+                await channel.send("Unable to get the Anniversaries.")
+                logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
+        except Exception as e:
+            logging.error(f"Good Morning Task Error: {str(e)}")
+
+    @commands.command(name="joined")
+    async def joined(self, ctx: commands.context, m: discord.Member = None):
+        """Tells you when you joined the server in M-D-Y Format"""
+        try:
+            def suffix(d):
+                return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+
+            if m is None:
+                user = ctx.message.author
+                await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
+                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}"
+                                f"{suffix(user.joined_at.day)} {user.joined_at.year}")
+            else:
+                await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
+                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}"
+                                f"{suffix(m.joined_at.day)} {m.joined_at.year}")
+        except Exception as e:
+            logging.error("Joined command error: " + str(e))
+            await ctx.send("Unable to fetch joined information.")
+
+    @commands.command(name="wrap")
+    async def create_bubblewrap(self, ctx: commands.context):
+        """For all your popping needs"""
+        message = f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
+                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||"
+        await ctx.send(message)
+
+    @commands.command(name="rng")
+    async def rng(self, ctx: commands.Context):
+        """RNG In vAA HM"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
+
+    @commands.command(name="vundees")
+    async def vundees_moment(self, ctx: commands.Context):
+        """He splooged."""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
+        except Exception as e:
+            await ctx.send("Unable to send image")
+            logging.error("Vundees error: " + str(e))
+
+    @commands.command(name="fishing")
+    async def fishing(self, ctx: commands.Context):
+        """Glub Glub"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976527850524016650/Fishing.gif')
+
+    @commands.command(name="dance")
+    async def dance(self, ctx: commands.Context):
+        """A little jiggle"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730135919628328/Dance.gif')
+
+    @commands.command(name="f")
+    async def f(self, ctx: commands.Context):
+        """F"""
+        await ctx.send('https://tenor.com/view/keyboard-hyperx-rgb-hyperx-family-hyperx-gaming-gif-17743649')
+
+    @commands.command(name="jabs")
+    async def jabs(self, ctx: commands.Context):
+        """The Templars do be like that"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837712196173824/jabs.gif')
+
+    @commands.command(name="facepalm")
+    async def facepalm(self, ctx: commands.Context):
+        """Arma every other second"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/912569604973404160/Facepalm.gif')
+
+    @commands.command(name="hummus")
+    async def hummus(self, ctx: commands.Context):
+        """It's what Drak likes"""
+        await ctx.send('https://tenor.com/view/hummus-hummusyes-hummushappy-gif-8630288')
+
+    @commands.command(name="maja")
+    async def maja(self, ctx: commands.Context):
+        """How she be after we kick her butt"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
+
+    @commands.command(name="lost")
+    async def lost(self, ctx: commands.Context):
+        """Then he was lost!"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
+
+    @commands.command(name="dungeons")
+    async def dungeons(self, ctx: commands.Context):
+        """DUNGEONS"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/983363613425278997/dungeons.gif')
+
+    @commands.command(name="youtube")
+    async def youtube(self, ctx: commands.Context):
+        """Links you to the BOK Trials Playlist"""
+        await ctx.send('https://youtube.com/playlist?list=PL-z7L6gs44NMN_fDzsZY-3RRwaxHzxCBQ')
+
+    @commands.command(name="lore")
+    async def lore(self, ctx: commands.Context):
+        """Shows a random lore tidbit"""
+        ran = random.randint(1, 10)  # Update to account for number of files
+        grab = str(ran)
+        grab += ".txt"
+        with open('Lore/' + grab, ) as l:
+            message = l.read()
+        await ctx.send(message)
+
+    @commands.command(name="joke")
+    async def joke(self, ctx: commands.Context):
+        """Tells a Joke"""
+        ran = random.randint(1, 11)  # Update to account for number of files
+        grab = str(ran)
+        grab += ".txt"
+        with open('Jokes/' + grab, encoding="utf8") as l:
+            message = l.read()
+        await ctx.send(message)
+
+    @commands.command(name="otter")
+    async def otter(self, ctx: commands.Context):
+        """Adder"""
+        await ctx.send('Adder')
+
+    @commands.command(name="adder")
+    async def adder(self, ctx: commands.Context):
+        """Otter"""
+        await ctx.send('Otter')
+
+    @commands.command(name="vka")
+    async def vka(self, ctx: commands.Context):
+        """Something you wanna see for vKA"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837688141856768/congaline.png')
+
+    @commands.command(name="lewd")
+    async def lewd(self, ctx: commands.Context):
+        """Be wary, very lewd option"""
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911776421473550346/interlocking.gif')
+
+    @commands.command(name="bokemon")
+    async def bokemon(self, ctx: commands.Context):
+        """A link to a perfect song"""
+        await ctx.send('https://youtu.be/OZrs7Blmank')
+
+    @commands.command(name="thepull")
+    async def thepull(self, ctx: commands.Context):
+        """Drak got the thing"""
+        await ctx.send('https://youtu.be/Cnf9lRtLSYk')
+
+    @commands.command(name="chainz", aliases=["chains"])
+    async def chainz(self, ctx: commands.Context):
+        """He always loses it"""
+        try:
+            await ctx.send('https://tenor.com/view/e40-tellmewhentogo-gif-21713338')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"Chainz error: {str(e)}")
+
+    @commands.command(name="pizza")
+    async def pizza(self, ctx: commands.Context):
+        """Pizza Pizza"""
+        await ctx.send('https://youtu.be/0YgW-05_y3A')
+
+    @commands.command(name="rezparse")
+    async def rezparse(self, ctx: commands.Context):
+        """When drak gets the highest rezzes instead of someone else"""
+        await ctx.send('https://youtu.be/uRbLz8COzHg')
+
+    @commands.command(name="philosophy")
+    async def philosophy(self, ctx: commands.Context):
+        """The philosophy of Drak"""
+        await ctx.send(
+            "All Healers are soft mommy doms \nAll Tanks are masochists \nAll DPS are sadistic \n - Drak the Wise, "
+            "who ponders his orb.")
+
+    @commands.command()
+    async def translate(self, ctx: commands.Context):
+        """For the Boomers to understand Drak"""
+
+        await ctx.send("Pog/Poggers: A triumphant cry of celebration. \nBased: The opposite of cringe. "
+                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice"
+                       "\nNo Cap: An expression of authenticity."
+                       "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
+                       "\nBussin: Same as Baller")
+
+    @commands.command(name="twitch")
+    async def get_twitch_url(self, ctx: commands.context):
+        """Share Draks Twitch URL"""
+        try:
+            await ctx.send("https://www.twitch.tv/drakadorx")
+        except Exception as e:
+            await ctx.send("Unable to send link.")
+            logging.error("Print Twitch Error: " + str(e))
+
     @commands.command()
     async def goodnight(self, ctx: commands.context):
         """A way to say goodnight to bok"""
@@ -296,84 +332,6 @@ Goodnight BOK
         """A way to say good morning to bok"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/970733506948890655/sleepy-sleep.gif')
 
-    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
-    async def scheduled_good_morning(self):
-        try:
-            guild = self.bot.get_guild(574095793414209556)
-            channel = guild.get_channel(574095793414209558)
-            await channel.send("Good Morning!")
-            try:
-                today = datetime.datetime.today()
-                today_month = today.month
-                today_day = today.day
-                today_year = today.year
-                for member in guild.members:
-                    joined = member.joined_at
-                    joined_month = joined.month
-                    joined_day = joined.day
-                    joined_year = joined.year
-                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
-                        await channel.send(f"{member.mention} Happy Anniversary of joining BOK!")
-            except Exception as e:
-                await channel.send("Unable to get the Anniversaries.")
-                logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
-        except Exception as e:
-            logging.error(f"Good Morning Task Error: {str(e)}")
-
-    @commands.command()
-    async def joined(self, ctx: commands.context, m: nextcord.Member = None):
-        """Tells you when you joined the server in M-D-Y Format"""
-        try:
-            def suffix(d):
-                return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
-
-            if m is None:
-                user = ctx.message.author
-                await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
-                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}"
-                                f"{suffix(user.joined_at.day)} {user.joined_at.year}")
-            else:
-                await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
-                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}"
-                                f"{suffix(m.joined_at.day)} {m.joined_at.year}")
-        except Exception as e:
-            logging.error("Joined command error: " + str(e))
-            await ctx.send("Unable to fetch joined information.")
-
-    @commands.command(name="reddit")
-    async def get_random_from_reddit(self, ctx: commands.context):
-        """Gets a random copypasta from reddit."""
-        try:
-            global client_id
-            global client_secret
-            await ctx.send("Loading a random post...")
-            reddit = praw.Reddit(client_id=client_id,
-                                 client_secret=client_secret,
-                                 user_agent='Linux:BOKBot:v2.0 by u/Drakidor')
-            subreddit = await reddit.subreddit('elderscrollsonline')
-            posts = [submission async for submission in subreddit.top()]
-            ran = random.randint(1, len(posts))
-            post = posts[ran]
-            await ctx.send("A random hot post from r/elderscrollsonline for you!")
-            await ctx.send(post.title)
-            if post.url:
-                await ctx.send(post.url)
-            if post.selftext:
-                await ctx.send(post.selftext)
-            await ctx.send(f"https://www.reddit.com{post.permalink}")
-        except Exception as e:
-            await ctx.send("I was unable to complete the command.")
-            logging.error("Reddit error: " + str(e))
-
-    @commands.command(name="wrap")
-    async def create_bubblewrap(self, ctx: commands.context):
-        """For all your popping needs"""
-        message = f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
-                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
-                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||\n" \
-                  f"||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop|| ||pop||"
-        await ctx.send(message)
-
     @commands.command(name="arma")
     async def get_arma_moment(self, ctx: commands.Context):
         """Arma Moments"""
@@ -391,18 +349,11 @@ Goodnight BOK
 
     @commands.command(name="drak")
     async def get_drak_moment(self, ctx: commands.Context):
-        """Drak Moments"""
+        """Drak Moment"""
         try:
-            ran = random.randint(1, 2)
-            match ran:
-                case 1:
-                    await ctx.send(
-                        'https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
-                case 2:
-                    await ctx.send(
-                        'https://media.discordapp.net/attachments/911730032286785536/982005217069498378/unknown.png')
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
         except Exception as e:
-            await ctx.send("Unable to send image")
+            await ctx.send("Unable to send gif")
             logging.error("Drak error: " + str(e))
 
     @commands.command(name="abbr")
@@ -480,7 +431,7 @@ Goodnight BOK
             await ctx.send("Unable to send the image")
             logging.error(f"Wipe error: {str(e)}")
 
-    @commands.command()
+    @commands.command(name="logz")
     async def logz(self, ctx: commands.Context):
         """Actual gif of him"""
         try:
@@ -524,6 +475,14 @@ Goodnight BOK
             await ctx.send("Unable to send the message")
             logging.error("sr error:" + str(e))
 
+    @commands.command(name='hrc', aliases=['vhrc', 'hrchm', 'vhrchm'])
+    async def send_hrc_gif(self, ctx: commands.Context):
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1043799209771548683/HRC_HM.gif')
+        except Exception as e:
+            await ctx.send("Unable to send the message")
+            logging.error(f"HRC gif error: {str(e)}")
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Things(bot))
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Fun(bot))
