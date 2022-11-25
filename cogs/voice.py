@@ -7,7 +7,7 @@ import logging
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
 class Voice(commands.Cog, name="Voice"):
