@@ -1,5 +1,5 @@
 # BOKBot
-A Discord bot written using Nextcord, requires at least Python 3.10 to work.
+A Discord bot written using Discord.py, requires at least Python 3.10 to work.
 
 An open-source template based off of BOKBot will be made later on, once I feel there is enough here to make a solid template.
 
