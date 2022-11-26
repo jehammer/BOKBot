@@ -103,7 +103,6 @@ class Overland(commands.Cog, name="Events"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        logging.info("Overland cog loaded")
 
     @commands.command()
     async def event(self, ctx: commands.Context):

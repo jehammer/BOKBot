@@ -27,3 +27,4 @@ replay_pid*
 venv/
 *.pyc
 config.yaml
+mongo.yaml

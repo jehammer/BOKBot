@@ -2,6 +2,7 @@ import calendar
 import datetime
 import re
 import discord
+import yaml
 from discord.ext import commands
 import logging
 from pytz import timezone
@@ -9,12 +10,14 @@ from enum import Enum
 from pymongo import MongoClient
 import asyncio
 
-from bot import mongo
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # Connect and get values from MongoDB
-client = mongo
+
+with open("mongo.yaml", 'r') as stream:
+    data_loaded = yaml.safe_load(stream)
+
+client = MongoClient(data_loaded['mongo'])
 database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
 raids = database.raids
 count = database.count

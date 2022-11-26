@@ -12,8 +12,6 @@ intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 
-mongo = ""
-
 
 # Events
 @bot.event
@@ -89,7 +87,6 @@ async def main():
         bot.config = load_configurations()
         await load_cogs()
         global mongo
-        mongo = bot.config['mongo']
         await bot.start(bot.config['bot']['token'])
 
 
