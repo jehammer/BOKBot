@@ -78,8 +78,8 @@ class Fun(commands.Cog, name="Fun Things"):
     @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
     async def scheduled_good_morning(self):
         try:
-            guild = self.bot.config['guild']
-            channel = self.bot.config['morning_channel']
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            channel = guild.get_channel(self.bot.config['morning_channel'])
             await channel.send(self.bot.config['morning'])
             try:
                 today = datetime.datetime.today()
