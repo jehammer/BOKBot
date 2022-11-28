@@ -75,7 +75,7 @@ class Fun(commands.Cog, name="Fun Things"):
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
 
-    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
+    @tasks.loop(time=datetime.time(14, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
     async def scheduled_good_morning(self):
         try:
             guild = self.bot.get_guild(self.bot.config['guild'])
@@ -477,11 +477,21 @@ Goodnight BOK
 
     @commands.command(name='hrc', aliases=['vhrc', 'hrchm', 'vhrchm'])
     async def send_hrc_gif(self, ctx: commands.Context):
+        """A helpful gif for vHRC HM"""
         try:
             await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1043799209771548683/HRC_HM.gif')
         except Exception as e:
             await ctx.send("Unable to send the message")
             logging.error(f"HRC gif error: {str(e)}")
+
+    @commands.command(name="dracus", aliases=["drac"])
+    async def send_dracus_image(self, ctx: commands.Context):
+        """His joke was ruined"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1046640340641271838/Dracus.png')
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Dracus Image error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
