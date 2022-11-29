@@ -29,3 +29,4 @@ venv/
 config.yaml
 mongo.yaml
 cogs/transfer.py
+_config.yaml

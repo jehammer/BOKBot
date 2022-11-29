@@ -41,7 +41,8 @@ def update_db(channel_id, raid):
     except Exception as e:
         raise Exception(f"Save to DB Error: {str(e)}")
 
-# TODO: Make a way for the raid limit to change for each role and who can join a raid. 
+
+# TODO: Make a way for the raid limit to change for each role and who can join a raid.
 
 
 class Raid:
@@ -1955,6 +1956,115 @@ class Raids(commands.Cog, name="Raids"):
                 await ctx.send("You do not have permission to use this command")
         except Exception as e:
             logging.error(f"Close error: {str(e)}")
+            await ctx.send("An error has occurred in the command.")
+
+    @commands.command(name="rolenum")
+    async def change_role_nums(self, ctx: commands.Context):
+        """For Raid Leads: Change the number of each role in a roster in dps, tank, healer format"""
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: discord.Message):  # m = discord.Message.
+                    return user == m.author
+
+                run = True
+                while run:
+                    try:
+                        counter = 0
+                        total = ""
+                        channels = {}
+                        rosters = raids.distinct("channelID")
+                        for i in rosters:
+                            channel = ctx.guild.get_channel(i)
+                            if channel is not None:
+                                total += f"{str(counter + 1)}: {channel.name}\n"
+                            else:
+                                total += f"{str(counter + 1)}: {i}\n"
+                            channels[counter] = i
+                            counter += 1
+                        total += f"0: Exit \n"
+                        await ctx.reply("Enter a number from the list below to have the role numbers changed")
+                        await ctx.send(total)
+                        #                        event = on_message without on_
+                        msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                        # msg = discord.Message
+                    except asyncio.TimeoutError:
+                        # at this point, the check didn't become True, let's handle it.
+                        await ctx.send(f"{ctx.author.mention}, rolenum has timed out")
+                        return
+                    else:
+                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        try:
+                            choice = int(msg.content)
+                            choice -= 1  # Need to lower it by one for the right number to get
+                            if choice == -1:
+                                await ctx.send("Exiting command")
+                                return
+                            try:
+                                channel_id = channels[choice]
+                                try:
+                                    try:
+                                        channel = ctx.guild.get_channel(channel_id)
+                                        rec = raids.find_one({'channelID': channel_id})
+                                        if rec is None:
+                                            await ctx.reply("Could not find Roster information")
+                                            return
+                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
+                                                    rec['data']['dps'],
+                                                    rec['data']['healers'], rec['data']['tanks'],
+                                                    rec['data']['backup_dps'],
+                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
+                                                    rec['data']['dps_limit'],
+                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
+                                                    rec['data']['role_limit'])
+
+                                    except Exception as e:
+                                        await ctx.send(f"Unable to get roster information.")
+                                        logging.error(f"Rolenum Raid Get Error: {str(e)}")
+                                        return
+                                    await ctx.send("Enter the new role nums in dps, tank, healer format: ")
+                                    confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
+                                    new_nums = confirm.content
+                                except asyncio.TimeoutError:
+                                    await ctx.send(f"{ctx.author.mention}, rolenum has timed out")
+                                    return
+                                else:
+
+                                    # Change the number for each role here, if anyone is extra move from the back
+                                    #   to the backup roster.
+                                    nums = new_nums.split(" ", 1)
+                                    nums = nums[1].split(",")
+
+                                    # update the numbers
+                                    old_dps = raid.dps_limit
+                                    raid.dps_limit = int(nums[0].strip())  # DPS comes first
+                                    old_tanks = raid.tank_limit
+                                    raid.tank_limit = int(nums[1].strip())
+                                    old_healers = raid.healer_limit
+                                    raid.healer_limit = int(nums[2].strip())
+
+                                    # TODO: Have it remove from overflow into backup.
+
+                                    try:
+                                        update_db(channel_id, raid)
+                                    except Exception as e:
+                                        await ctx.send("I was unable to save the updated roster.")
+                                        logging.error(f"Role Nums Error saving new roster: {str(e)}")
+                                        return
+                                    await ctx.send(f"Role Numbers have changed\n"
+                                                   f"DPS: {str(old_dps)} to {nums[0]}\n"
+                                                   f"Tanks: {str(old_tanks)} to {nums[1]}\n"
+                                                   f"Healers: {str(old_healers)} to {nums[2]}\n")
+                                    run = False
+                            except IndexError:
+                                await ctx.send("That is not a valid number, returning to menu.")
+                        except ValueError:
+                            await ctx.send("The input was not a valid number!")
+            else:
+                await ctx.send("You do not have permission to use this command")
+        except Exception as e:
+            logging.error(f"DateTime Change error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
 
     @commands.command(name="count")
