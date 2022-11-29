@@ -2033,8 +2033,7 @@ class Raids(commands.Cog, name="Raids"):
 
                                     # Change the number for each role here, if anyone is extra move from the back
                                     #   to the backup roster.
-                                    nums = new_nums.split(" ", 1)
-                                    nums = nums[1].split(",")
+                                    nums = new_nums.split(",")
 
                                     # update the numbers
                                     old_dps = raid.dps_limit
