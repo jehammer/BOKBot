@@ -33,7 +33,7 @@ class Roles(commands.Cog, name="Roles"):
             user = ctx.author
             total_roles = self.bot.config['roles']['vanity']
             role_name = total_roles.get(role).get('role_name')
-            role = discord.utils.get(ctx.author.guild.roles, name=role_name)
+            role = discord.utils.get(ctx.guild.roles, name=role_name)
             if user in role.members:
                 await ctx.author.remove_roles(role)
                 await user.send(f"Removed role: {role_name}")
@@ -47,7 +47,6 @@ class Roles(commands.Cog, name="Roles"):
     @commands.command()
     async def roles(self, ctx: commands.Context):
         """Lists the roles you can request from the bot"""
-        print(f"{self.bot.config['roles']['vanity']}")
         total_roles = self.bot.config['roles']['vanity']
         msg = ""
         for i in total_roles.keys():
