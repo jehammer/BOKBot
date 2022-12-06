@@ -32,7 +32,7 @@ class Roles(commands.Cog, name="Roles"):
                 return
             user = ctx.author
             total_roles = self.bot.config['roles']['vanity']
-            role_name = total_roles.get(role).get('role_name')
+            role_name = total_roles.get(role.lower()).get('role_name')
             role = discord.utils.get(ctx.guild.roles, name=role_name)
             if user in role.members:
                 await ctx.author.remove_roles(role)
