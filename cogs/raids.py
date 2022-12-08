@@ -850,7 +850,7 @@ class Raids(commands.Cog, name="Raids"):
                     modified = True
             if not names == "":
                 embed.add_field(name="Roster", value=names, inline=False)
-                names = f"Healers: {str(healer_count)}\nTanks: {str(tank_count)}\nDPS: {str(dps_count)}"
+                names = f"Healers: {str(healer_count)}/{str(raid.healer_limit)}\nTanks: {str(tank_count)}/{str(raid.tank_limit)}\nDPS: {str(dps_count)}/{str(raid.dps_limit)}"
                 embed.add_field(name="Total", value=names, inline=False)
             names = ""
 
