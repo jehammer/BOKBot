@@ -493,6 +493,15 @@ Goodnight BOK
             await ctx.send("Unable to send the image")
             logging.error(f"Dracus Image error: {str(e)}")
 
+    @commands.command(name="bocket")
+    async def send_bocket_image(self, ctx: commands.Context):
+        """Dracus! Chains!"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1050804078202077274/bocket.png')
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Bocket Image error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))
