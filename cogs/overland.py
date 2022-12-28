@@ -2,14 +2,16 @@ from discord.ext import commands
 import random
 import logging
 
+last4z = []
+last4t = []
+
 
 # Singular function to get random zones
 def get_zone():
     loop = True
-    last4 = []
     while loop:
         ran = random.randint(1, 11)
-        if ran not in last4:
+        if ran not in last4z:
             loop = False
     zone = ""
     match ran:
@@ -34,22 +36,21 @@ def get_zone():
         case 10:
             zone = "Gold Coast, Hew's Bane, Murkmire"
         case 11:
-            zone = "Legacy of The Bretons - High Isle"
-    if len(last4) < 4:
-        last4.append(ran)
+            zone = "Legacy of The Bretons - High Isle and Amenos, Galen and Y'ffelon"
+    if len(last4z) < 4:
+        last4z.append(ran)
     else:
-        last4.pop()
-        last4.append(ran)
-    logging.info("Last4 overland: " + str(last4))
+        last4z.pop()
+        last4z.append(ran)
+    logging.info("Last4z overland: " + str(last4z))
     return zone
 
 
 def get_trial(cap):
     loop = True
-    last4 = []
     while loop:
         ran = random.randint(1, cap)
-        if ran not in last4:
+        if ran not in last4t:
             loop = False
     trial = ""
     match ran:
@@ -75,26 +76,28 @@ def get_trial(cap):
             trial = "Rockgrove"
         case 11:
             trial = "Dreadsail Reef"
-    if len(last4) < 4:
-        last4.append(ran)
+    if len(last4t) < 4:
+        last4t.append(ran)
     else:
-        last4.pop()
-        last4.append(ran)
-    logging.info("Status of last4: " + str(last4))
+        last4t.pop()
+        last4t.append(ran)
+    logging.info("Status of last4: " + str(last4t))
     return trial
 
 
 # Function to get a random event to do
 def get_event():
-    ran = random.randint(1, 3)
+    ran = random.randint(1, 4)
     eve = ""
     match ran:
         case 1:
-            eve = "Shyshard Hunt - " + get_zone()
+            eve = "Shyshard Hunt starting: " + get_zone()
         case 2:
-            eve = "World Boss Crawl - " + get_zone()
+            eve = "World Boss Crawl starting: " + get_zone()
         case 3:
-            eve = "Overland - " + get_zone()
+            eve = "Overland starting: " + get_zone()
+        case 4:
+            eve = f"Public Dungeon Crawl starting: {get_zone()}"
     return eve
 
 
