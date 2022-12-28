@@ -40,7 +40,7 @@ def get_zone():
     if len(last4z) < 4:
         last4z.append(ran)
     else:
-        last4z.pop()
+        last4z.pop(0)
         last4z.append(ran)
     logging.info("Last4z overland: " + str(last4z))
     return zone
@@ -79,7 +79,7 @@ def get_trial(cap):
     if len(last4t) < 4:
         last4t.append(ran)
     else:
-        last4t.pop()
+        last4t.pop(0)
         last4t.append(ran)
     logging.info("Status of last4: " + str(last4t))
     return trial
