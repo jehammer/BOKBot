@@ -64,7 +64,7 @@ class Guides(commands.Cog, name="Guides"):
         """Something you wanna see for KA"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837688141856768/congaline.png')
 
-    @commands.command(name="backyard", aliases=["yard", "back"])
+    @commands.command(name="backyard", aliases=["yard", "back", "milkshake"])
     async def send_backyard_image(self, ctx: commands.Context):
         """MOL Backyard Guide"""
         try:
