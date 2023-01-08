@@ -222,11 +222,6 @@ class Fun(commands.Cog, name="Fun Things"):
         """Otter"""
         await ctx.send('Otter')
 
-    @commands.command(name="vka")
-    async def vka(self, ctx: commands.Context):
-        """Something you wanna see for vKA"""
-        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/911837688141856768/congaline.png')
-
     @commands.command(name="lewd")
     async def lewd(self, ctx: commands.Context):
         """Be wary, very lewd option"""
@@ -356,27 +351,6 @@ Goodnight BOK
             await ctx.send("Unable to send gif")
             logging.error("Drak error: " + str(e))
 
-    @commands.command(name="abbr")
-    async def dm_trial_abbreviations(self, ctx: commands.Context):
-        """DMs the User the Trial abbreviations"""
-        message = f"n - Normal\n" \
-                  f"v - Veteran\n" \
-                  f"+[#] - How many Minis are up for the Arena type Trials\n" \
-                  f"hm - Hard Mode\n" \
-                  f"hrc - Hel Ra Citadel\n" \
-                  f"aa - Atherian Archive\n" \
-                  f"so - Sanctum Ophidia\n" \
-                  f"mol - Maw of Lorkhaj\n" \
-                  f"hof - Halls of Fabrication\n" \
-                  f"as - Asylum Sanctorium\n" \
-                  f"cr - Cloud Rest\n" \
-                  f"ss - Sunspire\n" \
-                  f"ka - Kyne's Aegis\n" \
-                  f"rg - Rockgrove\n" \
-                  f"dsr - Dreadsail Reef"
-        author = ctx.author
-        await author.send(message)
-
     @commands.command(name="mommy")
     async def mommy(self, ctx: commands.Context):
         """You know you like it, you dirty little gamer"""
@@ -403,24 +377,6 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the image")
             logging.error(f"Bever error: {str(e)}")
-
-    @commands.command(name="reef")
-    async def reef_image(self, ctx: commands.Context):
-        """Helpful image for DSR"""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/990441515979505714/Reef.png")
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Reef error: {str(e)}")
-
-    @commands.command(name="vas", aliases=["nas", "as"])
-    async def as_gif(self, ctx: commands.Context):
-        """Kite gif for AS"""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/913342788907716628/vAS.gif")
-        except Exception as e:
-            await ctx.send("Unable to send the gif")
-            logging.error(f"AS Gif error: {str(e)}")
 
     @commands.command(name="wiped", aliases=["wipe"])
     async def wipe_meme(self, ctx: commands.Context):
@@ -475,14 +431,6 @@ Goodnight BOK
             await ctx.send("Unable to send the message")
             logging.error("sr error:" + str(e))
 
-    @commands.command(name='hrc', aliases=['vhrc', 'hrchm', 'vhrchm'])
-    async def send_hrc_gif(self, ctx: commands.Context):
-        """A helpful gif for vHRC HM"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1043799209771548683/HRC_HM.gif')
-        except Exception as e:
-            await ctx.send("Unable to send the message")
-            logging.error(f"HRC gif error: {str(e)}")
 
     @commands.command(name="dracus", aliases=["drac"])
     async def send_dracus_image(self, ctx: commands.Context):
@@ -501,6 +449,24 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the image")
             logging.error(f"Bocket Image error: {str(e)}")
+
+    @commands.command(name="tip")
+    async def send_tip_image(self, ctx: commands.Context):
+        """Just it"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1060236623083741244/tip.png')
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Tip Image error: {str(e)}")
+
+    @commands.command(name="oops")
+    async def send_oops_image(self, ctx: commands.Context):
+        """Ope"""
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1060236623448657960/oops.png')
+        except Exception as e:
+            await ctx.send("Unable to send the image")
+            logging.error(f"Oops Image error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
