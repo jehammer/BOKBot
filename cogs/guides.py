@@ -75,7 +75,7 @@ class Guides(commands.Cog, name="Guides"):
             logging.error(f"Backyard Error: {str(e)}")
 
     @commands.command(name="zhaj", aliases=["mol1"])
-    async def send_backyard_image(self, ctx: commands.Context):
+    async def send_zhaj_image(self, ctx: commands.Context):
         """MOL Zhaj positioning good for Yandir and Vrol too"""
         try:
             await ctx.send(
@@ -85,7 +85,7 @@ class Guides(commands.Cog, name="Guides"):
             logging.error(f"Zhaj Error: {str(e)}")
 
     @commands.command(name="mol", aliases=["nmol", "vmol"])
-    async def send_backyard_image(self, ctx: commands.Context):
+    async def send_mol_images(self, ctx: commands.Context):
         """Both MOL guide images"""
         try:
             await ctx.send(
