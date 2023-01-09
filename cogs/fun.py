@@ -468,6 +468,24 @@ Goodnight BOK
             await ctx.send("Unable to send the image")
             logging.error(f"Oops Image error: {str(e)}")
 
+    @commands.command(name="ec")
+    async def my_ec_gif(self, ctx: commands.Context):
+        """You have it!"""
+        try:
+            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1062132264382775296/DrakadorMyEC.gif')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"EC GIF error: {str(e)}")
+
+    @commands.command(name="noec")
+    async def no_ec_gif(self, ctx: commands.Context):
+        """You dont have it!"""
+        try:
+            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1062132263980126250/DrakadorNoEC.gif')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"NO EC GIF error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))
