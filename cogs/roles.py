@@ -32,7 +32,11 @@ class Roles(commands.Cog, name="Roles"):
                 return
             user = ctx.author
             total_roles = self.bot.config['roles']['vanity']
-            role_name = total_roles.get(role.lower()).get('role_name')
+            role_data = total_roles.get(role.lower())
+            if role_data is None:
+                await ctx.send("Unknown Role, use !roles to see a list of available roles.")
+                return
+            role_name = role_data.get('role_name')
             role = discord.utils.get(ctx.guild.roles, name=role_name)
             if user in role.members:
                 await ctx.author.remove_roles(role)
