@@ -15,10 +15,14 @@ class Roles(commands.Cog, name="Roles"):
     async def agree(self, ctx: commands.Context):
         """For agreeing with the rules of the discord"""
         try:
+
             role = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["roles"]["base"])
             if role != "@everyone":
                 await ctx.message.author.add_roles(role)
             await ctx.author.send(self.bot.config['agree'])
+        except discord.Forbidden:
+            await ctx.reply(f"I need permission to DM you for this. Please enable DMs on this server.\n"
+                            f"I have granted you the role for now, call the command later on for me to DM you important info!")
         except Exception as e:
             await ctx.send("Unable to grant the role, please notify an Admin/Officer")
             logging.error(f"Agree Error: {str(e)}")
@@ -44,6 +48,8 @@ class Roles(commands.Cog, name="Roles"):
             else:
                 await ctx.author.add_roles(role)
                 await user.send(f"Added role: {role_name}")
+        except discord.Forbidden:
+            await ctx.reply(f"Please enable DMs on this server, I have granted you the role for now.")
         except Exception as e:
             await ctx.send("Unable to grant roles, please notify an Admin/Officer")
             logging.error(f"Add Role Error: {str(e)}")
