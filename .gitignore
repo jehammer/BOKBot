@@ -31,3 +31,5 @@ mongo.yaml
 cogs/transfer.py
 cogs/_transfer.py
 _config.yaml
+cogs/_help_prac.py
+cogs/help_prac.py

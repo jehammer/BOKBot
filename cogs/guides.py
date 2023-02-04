@@ -20,7 +20,7 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send the message")
             logging.error(f"HRC gif error: {str(e)}")
 
-    @commands.command(name="vas", aliases=["nas", "as"])
+    @commands.command(name="as", aliases=["nas", "vas"])
     async def as_gif(self, ctx: commands.Context):
         """Kite gif for AS"""
         try:

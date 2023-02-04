@@ -16,6 +16,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # TODO:
 #   add "trail" counter for Dracus, have it suggest a dictonary when he uses it.
+#   Replace code duplication for saving new counters with one function.
+#   Replace code duplication for loading from Database with one function
 
 with open("mongo.yaml", 'r') as stream:
     data_loaded = yaml.safe_load(stream)
