@@ -14,6 +14,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # Connect and get values from MongoDB
 
+# TODO:
+#   add "trail" counter for Dracus, have it suggest a dictonary when he uses it.
+
 with open("mongo.yaml", 'r') as stream:
     data_loaded = yaml.safe_load(stream)
 
@@ -172,15 +175,15 @@ class Raid:
             logging.error(f"Fill Spots error: {str(e)}")
 
 
-class Raids(commands.Cog, name="Raids"):
-    """Commands related to Raids"""
+class Raids(commands.Cog, name="Trials"):
+    """Commands related to Raids/Trials"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="raid", aliases=["trial"])
+    @commands.command(name="trial", aliases=["raid", "trail"])
     async def create_roster(self, ctx: commands.Context):
-        """Created a new roster"""
+        """Creates a new roster"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             if role != "@everyone" and ctx.message.author not in role.members:

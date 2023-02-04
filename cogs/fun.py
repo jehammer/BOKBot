@@ -10,7 +10,7 @@ import calendar
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
-class Fun(commands.Cog, name="Fun Things"):
+class Fun(commands.Cog, name="Fun"):
     """For Fun/Event Type Things"""
 
     def __init__(self, bot: commands.Bot):
@@ -431,7 +431,6 @@ Goodnight BOK
             await ctx.send("Unable to send the message")
             logging.error("sr error:" + str(e))
 
-
     @commands.command(name="dracus", aliases=["drac"])
     async def send_dracus_image(self, ctx: commands.Context):
         """His joke was ruined"""
@@ -472,7 +471,8 @@ Goodnight BOK
     async def my_ec_gif(self, ctx: commands.Context):
         """You have it!"""
         try:
-            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1062132264382775296/DrakadorMyEC.gif')
+            await ctx.send(
+                'https://cdn.discordapp.com/attachments/911730032286785536/1062132264382775296/DrakadorMyEC.gif')
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"EC GIF error: {str(e)}")
@@ -481,7 +481,8 @@ Goodnight BOK
     async def no_ec_gif(self, ctx: commands.Context):
         """You dont have it!"""
         try:
-            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1062132263980126250/DrakadorNoEC.gif')
+            await ctx.send(
+                'https://cdn.discordapp.com/attachments/911730032286785536/1062132263980126250/DrakadorNoEC.gif')
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"NO EC GIF error: {str(e)}")

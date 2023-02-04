@@ -29,4 +29,5 @@ venv/
 config.yaml
 mongo.yaml
 cogs/transfer.py
+cogs/_transfer.py
 _config.yaml

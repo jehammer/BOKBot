@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')  # , 
 intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
+bot.remove_command("help") # the help.py cog will replace the default command
 
 
 # Events
