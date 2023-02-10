@@ -29,7 +29,8 @@ class Help(commands.Cog):
 
                 # starting to build embed
                 emb = discord.Embed(title='Commands and modules', color=discord.Color.blue(),
-                                    description=f'Use `!help <module>` to gain more information about that module')
+                                    description=f'Use `!help <module>` to gain more information about that module\n'
+                                                f'Be sure to check <#932438565009379358> for more in-depth help!')
 
                 # iterating trough cogs, gathering descriptions
                 cogs_desc = ''
@@ -126,6 +127,8 @@ class Help(commands.Cog):
         except Exception as e:
             await ctx.send("I was unable to complete the help command")
             logging.error(f"Help command Error: {str(e)}")
+
+    # TODO: Create a function called !start or !starter that will print an embed guide for people to get setup with BOKBot.
 
 
 async def setup(bot: commands.Bot):

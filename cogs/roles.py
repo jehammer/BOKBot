@@ -13,7 +13,7 @@ class Roles(commands.Cog, name="Roles"):
 
     @commands.command()
     async def agree(self, ctx: commands.Context):
-        """For agreeing with the rules of the discord"""
+        """For agreeing with the rules of the discord | `!agree`"""
         try:
 
             role = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["roles"]["base"])
@@ -29,7 +29,7 @@ class Roles(commands.Cog, name="Roles"):
 
     @commands.command()
     async def role(self, ctx: commands.Context, role=None):
-        """use !role [role] to get the request role from roles"""
+        """use `!role [role]` to get the role. `!roles` for list"""
         try:
             if role is None:
                 await ctx.send(f"Please include a role to add")
@@ -38,7 +38,7 @@ class Roles(commands.Cog, name="Roles"):
             total_roles = self.bot.config['roles']['vanity']
             role_data = total_roles.get(role.lower())
             if role_data is None:
-                await ctx.send("Unknown Role, use !roles to see a list of available roles.")
+                await ctx.send("Unknown Role, use `!roles` to see a list of available roles.")
                 return
             role_name = role_data.get('role_name')
             role = discord.utils.get(ctx.guild.roles, name=role_name)

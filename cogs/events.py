@@ -101,42 +101,42 @@ def get_event():
     return eve
 
 
-class Overland(commands.Cog, name="Events"):
-    """For Overland Type Stuff"""
+class Events(commands.Cog, name="Events"):
+    """For PVE/PVP Type Stuff"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name="event")
     async def event(self, ctx: commands.Context):
         """Gives you a random event and zone to do"""
         await ctx.send(get_event())
 
-    @commands.command()
+    @commands.command(name="zone")
     async def zone(self, ctx: commands.Context):
         """Gives you a random zone to do for your event"""
         await ctx.send(get_zone())
 
     # Get a trial randomly chosen
-    @commands.command()
+    @commands.command(name="ntrial")
     async def ntrial(self, ctx: commands.Context):
         """Gives you a random normal trial to do"""
         trial = get_trial(11)
         await ctx.send("Normal " + trial)
         logging.info("Random normal generated: " + trial)
 
-    @commands.command()
+    @commands.command(name="vtrial")
     async def vtrial(self, ctx: commands.Context):
         """Gives you a random veteran trial to do"""
         trial = get_trial(11)
         await ctx.send("Veteran " + trial)
 
-    @commands.command()
+    @commands.command(name="hmtrial")
     async def hmtrial(self, ctx: commands.Context):
         """Gives you a random veteran hm trial to do"""
-        trial = get_trial(4)
+        trial = get_trial(5)
         await ctx.send("Veteran " + trial + " HM")
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Overland(bot))
+    await bot.add_cog(Events(bot))

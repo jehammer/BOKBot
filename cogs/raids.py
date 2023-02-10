@@ -51,7 +51,7 @@ def update_db(channel_id, raid):
 
 
 class Raid:
-    """Class to hold Raid information"""
+    """Class for handling roster and related information"""
 
     def __init__(self, raid, date, leader, dps={}, healers={}, tanks={}, backup_dps={}, backup_healers={},
                  backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0):
@@ -185,7 +185,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="trial", aliases=["raid", "trail"])
     async def create_roster(self, ctx: commands.Context):
-        """Creates a new roster"""
+        """Creates a new roster | `!trial [leader],[trial],[date info]`"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             if role != "@everyone" and ctx.message.author not in role.members:
@@ -340,7 +340,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="su")
     async def su(self, ctx: commands.Context):
-        """Signs you up to a roster"""
+        """Signs you up to a roster | `!su [optional role] [optional message]`"""
         try:
             channel = ctx.message.channel.id
             try:
@@ -531,7 +531,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="bu")
     async def bu(self, ctx: commands.Context):
-        """Signs you up to a roster as a backup"""
+        """Signs you up as a backup | `!bu [optional role] [optional message]`"""
         try:
             channel = ctx.message.channel.id
             try:
@@ -936,7 +936,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="msg")
     async def set_message(self, ctx: commands.Context):
-        """!msg [message] to modify your message in the roster"""
+        """Modified your message in the roster | `!msg [message]`"""
         try:
             try:
                 channel = ctx.message.channel.id
@@ -987,7 +987,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="fill")
     async def roster_fill(self, ctx: commands.Context):
-        """Lets you select the raid to fill the main list from backups"""
+        """ For Raid Leads: Lets you select the raid to fill the main list from backups."""
         try:
             try:
                 role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
@@ -1100,7 +1100,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="call")
     async def send_message_to_everyone(self, ctx: commands.Context):
-        """For Raid Leads. A way to send a ping to everyone in a roster."""
+        """For Raid Leads: A way to send a ping to everyone in a roster."""
         try:
             user = ctx.message.author
             try:
@@ -1390,7 +1390,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="add")
     async def add_to_roster(self, ctx: commands.Context, p_type, member: discord.Member):
-        """Raid Lead command to manually add someone to a roster"""
+        """For Raid Leads: Manually add to roster | `!add [role] [@ the user]`"""
         try:
             try:
                 role = discord.utils.get(ctx.message.author.guild.roles,
@@ -1538,7 +1538,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="change")
     async def change_raid(self, ctx: commands.Context):
-        """For Officers: Replaces the raid field"""
+        """For Raid Leads: Replaces the trial field"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             user = ctx.message.author
@@ -1965,7 +1965,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="rolenum")
     async def change_role_nums(self, ctx: commands.Context):
-        """For Raid Leads: Change the number of each role in a roster in dps, tank, healer format"""
+        """For Raid Leads: role numbers in a roster in dps, tank, healer format"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             user = ctx.message.author

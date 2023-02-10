@@ -24,7 +24,7 @@ class Defaults(commands.Cog, name="Defaults"):
 
     @commands.command(name="default")
     async def set_default_role(self, ctx: commands.Context, role="check"):
-        """Set or check your default role to dps, healer, or tank when using !su. !default [optional: role]"""
+        """Set or check your default for rosters | `!default [optional: role]`"""
         try:
             role = role.lower()
             user_id = ctx.message.author.id
@@ -64,7 +64,7 @@ class Defaults(commands.Cog, name="Defaults"):
 
     @commands.command(name="setdef")
     async def admin_set_default_role(self, ctx: commands.Context, m: discord.Member, role="check"):
-        """Admin way of manually assigning default roles"""
+        """Officer manually assigndefault role | `!setdef [@user] [role]`"""
         try:
             officer = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['roles']['admin'])
             user = ctx.message.author
