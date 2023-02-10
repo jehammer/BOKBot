@@ -64,7 +64,7 @@ class Defaults(commands.Cog, name="Defaults"):
 
     @commands.command(name="setdef")
     async def admin_set_default_role(self, ctx: commands.Context, m: discord.Member, role="check"):
-        """Officer manually assigndefault role | `!setdef [@user] [role]`"""
+        """Officer manually assign default role | `!setdef [@user] [role]`"""
         try:
             officer = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['roles']['admin'])
             user = ctx.message.author
