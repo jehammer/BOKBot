@@ -415,7 +415,7 @@ Goodnight BOK
             await ctx.send("Unable to send the gif")
             logging.error(f"Auddy error: {str(e)}")
 
-    @commands.command(name="sr")
+    @commands.command(name="sr", hidden=True)
     async def send_message_into_chat(self, ctx: commands.Context):
         """Just a fun little thing"""
         try:

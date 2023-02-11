@@ -99,7 +99,9 @@ class Help(commands.Cog):
                                         emb = discord.Embed(title=f'{cog}: !{command}', color=discord.Color.blurple())
                                     emb.add_field(name=f"", value=f"{command.help}", inline=False)
                                 # found so break
-                                found = True
+                                    found = True
+                                else:
+                                    break
                         if found is True:
                             break
 
