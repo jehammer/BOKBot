@@ -1965,7 +1965,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="rolenum")
     async def change_role_nums(self, ctx: commands.Context):
-        """For Raid Leads: role numbers in a roster in dps, tank, healer format"""
+        """For Raid Leads: Change role nums in a roster in dps, tank, healer format"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             user = ctx.message.author
