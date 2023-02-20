@@ -45,7 +45,7 @@ def update_db(channel_id, raid):
         logging.info(f"Updating Roster channelID: {channel_id}")
         new_rec = {'$set': {'data': raid.get_data()}}
         raids.update_one({'channelID': channel_id}, new_rec)
-        logging.info(f"Roster channelID: {channel_id} updated")
+        logging.info(f"Roster channelID: {channel_id} - {raid.raid} updated")
     except Exception as e:
         raise Exception(f"Save to DB Error: {str(e)}")
 
