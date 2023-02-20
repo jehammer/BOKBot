@@ -181,7 +181,7 @@ class Reports(commands.Cog, name="Reports"):
                 message = message[2]
                 report = reps.find_one({'localID': rep_id})
                 reporter = ctx.author.guild.get_member(report['reporterID'])
-                await ctx.send(f"Send:\n{message}\nto:{reporter.display_name} (y/n)")
+                await ctx.send(f"Send:\n{message}\nto: {reporter.display_name} (y/n)")
                 confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
                 confirm = confirm.content.lower()
                 if confirm == 'y':
