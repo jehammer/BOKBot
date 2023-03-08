@@ -2193,22 +2193,33 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Run Count error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
 
-    @commands.command(name="pin")
+    @commands.command(name="pin", aliases=["unpin"])
     async def pin_message(self, ctx: commands.Context):
         """For Raid Leads: Allows pinning of a message"""
         try:
             role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
             user = ctx.message.author
             if user in role.members:
-                if ctx.message.reference is not None:
-                    await ctx.send("Is a reply")
+                ref = ctx.message.reference
+                if ref is not None:
+                    # Is a reply - pin or unpin the reply message
+                    message = await ctx.fetch_message(ref.message_id)
+                    if message.pinned is True:
+                        await message.unpin()
+                        await ctx.reply(f"Message unpinned")
+                        return
+                    else:
+                        await message.pin()
+                        return
                 else:
-                    await ctx.send("Is not a reply")
+                    # Is not a reply - pin the command message
+                    await ctx.message.pin()
+                    return
             else:
                 await ctx.send(f"You do not have permission to use this command.")
                 return
         except Exception as e:
-            await ctx.send("An unknown error has occured with the command")
+            await ctx.send("An unknown error has occurred with the command")
             logging.error(f"Pin Error: {str(e)}")
 
     @commands.command(name="count")
