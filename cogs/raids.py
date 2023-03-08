@@ -2,7 +2,6 @@ import calendar
 import datetime
 import re
 import discord
-import yaml
 from discord.ext import commands
 import logging
 from pytz import timezone
@@ -12,24 +11,28 @@ import asyncio
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
-# Connect and get values from MongoDB
-
 # TODO:
-#   add "trail" counter for Dracus, have it suggest a dictonary when he uses it.
-#   Replace code duplication for saving new counters with one function.
-#   Replace code duplication for loading from Database with one function
+#   add "trail" counter for Dracus, have it suggest a dictionary when he uses it.
+#   Replace code duplication for saving new counters with one function. - IP
+#   Replace code duplication for loading from Database with one function - IP
 #   2/20/2023 update: At this point I got way too much code replication, I need to dedicate a day to just
 #       going through it and really clearing this all out. If the code is used more than twice, it is safe to
 #       put it in its own function somewhere if I can.
 
-with open("mongo.yaml", 'r') as stream:
-    data_loaded = yaml.safe_load(stream)
+# TODO: 2/28/2023: Reimplement Mongo from something separate into main config folder.
 
-client = MongoClient(data_loaded['mongo'])
-database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
-raids = database.raids
-count = database.count
-defaults = database.defaults
+# TODO: Add memo command to create/modify memo
+# TODO: Add a pin command for Raid Leads, make it either a reply or start of message command
+# TODO: Add a command to update channel names manually for RLs
+# TODO: Command to print template for things, store in txt maybe?
+
+# TODO: Review delete command, why does it follow through with delete if you let there be an error for
+#   increasing runs or not
+
+# Global variables for the MongoDB channels, set by set_channels function
+global raids
+global count
+global defaults
 
 
 class Role(Enum):
@@ -50,7 +53,129 @@ def update_db(channel_id, raid):
         raise Exception(f"Save to DB Error: {str(e)}")
 
 
+def get_raid(channel_id):
+    """Loads raid information from a database or returns None if there is none"""
+    rec = raids.find_one({'channelID': channel_id})
+    if rec is None:
+        return None
+    raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
+                rec['data']['dps'],
+                rec['data']['healers'], rec['data']['tanks'],
+                rec['data']['backup_dps'],
+                rec['data']['backup_healers'], rec['data']['backup_tanks'],
+                rec['data']['dps_limit'],
+                rec['data']['healer_limit'], rec['data']['tank_limit'],
+                rec['data']['role_limit'])
+    return raid
+
+
+# TODO: Complete update_runs command
+def update_runs(raid):
+    """Updates the number of runs for people in the raid roster"""
+    for i in raid.dps:
+        counts = count.find_one({'userID': int(i)})
+        if counts is None:
+            new_data = {
+                "userID": int(i),
+                "raidCount": 1,
+                "lastRaid": raid.raid,
+                "lastDate": raid.date,
+                "dpsRuns": 1,
+                "tankRuns": 0,
+                "healerRuns": 0
+            }
+            try:
+                count.insert_one(new_data)
+            except Exception as e:
+                logging.error(f"Update Count Increase Error: {str(e)}")
+                raise IOError("Unable to update runs info") # Will automatically return from here
+        else:
+            counts["raidCount"] += 1
+            counts["lastRaid"] = raid.raid
+            counts["lastDate"] = raid.date
+            counts["dpsRuns"] += 1
+            try:
+                new_rec = {'$set': counts}
+                count.update_one({'userID': int(i)}, new_rec)
+            except Exception as e:
+                logging.error(f"Update Count Decrease Error: {str(e)}")
+                raise IOError("Unable to update runs info")
+    for i in raid.healers:
+        counts = count.find_one({'userID': int(i)})
+        if counts is None:
+            new_data = {
+                "userID": int(i),
+                "raidCount": 1,
+                "lastRaid": raid.raid,
+                "lastDate": raid.date,
+                "dpsRuns": 0,
+                "tankRuns": 0,
+                "healerRuns": 1
+            }
+            try:
+                count.insert_one(new_data)
+            except Exception as e:
+                logging.error(f"Update Count Increase Error: {str(e)}")
+                raise IOError("Unable to update runs info")
+        else:
+            counts["raidCount"] += 1
+            counts["lastRaid"] = raid.raid
+            counts["lastDate"] = raid.date
+            counts["healerRuns"] += 1
+            try:
+                new_rec = {'$set': counts}
+                count.update_one({'userID': int(i)}, new_rec)
+            except Exception as e:
+                logging.error(f"Update Count Error: {str(e)}")
+                raise IOError("Unable to update runs info")
+    for i in raid.tanks:
+        counts = count.find_one({'userID': int(i)})
+        if counts is None:
+            new_data = {
+                "userID": int(i),
+                "raidCount": 1,
+                "lastRaid": raid.raid,
+                "lastDate": raid.date,
+                "dpsRuns": 0,
+                "tankRuns": 1,
+                "healerRuns": 0
+            }
+            try:
+                count.insert_one(new_data)
+            except Exception as e:
+                logging.error(f"Update Count Increase Error: {str(e)}")
+                raise IOError("Unable to update runs info")
+        else:
+            counts["raidCount"] += 1
+            counts["lastRaid"] = raid.raid
+            counts["lastDate"] = raid.date
+            counts["tankRuns"] += 1
+            try:
+                new_rec = {'$set': counts}
+                count.update_one({'userID': int(i)}, new_rec)
+            except Exception as e:
+                logging.error(f"Update Count Error: {str(e)}")
+                raise IOError("Unable to update runs info")
+
+
+# TODO: Implement initial menu setup information in a function to print out the menu
+def print_initial_menu():
+    """Prints the initial startup menu"""
+    pass
+
 # TODO: Make a way for the raid limit to change for each role and who can join a raid.
+
+
+def set_channels(config):
+    """Function to set the MongoDB information on cog load"""
+    global raids
+    global count
+    global defaults
+    client = MongoClient(config['mongo'])
+    database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
+    raids = database.raids
+    count = database.count
+    defaults = database.defaults
 
 
 class Raid:
@@ -185,6 +310,7 @@ class Raids(commands.Cog, name="Trials"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        set_channels(self.bot.config)
 
     @commands.command(name="trial", aliases=["raid", "trail"])
     async def create_roster(self, ctx: commands.Context):
@@ -1288,19 +1414,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel_id = channels.get(choice)
-                                        channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -1404,18 +1521,11 @@ class Raids(commands.Cog, name="Trials"):
                     return
                 else:
                     channel_id = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
-                    rec = raids.find_one({'channelID': channel_id})
-                    if rec is None:
-                        await ctx.reply("Could not find Roster information")
+                    raid = get_raid(channel_id)
+                    if raid is None:
+                        await ctx.send(f"Unable to find roster information.")
                         return
-                    raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                rec['data']['dps'],
-                                rec['data']['healers'], rec['data']['tanks'],
-                                rec['data']['backup_dps'],
-                                rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                rec['data']['dps_limit'],
-                                rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                rec['data']['role_limit'])
+
             except Exception as e:
                 await ctx.send(f"Unable to get roster information.")
                 logging.error(f"Add Raid Get Error: {str(e)}")
@@ -1493,18 +1603,10 @@ class Raids(commands.Cog, name="Trials"):
                             try:
                                 try:
                                     channel_id = channels.get(choice)
-                                    rec = raids.find_one({'channelID': channel_id})
-                                    if rec is None:
-                                        await ctx.reply("Could not find Roster information")
+                                    raid = get_raid(channel_id)
+                                    if raid is None:
+                                        await ctx.send(f"Unable to find roster information.")
                                         return
-                                    raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                rec['data']['dps'],
-                                                rec['data']['healers'], rec['data']['tanks'],
-                                                rec['data']['backup_dps'],
-                                                rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                rec['data']['dps_limit'],
-                                                rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                rec['data']['role_limit'])
 
                                 except Exception as e:
                                     await ctx.send(f"Unable to get roster information.")
@@ -1590,18 +1692,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -1617,7 +1711,7 @@ class Raids(commands.Cog, name="Trials"):
                                     old_raid = raid.raid
                                     raid.raid = new_raid
                                     try:
-                                        raid.fill_spots(channel_id)
+                                        # raid.fill_spots(channel_id) # TODO: Verify this is expected?
                                         update_db(channel_id, raid)
                                     except Exception as e:
                                         await ctx.send("I was unable to save the updated roster.")
@@ -1702,18 +1796,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send("Unable to find the raid information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -1811,18 +1897,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -1850,97 +1928,11 @@ class Raids(commands.Cog, name="Trials"):
                                         return
                                     else:
                                         if confirm == 'y':
-                                            for i in raid.dps:
-                                                counts = count.find_one({'userID': int(i)})
-                                                if counts is None:
-                                                    new_data = {
-                                                        "userID": int(i),
-                                                        "raidCount": 1,
-                                                        "lastRaid": raid.raid,
-                                                        "lastDate": raid.date,
-                                                        "dpsRuns": 1,
-                                                        "tankRuns": 0,
-                                                        "healerRuns": 0
-                                                    }
-                                                    try:
-                                                        count.insert_one(new_data)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Increase Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-                                                else:
-                                                    counts["raidCount"] += 1
-                                                    counts["lastRaid"] = raid.raid
-                                                    counts["lastDate"] = raid.date
-                                                    counts["dpsRuns"] += 1
-                                                    try:
-                                                        new_rec = {'$set': counts}
-                                                        count.update_one({'userID': int(i)}, new_rec)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-                                            for i in raid.healers:
-                                                counts = count.find_one({'userID': int(i)})
-                                                if counts is None:
-                                                    new_data = {
-                                                        "userID": int(i),
-                                                        "raidCount": 1,
-                                                        "lastRaid": raid.raid,
-                                                        "lastDate": raid.date,
-                                                        "dpsRuns": 0,
-                                                        "tankRuns": 0,
-                                                        "healerRuns": 1
-                                                    }
-                                                    try:
-                                                        count.insert_one(new_data)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Increase Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-                                                else:
-                                                    counts["raidCount"] += 1
-                                                    counts["lastRaid"] = raid.raid
-                                                    counts["lastDate"] = raid.date
-                                                    counts["healerRuns"] += 1
-                                                    try:
-                                                        new_rec = {'$set': counts}
-                                                        count.update_one({'userID': int(i)}, new_rec)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-                                            for i in raid.tanks:
-                                                counts = count.find_one({'userID': int(i)})
-                                                if counts is None:
-                                                    new_data = {
-                                                        "userID": int(i),
-                                                        "raidCount": 1,
-                                                        "lastRaid": raid.raid,
-                                                        "lastDate": raid.date,
-                                                        "dpsRuns": 0,
-                                                        "tankRuns": 1,
-                                                        "healerRuns": 0
-                                                    }
-                                                    try:
-                                                        count.insert_one(new_data)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Increase Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-                                                else:
-                                                    counts["raidCount"] += 1
-                                                    counts["lastRaid"] = raid.raid
-                                                    counts["lastDate"] = raid.date
-                                                    counts["tankRuns"] += 1
-                                                    try:
-                                                        new_rec = {'$set': counts}
-                                                        count.update_one({'userID': int(i)}, new_rec)
-                                                    except Exception as e:
-                                                        logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                        await ctx.send("Unable to update the count")
-                                                        return
-
+                                            try:
+                                                update_runs(raid)
+                                            except IOError:
+                                                await ctx.send("I was unable to update the run count, Roster not closed.")
+                                                return
                                     try:
                                         to_delete = {"channelID": channel_id}
                                         raids.delete_one(to_delete)
@@ -2013,19 +2005,10 @@ class Raids(commands.Cog, name="Trials"):
                                 channel_id = channels[choice]
                                 try:
                                     try:
-                                        channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -2125,18 +2108,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -2174,96 +2149,11 @@ class Raids(commands.Cog, name="Trials"):
                                         await ctx.send(f"{ctx.author.mention}, run count has timed out")
                                         return
                                     else:
-                                        for i in raid.dps:
-                                            counts = count.find_one({'userID': int(i)})
-                                            if counts is None:
-                                                new_data = {
-                                                    "userID": int(i),
-                                                    "raidCount": 1,
-                                                    "lastRaid": raid.raid,
-                                                    "lastDate": raid.date,
-                                                    "dpsRuns": 1,
-                                                    "tankRuns": 0,
-                                                    "healerRuns": 0
-                                                }
-                                                try:
-                                                    count.insert_one(new_data)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Increase Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
-                                            else:
-                                                counts["raidCount"] += 1
-                                                counts["lastRaid"] = raid.raid
-                                                counts["lastDate"] = raid.date
-                                                counts["dpsRuns"] += 1
-                                                try:
-                                                    new_rec = {'$set': counts}
-                                                    count.update_one({'userID': int(i)}, new_rec)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
-                                        for i in raid.healers:
-                                            counts = count.find_one({'userID': int(i)})
-                                            if counts is None:
-                                                new_data = {
-                                                    "userID": int(i),
-                                                    "raidCount": 1,
-                                                    "lastRaid": raid.raid,
-                                                    "lastDate": raid.date,
-                                                    "dpsRuns": 0,
-                                                    "tankRuns": 0,
-                                                    "healerRuns": 1
-                                                }
-                                                try:
-                                                    count.insert_one(new_data)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Increase Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
-                                            else:
-                                                counts["raidCount"] += 1
-                                                counts["lastRaid"] = raid.raid
-                                                counts["lastDate"] = raid.date
-                                                counts["healerRuns"] += 1
-                                                try:
-                                                    new_rec = {'$set': counts}
-                                                    count.update_one({'userID': int(i)}, new_rec)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
-                                        for i in raid.tanks:
-                                            counts = count.find_one({'userID': int(i)})
-                                            if counts is None:
-                                                new_data = {
-                                                    "userID": int(i),
-                                                    "raidCount": 1,
-                                                    "lastRaid": raid.raid,
-                                                    "lastDate": raid.date,
-                                                    "dpsRuns": 0,
-                                                    "tankRuns": 1,
-                                                    "healerRuns": 0
-                                                }
-                                                try:
-                                                    count.insert_one(new_data)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Increase Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
-                                            else:
-                                                counts["raidCount"] += 1
-                                                counts["lastRaid"] = raid.raid
-                                                counts["lastDate"] = raid.date
-                                                counts["tankRuns"] += 1
-                                                try:
-                                                    new_rec = {'$set': counts}
-                                                    count.update_one({'userID': int(i)}, new_rec)
-                                                except Exception as e:
-                                                    logging.error(f"Update Count Decrease Error: {str(e)}")
-                                                    await ctx.send("Unable to update the count")
-                                                    return
+                                        try:
+                                            update_runs(raid)
+                                        except IOError:
+                                            await ctx.send("I was unable to update the run count, exiting command")
+                                            return
                                     try:
                                         if confirmed is True:
                                             formatted_date = f"<t:{re.sub('[^0-9]', '', new_date)}:f>"
@@ -2302,6 +2192,24 @@ class Raids(commands.Cog, name="Trials"):
         except Exception as e:
             logging.error(f"Run Count error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
+
+    @commands.command(name="pin")
+    async def pin_message(self, ctx: commands.Context):
+        """For Raid Leads: Allows pinning of a message"""
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
+            user = ctx.message.author
+            if user in role.members:
+                if ctx.message.reference is not None:
+                    await ctx.send("Is a reply")
+                else:
+                    await ctx.send("Is not a reply")
+            else:
+                await ctx.send(f"You do not have permission to use this command.")
+                return
+        except Exception as e:
+            await ctx.send("An unknown error has occured with the command")
+            logging.error(f"Pin Error: {str(e)}")
 
     @commands.command(name="count")
     async def check_own_count(self, ctx: commands.Context):

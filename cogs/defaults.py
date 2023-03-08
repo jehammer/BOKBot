@@ -1,5 +1,4 @@
 import discord
-import yaml
 from discord.ext import commands
 import logging
 from pymongo import MongoClient
@@ -8,12 +7,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # Connect and get values from MongoDB
 
-with open("mongo.yaml", 'r') as stream:
-    data_loaded = yaml.safe_load(stream)
+global defaults
 
-client = MongoClient(data_loaded['mongo'])
-database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
-defaults = database.defaults
+
+def set_channels(config):
+    """Function to set the MongoDB information on cog load"""
+    global defaults
+    client = MongoClient(config['mongo'])
+    database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
+    defaults = database.defaults
 
 
 class Defaults(commands.Cog, name="Defaults"):
@@ -21,6 +23,7 @@ class Defaults(commands.Cog, name="Defaults"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        set_channels(self.bot.config)
 
     @commands.command(name="default")
     async def set_default_role(self, ctx: commands.Context, role="check"):
@@ -62,6 +65,7 @@ class Defaults(commands.Cog, name="Defaults"):
             await ctx.send("Unable to set default role")
             logging.error(f"Default Role Set Error: {str(e)}")
 
+# TODO: Fix this printing the default of the caller and not the person checked
     @commands.command(name="setdef")
     async def admin_set_default_role(self, ctx: commands.Context, m: discord.Member, role="check"):
         """Officer manually assign default role | `!setdef [@user] [role]`"""

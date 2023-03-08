@@ -41,6 +41,8 @@ async def on_member_remove(member):
     user = member
     channel = guild.get_channel(bot.config['administration']['private'])
     await channel.send(f"{member.name}#{user.discriminator} - {member.display_name} has left the server")
+    # TODO: Implement a roster cleanup on user leave, mention if someone was removed from a particular roster.
+    #   Implement another channel check for the new bokbot playground from the config to get and notify there.
 
 
 @bot.event
