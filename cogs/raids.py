@@ -159,9 +159,26 @@ def update_runs(raid):
 
 
 # TODO: Implement initial menu setup information in a function to print out the menu
-def print_initial_menu():
+def print_initial_menu(ctx):
     """Prints the initial startup menu"""
-    pass
+    try:
+        counter = 0
+        total = ""
+        channels = {}
+        rosters = raids.distinct("channelID")
+        for i in rosters:
+            channel = ctx.guild.get_channel(i)
+            if channel is not None:
+                total += f"{str(counter + 1)}: {channel.name}\n"
+            else:
+                total += f"{str(counter + 1)}: {i}\n"
+            channels[counter] = i
+            counter += 1
+        total += f"0: Exit \n"
+        return total, channels
+    except Exception as e:
+        logging.error(f"Unable to print initial menu: {str(e)}")
+        raise IOError("Unable to load distinct roster information")
 
 # TODO: Make a way for the raid limit to change for each role and who can join a raid.
 
@@ -471,16 +488,12 @@ class Raids(commands.Cog, name="Trials"):
     async def su(self, ctx: commands.Context):
         """Signs you up to a roster | `!su [optional role] [optional message]`"""
         try:
-            channel = ctx.message.channel.id
+            channel_id = ctx.message.channel.id
             try:
-                rec = raids.find_one({'channelID': channel})
-                if rec is None:
-                    await ctx.reply("You are not in a raid roster channel")
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
                     return
-                raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'], rec['data']['dps'],
-                            rec['data']['healers'], rec['data']['tanks'], rec['data']['backup_dps'],
-                            rec['data']['backup_healers'], rec['data']['backup_tanks'], rec['data']['dps_limit'],
-                            rec['data']['healer_limit'], rec['data']['tank_limit'], rec['data']['role_limit'])
             except Exception as e:
                 await ctx.send("Unable to load raid.")
                 logging.error(f"SU Load Raid Error: {str(e)}")
@@ -647,7 +660,7 @@ class Raids(commands.Cog, name="Trials"):
 
             try:
                 if worked is True:
-                    update_db(channel, raid)
+                    update_db(channel_id, raid)
             except Exception as e:
                 await ctx.send("I was unable to save the updated roster.")
                 logging.error(f"SU Error saving new roster: {str(e)}")
@@ -662,16 +675,12 @@ class Raids(commands.Cog, name="Trials"):
     async def bu(self, ctx: commands.Context):
         """Signs you up as a backup | `!bu [optional role] [optional message]`"""
         try:
-            channel = ctx.message.channel.id
+            channel_id = ctx.message.channel.id
             try:
-                rec = raids.find_one({'channelID': channel})
-                if rec is None:
-                    await ctx.reply("You are not in a raid roster channel")
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
                     return
-                raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'], rec['data']['dps'],
-                            rec['data']['healers'], rec['data']['tanks'], rec['data']['backup_dps'],
-                            rec['data']['backup_healers'], rec['data']['backup_tanks'], rec['data']['dps_limit'],
-                            rec['data']['healer_limit'], rec['data']['tank_limit'], rec['data']['role_limit'])
             except Exception as e:
                 await ctx.send("Unable to load raid.")
                 logging.error(f"BU Load Raid Error: {str(e)}")
@@ -838,7 +847,7 @@ class Raids(commands.Cog, name="Trials"):
 
             try:
                 if worked is True:
-                    update_db(channel, raid)
+                    update_db(channel_id, raid)
             except Exception as e:
                 await ctx.send("I was unable to save the updated roster.")
                 logging.error(f"BU Error saving new roster: {str(e)}")
@@ -854,17 +863,13 @@ class Raids(commands.Cog, name="Trials"):
         """Will remove you from both BU and Main rosters"""
         try:
             worked = False
-            channel = ctx.message.channel.id
+            channel_id = ctx.message.channel.id
             user_id = str(ctx.message.author.id)
             try:
-                rec = raids.find_one({'channelID': channel})
-                if rec is None:
-                    await ctx.reply("You are not in a raid roster channel")
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
                     return
-                raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'], rec['data']['dps'],
-                            rec['data']['healers'], rec['data']['tanks'], rec['data']['backup_dps'],
-                            rec['data']['backup_healers'], rec['data']['backup_tanks'], rec['data']['dps_limit'],
-                            rec['data']['healer_limit'], rec['data']['tank_limit'], rec['data']['role_limit'])
             except Exception as e:
                 await ctx.send("Unable to load raid.")
                 logging.error(f"WD Load Raid Error: {str(e)}")
@@ -890,7 +895,7 @@ class Raids(commands.Cog, name="Trials"):
             if worked:
                 try:
                     if worked is True:
-                        update_db(channel, raid)
+                        update_db(channel_id, raid)
                 except Exception as e:
                     await ctx.send("I was unable to save the updated roster.")
                     logging.error(f"WD Error saving new roster: {str(e)}")
@@ -905,16 +910,12 @@ class Raids(commands.Cog, name="Trials"):
     async def send_status_embed(self, ctx: commands.Context):
         """Posts the current roster information"""
         try:
-            channel = ctx.message.channel.id
+            channel_id = ctx.message.channel.id
             try:
-                rec = raids.find_one({'channelID': channel})
-                if rec is None:
-                    await ctx.reply("You are not in a raid roster channel")
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
                     return
-                raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'], rec['data']['dps'],
-                            rec['data']['healers'], rec['data']['tanks'], rec['data']['backup_dps'],
-                            rec['data']['backup_healers'], rec['data']['backup_tanks'], rec['data']['dps_limit'],
-                            rec['data']['healer_limit'], rec['data']['tank_limit'], rec['data']['role_limit'])
             except Exception as e:
                 await ctx.send("Unable to load raid.")
                 logging.error(f"Status Load Raid Error: {str(e)}")
@@ -1053,7 +1054,7 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send(embed=embed)
             if modified:
                 try:
-                    update_db(channel, raid)
+                    update_db(channel_id, raid)
                 except Exception as e:
                     await ctx.send("I was unable to save the updated roster.")
                     logging.error(f"Status Error saving new roster: {str(e)}")
@@ -1068,15 +1069,11 @@ class Raids(commands.Cog, name="Trials"):
         """Modified your message in the roster | `!msg [message]`"""
         try:
             try:
-                channel = ctx.message.channel.id
-                rec = raids.find_one({'channelID': channel})
-                if rec is None:
-                    await ctx.reply("You are not in a raid roster channel")
+                channel_id = ctx.message.channel.id
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
                     return
-                raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'], rec['data']['dps'],
-                            rec['data']['healers'], rec['data']['tanks'], rec['data']['backup_dps'],
-                            rec['data']['backup_healers'], rec['data']['backup_tanks'], rec['data']['dps_limit'],
-                            rec['data']['healer_limit'], rec['data']['tank_limit'], rec['data']['role_limit'])
             except Exception as e:
                 await ctx.send("Unable to load raid.")
                 logging.error(f"MSG Load Raid Error: {str(e)}")
@@ -1103,7 +1100,7 @@ class Raids(commands.Cog, name="Trials"):
                 found = False
             if found:
                 try:
-                    update_db(channel, raid)
+                    update_db(channel_id, raid)
                 except Exception as e:
                     await ctx.send("I was unable to save the updated roster.")
                     logging.error(f"Message Update Error saving new roster: {str(e)}")
@@ -1172,18 +1169,10 @@ class Raids(commands.Cog, name="Trials"):
                                 try:
                                     try:
                                         channel = ctx.guild.get_channel(channel_id)
-                                        rec = raids.find_one({'channelID': channel_id})
-                                        if rec is None:
-                                            await ctx.reply("Could not find Roster information")
+                                        raid = get_raid(channel_id)
+                                        if raid is None:
+                                            await ctx.send(f"Unable to find roster information.")
                                             return
-                                        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                                                    rec['data']['dps'],
-                                                    rec['data']['healers'], rec['data']['tanks'],
-                                                    rec['data']['backup_dps'],
-                                                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                                                    rec['data']['dps_limit'],
-                                                    rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                    rec['data']['role_limit'])
 
                                     except Exception as e:
                                         await ctx.send(f"Unable to get roster information.")
@@ -1281,7 +1270,7 @@ class Raids(commands.Cog, name="Trials"):
                                 await ctx.send("Exiting command")
                                 return
                             try:
-                                num = channels.get(choice)
+                                channel_id = channels.get(choice)
                                 try:
                                     await ctx.send("Enter the message to send, or cancel to exit.")
                                     confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
@@ -1301,22 +1290,11 @@ class Raids(commands.Cog, name="Trials"):
                                         if confirm.lower() == "y":
                                             try:
                                                 try:
-                                                    channel = ctx.guild.get_channel(num)
-                                                    rec = raids.find_one({'channelID': num})
-                                                    if rec is None:
-                                                        await ctx.reply("Could not find Roster information")
+                                                    channel = ctx.guild.get_channel(channel_id)
+                                                    raid = get_raid(channel_id)
+                                                    if raid is None:
+                                                        await ctx.send(f"Unable to find roster information.")
                                                         return
-                                                    raid = Raid(rec['data']['raid'], rec['data']['date'],
-                                                                rec['data']['leader'],
-                                                                rec['data']['dps'],
-                                                                rec['data']['healers'], rec['data']['tanks'],
-                                                                rec['data']['backup_dps'],
-                                                                rec['data']['backup_healers'],
-                                                                rec['data']['backup_tanks'],
-                                                                rec['data']['dps_limit'],
-                                                                rec['data']['healer_limit'], rec['data']['tank_limit'],
-                                                                rec['data']['role_limit'])
-
                                                 except Exception as e:
                                                     await ctx.send(f"Unable to get roster information.")
                                                     logging.error(f"Call Raid Get Error: {str(e)}")
