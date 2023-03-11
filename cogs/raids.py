@@ -19,10 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 #       going through it and really clearing this all out. If the code is used more than twice, it is safe to
 #       put it in its own function somewhere if I can.
 
-# TODO: 2/28/2023: Reimplement Mongo from something separate into main config folder.
-
 # TODO: Add memo command to create/modify memo
-# TODO: Add a pin command for Raid Leads, make it either a reply or start of message command
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
 
@@ -157,7 +154,6 @@ def update_runs(raid):
                 raise IOError("Unable to update runs info")
 
 
-# TODO: Implement initial menu setup information in a function to print out the menu
 def print_initial_menu(ctx):
     """Prints the initial startup menu"""
     try:
@@ -1133,19 +1129,7 @@ class Raids(commands.Cog, name="Trials"):
                     def check(m: discord.Message):  # m = discord.Message.
                         return user == m.author
 
-                    counter = 0
-                    total = ""
-                    channels = {}
-                    rosters = raids.distinct("channelID")
-                    for i in rosters:
-                        channel = ctx.guild.get_channel(i)
-                        if channel is not None:
-                            total += f"{str(counter + 1)}: {channel.name}\n"
-                        else:
-                            total += f"{str(counter + 1)}: {i}\n"
-                        channels[counter] = i
-                        counter += 1
-                    total += f"0: Exit \n"
+                    total, channels = print_initial_menu(ctx)
                     await ctx.reply("Enter a number from the list below to have the roster closed and "
                                     "the channel deleted")
                     await ctx.send(total)
@@ -1238,19 +1222,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the roster closed and "
                                         "the channel deleted")
                         await ctx.send(total)
@@ -1358,19 +1330,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to select the roster")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -1546,19 +1506,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to select the roster")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -1632,19 +1580,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the raid changed")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -1733,19 +1669,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the date/time changed")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -1834,19 +1758,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the roster closed")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -1944,19 +1856,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the role numbers changed")
                         await ctx.send(total)
                         #                        event = on_message without on_
@@ -2043,19 +1943,7 @@ class Raids(commands.Cog, name="Trials"):
                 run = True
                 while run:
                     try:
-                        counter = 0
-                        total = ""
-                        channels = {}
-                        rosters = raids.distinct("channelID")
-                        for i in rosters:
-                            channel = ctx.guild.get_channel(i)
-                            if channel is not None:
-                                total += f"{str(counter + 1)}: {channel.name}\n"
-                            else:
-                                total += f"{str(counter + 1)}: {i}\n"
-                            channels[counter] = i
-                            counter += 1
-                        total += f"0: Exit \n"
+                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the runs increased")
                         await ctx.send(total)
                         #                        event = on_message without on_
