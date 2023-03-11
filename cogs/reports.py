@@ -97,7 +97,10 @@ class Reports(commands.Cog, name="Reports"):
                     await ctx.send("I was unable to save the report. Report not updated. Please notify an Admin.")
                     return
                 await ctx.author.send(f"Your report has been updated.")
+        except IndexError:
+            await ctx.send(f"Invalid number entered.")
         except Exception as e:
+            await ctx.send(f"I am sorry, something has gone wrong with the update. Remember, it is `!update [id] [msg]`")
             logging.error(str(e))
 
     @commands.command(name="next")

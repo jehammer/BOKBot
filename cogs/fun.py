@@ -75,7 +75,7 @@ class Fun(commands.Cog, name="Fun"):
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
 
-    @tasks.loop(time=datetime.time(14, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock.
+    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
     async def scheduled_good_morning(self):
         try:
             guild = self.bot.get_guild(self.bot.config['guild'])

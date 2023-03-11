@@ -478,7 +478,8 @@ class Raids(commands.Cog, name="Trials"):
                     logging.info(f"Attempted to create roster with role limits that are not configured.")
                     return
         except Exception as e:
-            await ctx.send(f"Raid Creation Error: {str(e)}")
+            await ctx.send(f"I was unable to create the roster.")
+            logging.error(f"Raid Creation Error: {str(e)}")
             return
 
         try:
@@ -1676,11 +1677,10 @@ class Raids(commands.Cog, name="Trials"):
                                     old_raid = raid.raid
                                     raid.raid = new_raid
                                     try:
-                                        # raid.fill_spots(channel_id) # TODO: Verify this is expected?
                                         update_db(channel_id, raid)
                                     except Exception as e:
                                         await ctx.send("I was unable to save the updated roster.")
-                                        logging.error(f"Message Update Error saving new roster: {str(e)}")
+                                        logging.error(f"Raid Change Error saving new roster: {str(e)}")
                                         return
                                     await ctx.send(f"Raid has been changed from {old_raid} to {new_raid}")
                                     try:
@@ -2191,7 +2191,7 @@ class Raids(commands.Cog, name="Trials"):
                 return
         except Exception as e:
             await ctx.send("An unknown error has occurred with the command")
-            logging.error(f"Pin Error: {str(e)}")
+            logging.error(f"Memo Error: {str(e)}")
 
         # TODO: Think of adding a plaintext ` ` get of the memo
 
