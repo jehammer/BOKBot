@@ -330,6 +330,55 @@ class Raids(commands.Cog, name="Trials"):
         self.bot = bot
         set_channels(self.bot.config)
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        """Event listener for when someone leaves the server to remove them from all rosters they are on."""
+        try:
+            was_on = False
+            user_id = str(member.id)
+            rosters = raids.distinct("channelID")
+            private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
+            for i in rosters:
+                raid = get_raid(i)
+                channel = member.guild.get_channel(i)
+                if user_id in raid.dps.keys():
+                    raid.remove_dps(user_id)
+                    await private_channel.send(f"Traitor was removed as a DPS. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+                elif user_id in raid.backup_dps.keys():
+                    raid.remove_dps(user_id)
+                    await private_channel.send(f"Traitor was removed as a backup DPS. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+                elif user_id in raid.healers.keys():
+                    raid.remove_healer(user_id)
+                    await private_channel.send(f"Traitor was removed as a Healer. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+                elif user_id in raid.backup_healers.keys():
+                    raid.remove_healer(user_id)
+                    await private_channel.send(f"Traitor was removed as a backup Healer. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+                elif user_id in raid.tanks.keys():
+                    raid.remove_tank(user_id)
+                    await private_channel.send(f"Traitor was removed as a Tank. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+                elif user_id in raid.backup_tanks.keys():
+                    raid.remove_tank(user_id)
+                    await private_channel.send(f"Traitor was removed as a backup Tank. - {channel.name}")
+                    was_on = True
+                    update_db(i, raid)
+            if was_on:
+                await private_channel.send(f"The Traitor has been removed from all active rosters.")
+            else:
+                await private_channel.send(f"The Traitor was not on any active rosters.")
+        except Exception as e:
+            logging.error(f"User Roster Exit Removal Error: {str(e)}")
+            raise IOError(f"Unable to remove user on exit from rosters.")
+
     @commands.command(name="trial", aliases=["raid", "trail"])
     async def create_roster(self, ctx: commands.Context):
         """Creates a new roster | `!trial [leader],[trial],[date info]`"""

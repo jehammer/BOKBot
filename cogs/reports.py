@@ -32,7 +32,7 @@ class Reports(commands.Cog, name="Reports"):
             else:
                 # Is sent in a DM
                 guild = self.bot.get_guild(self.bot.config['guild'])
-                channel = guild.get_channel(self.bot.config['administration']['private'])
+                channel = guild.get_channel(self.bot.config['administration']['reports'])
                 message = ctx.message.content
                 message = message.split(' ', 1)
                 message = message[1]
@@ -75,7 +75,7 @@ class Reports(commands.Cog, name="Reports"):
             else:
                 # Is sent in a DM
                 guild = self.bot.get_guild(self.bot.config['guild'])
-                channel = guild.get_channel(self.bot.config['administration']['private'])
+                channel = guild.get_channel(self.bot.config['administration']['reports'])
                 message = ctx.message.content
                 message = message.split(' ', 2)
                 rep_id = message[1]
