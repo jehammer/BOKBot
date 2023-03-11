@@ -13,13 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 # TODO:
 #   add "trail" counter for Dracus, have it suggest a dictionary when he uses it.
-#   Replace code duplication for saving new counters with one function. - IP
-#   Replace code duplication for loading from Database with one function - IP
-#   2/20/2023 update: At this point I got way too much code replication, I need to dedicate a day to just
-#       going through it and really clearing this all out. If the code is used more than twice, it is safe to
-#       put it in its own function somewhere if I can.
 
-# TODO: Add memo command to create/modify memo
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
 
@@ -47,7 +41,8 @@ def update_db(channel_id, raid):
         raids.update_one({'channelID': channel_id}, new_rec)
         logging.info(f"Roster channelID: {channel_id} - {raid.raid} updated")
     except Exception as e:
-        raise Exception(f"Save to DB Error: {str(e)}")
+        logging.error(f"Save to DB Error: {str(e)}")
+        raise IOError(f"Unable to save to DB")
 
 
 def get_raid(channel_id):
@@ -62,7 +57,7 @@ def get_raid(channel_id):
                 rec['data']['backup_healers'], rec['data']['backup_tanks'],
                 rec['data']['dps_limit'],
                 rec['data']['healer_limit'], rec['data']['tank_limit'],
-                rec['data']['role_limit'])
+                rec['data']['role_limit'], rec['data']['memo'])
     return raid
 
 
@@ -203,7 +198,7 @@ class Raid:
     """Class for handling roster and related information"""
 
     def __init__(self, raid, date, leader, dps={}, healers={}, tanks={}, backup_dps={}, backup_healers={},
-                 backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0):
+                 backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0, memo="delete"):
         self.raid = raid
         self.date = date
         self.leader = leader
@@ -217,6 +212,7 @@ class Raid:
         self.tank_limit = tank_limit
         self.healer_limit = healer_limit
         self.role_limit = role_limit
+        self.memo = memo
 
     def get_data(self):
         all_data = {
@@ -232,7 +228,8 @@ class Raid:
             "dps_limit": self.dps_limit,
             "healer_limit": self.healer_limit,
             "tank_limit": self.tank_limit,
-            "role_limit": self.role_limit
+            "role_limit": self.role_limit,
+            "memo": self.memo
         }
         return all_data
 
@@ -1047,6 +1044,14 @@ class Raids(commands.Cog, name="Trials"):
                 names = f"Healers: {str(healer_count)}\nTanks: {str(tank_count)}\nDPS: {str(dps_count)}"
                 embed.add_field(name="Total Backups", value=names, inline=False)
 
+            if raid.memo != "delete":
+                embed_memo = discord.Embed(
+                    title=" ",
+                    color=discord.Color.dark_gray()
+                )
+                embed_memo.add_field(name=" ", value=raid.memo, inline=True)
+                embed_memo.set_footer(text="This is very important!")
+                await ctx.send(embed=embed_memo)
             await ctx.send(embed=embed)
             if modified:
                 try:
@@ -2079,6 +2084,67 @@ class Raids(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send("An unknown error has occurred with the command")
             logging.error(f"Pin Error: {str(e)}")
+
+    @commands.command(name="memo")
+    async def create_modify_roster_memo(self, ctx: commands.Context):
+        """For Raid Leads: Updates the memo for a roster"""
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
+            user = ctx.message.author
+            if user in role.members:
+                def check(m: discord.Message):  # m = discord.Message.
+                    return user == m.author
+
+                try:
+                    total, channels = print_initial_menu(ctx)
+                    await ctx.reply("Enter a number from the list below to modify the memo")
+                    await ctx.send(total)
+                except IOError as e:
+                    await ctx.send(f"Unable to print menu")
+                    logging.error(f"Memo Error: {str(e)}")
+
+                try:
+                    msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                    choice = int(msg.content)
+                    choice -= 1
+                    if choice == -1:
+                        await ctx.send("Exiting command")
+                        return
+                    channel_id = channels[choice]
+                    raid = get_raid(channel_id)
+                    if raid is None:
+                        await ctx.send(f"Unable to load roster information")
+                        return
+                    await ctx.send(f"Enter the new memo. use `delete` to delete the memo.")
+                    msg = await self.bot.wait_for('message', check=check, timeout=30.0)
+                    new_memo = msg.content
+                    if new_memo.lower() == "delete":
+                        new_memo = "delete"
+                    raid.memo = new_memo
+                    update_db(channel_id, raid)
+                    await ctx.send(f"Memo updated.")
+                    return
+                except KeyError:
+                    await ctx.send(f"Invalid value entered")
+                    return
+                except ValueError:
+                    await ctx.send(f"Invalid value entered")
+                    return
+                except asyncio.TimeoutError:
+                    await ctx.send(f"Memo has timed out")
+                except IOError:
+                    await ctx.send("Unable to process DB changes.")
+                except Exception as e:
+                    await ctx.send(f"Unable to complete command")
+                    logging.error(f"Memo error: {str(e)}")
+            else:
+                await ctx.send(f"You do not have permission to use this command.")
+                return
+        except Exception as e:
+            await ctx.send("An unknown error has occurred with the command")
+            logging.error(f"Pin Error: {str(e)}")
+
+        # TODO: Think of adding a plaintext ` ` get of the memo
 
     @commands.command(name="count")
     async def check_own_count(self, ctx: commands.Context):
