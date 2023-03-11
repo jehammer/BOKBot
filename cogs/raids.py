@@ -69,7 +69,6 @@ def get_raid(channel_id):
     return raid
 
 
-# TODO: Complete update_runs command
 def update_runs(raid):
     """Updates the number of runs for people in the raid roster"""
     for i in raid.dps:
@@ -88,7 +87,7 @@ def update_runs(raid):
                 count.insert_one(new_data)
             except Exception as e:
                 logging.error(f"Update Count Increase Error: {str(e)}")
-                raise IOError("Unable to update runs info") # Will automatically return from here
+                raise IOError("Unable to update runs info")  # Will automatically return from here
         else:
             counts["raidCount"] += 1
             counts["lastRaid"] = raid.raid
@@ -180,6 +179,7 @@ def print_initial_menu(ctx):
         logging.error(f"Unable to print initial menu: {str(e)}")
         raise IOError("Unable to load distinct roster information")
 
+
 # TODO: Make a way for the raid limit to change for each role and who can join a raid.
 
 
@@ -193,6 +193,14 @@ def set_channels(config):
     raids = database.raids
     count = database.count
     defaults = database.defaults
+
+
+def suffix(d):
+    try:
+        return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+    except Exception as e:
+        logging.error(f"Suffix Failure: {str(e)}")
+        raise ValueError("Unable to set suffix value")
 
 
 class Raid:
@@ -340,14 +348,6 @@ class Raids(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.send(f"Unable to verify roles, check that the config is spelled the same as the discord role.")
             logging.error(f"creation error on role verification: {str(e)}")
-
-        def suffix(d):
-            try:
-                return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
-            except Exception as e2:
-                ctx.send(f"Error on setting the suffix.")
-                logging.error(f"Suffix Failure: {str(e2)}")
-                return
 
         def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
                     fact_role_limit):
@@ -1629,9 +1629,6 @@ class Raids(commands.Cog, name="Trials"):
                 def check(m: discord.Message):  # m = discord.Message.
                     return user == m.author
 
-                def suffix(d):
-                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
-
                 run = True
                 while run:
                     try:
@@ -1732,9 +1729,6 @@ class Raids(commands.Cog, name="Trials"):
             if user in role.members:
                 def check(m: discord.Message):  # m = discord.Message.
                     return user == m.author
-
-                def suffix(d):
-                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
 
                 run = True
                 while run:
@@ -1909,7 +1903,8 @@ class Raids(commands.Cog, name="Trials"):
                                             try:
                                                 update_runs(raid)
                                             except IOError:
-                                                await ctx.send("I was unable to update the run count, Roster not closed.")
+                                                await ctx.send(
+                                                    "I was unable to update the run count, Roster not closed.")
                                                 return
                                     try:
                                         to_delete = {"channelID": channel_id}
@@ -2044,9 +2039,6 @@ class Raids(commands.Cog, name="Trials"):
             if user in role.members:
                 def check(m: discord.Message):  # m = discord.Message.
                     return user == m.author
-
-                def suffix(d):
-                    return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
 
                 run = True
                 while run:
