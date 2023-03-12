@@ -194,6 +194,23 @@ def suffix(d):
         raise ValueError("Unable to set suffix value")
 
 
+def generate_channel_name(date, raid_name, tz_info):
+    """Function to generate channel names on changed information"""
+    new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', date)))
+    tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
+        tz=timezone(tz_info))
+    weekday = calendar.day_name[tz.weekday()]
+    day = tz.day
+    new_name = raid_name + "-" + weekday + "-" + str(day) + suffix(day)
+    return new_name
+
+
+def format_date(date):
+    """Formats the timestamp date to the correct version"""
+    formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
+    return formatted_date
+
+
 class Raid:
     """Class for handling roster and related information"""
 
@@ -435,7 +452,7 @@ class Raids(commands.Cog, name="Trials"):
                     leader, raid, date, dps_limit, healer_limit, tank_limit, role_limit = vals
                     if 0 > role_limit > 3:
                         await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
-                    formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
+                    formatted_date = format_date(date)
                     dps_limit = int(dps_limit.strip())
                     healer_limit = int(healer_limit.strip())
                     tank_limit = int(tank_limit.strip())
@@ -447,7 +464,7 @@ class Raids(commands.Cog, name="Trials"):
                     if 0 > role_limit > 3:
                         await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
                     dps_limit, healer_limit, tank_limit = None, None, None
-                    formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
+                    formatted_date = format_date(date)
                     created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit)
                 else:
                     if len(vals) > 7:
@@ -463,7 +480,7 @@ class Raids(commands.Cog, name="Trials"):
             else:
                 if len(vals) == 6:
                     leader, raid, date, dps_limit, healer_limit, tank_limit = vals
-                    formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
+                    formatted_date = format_date(date)
                     dps_limit = int(dps_limit.strip())
                     healer_limit = int(healer_limit.strip())
                     tank_limit = int(tank_limit.strip())
@@ -471,7 +488,7 @@ class Raids(commands.Cog, name="Trials"):
                 elif len(vals) == 3:
                     leader, raid, date = vals
                     dps_limit, healer_limit, tank_limit = None, None, None
-                    formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
+                    formatted_date = format_date(date)
                     created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, 0)
                 else:
                     await ctx.reply("Role Limits are not configured, please do not include them.")
@@ -485,12 +502,7 @@ class Raids(commands.Cog, name="Trials"):
         try:
             logging.info(f"Creating new channel.")
             category = ctx.guild.get_channel(self.bot.config["raids"]["category"])
-            new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', date)))
-            tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                tz=timezone(self.bot.config["raids"]["timezone"]))
-            weekday = calendar.day_name[tz.weekday()]
-            day = tz.day
-            new_name = created.raid + "-" + weekday + "-" + str(day) + suffix(day)
+            new_name = generate_channel_name(date, created.raid, self.bot.config["raids"]["timezone"])
             channel = await category.create_text_channel(new_name)
 
             embed = discord.Embed(
@@ -1684,15 +1696,8 @@ class Raids(commands.Cog, name="Trials"):
                                         return
                                     await ctx.send(f"Raid has been changed from {old_raid} to {new_raid}")
                                     try:
-                                        new = re.sub('[^0-9]', '',
-                                                     raid.date)  # Gotta get just the numbers for this part
-                                        new = int(new)
-                                        time = datetime.datetime.utcfromtimestamp(new)
-                                        tz = time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                                            tz=timezone(self.bot.config["raids"]["timezone"]))
-                                        weekday = calendar.day_name[tz.weekday()]
-                                        day = tz.day
-                                        new_name = raid.raid + "-" + weekday + "-" + str(day) + suffix(day)
+                                        new_name = generate_channel_name(raid.date, raid.raid,
+                                                                         self.bot.config["raids"]["timezone"])
                                         await channel.edit(name=new_name)
                                         run = False
                                     except Exception as e:
@@ -1710,7 +1715,7 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Raid Change error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
 
-    @commands.command(name="datetime")
+    @commands.command(name="datetime", aliases=["date", "time"])
     async def change_date_time(self, ctx: commands.Context):
         """For Raid Leads: Replaces the date of a raid"""
         try:
@@ -1762,7 +1767,7 @@ class Raids(commands.Cog, name="Trials"):
                                     await ctx.send(f"{ctx.author.mention}, datetime has timed out")
                                     return
                                 else:
-                                    formatted_date = f"<t:{re.sub('[^0-9]', '', new_date)}:f>"
+                                    formatted_date = format_date(new_date)
                                     old_date = raid.date
                                     raid.date = formatted_date
                                     try:
@@ -1773,15 +1778,8 @@ class Raids(commands.Cog, name="Trials"):
                                         return
                                     await ctx.send(f"Date/Time has been changed from {old_date} to {raid.date}")
                                     try:
-                                        new = re.sub('[^0-9]', '',
-                                                     raid.date)  # Gotta get just the numbers for this part
-                                        new = int(new)
-                                        time = datetime.datetime.utcfromtimestamp(new)
-                                        tz = time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                                            tz=timezone(self.bot.config["raids"]["timezone"]))
-                                        weekday = calendar.day_name[tz.weekday()]
-                                        day = tz.day
-                                        new_name = raid.raid + "-" + weekday + "-" + str(day) + suffix(day)
+                                        new_name = generate_channel_name(raid.date, raid.raid,
+                                                                         self.bot.config["raids"]["timezone"])
                                         await channel.edit(name=new_name)
                                         run = False
                                     except Exception as e:
@@ -2068,7 +2066,7 @@ class Raids(commands.Cog, name="Trials"):
                                             return
                                     try:
                                         if confirmed is True:
-                                            formatted_date = f"<t:{re.sub('[^0-9]', '', new_date)}:f>"
+                                            formatted_date = format_date(new_date)
                                             old_date = raid.date
                                             raid.date = formatted_date
                                             update_db(channel_id, raid)
@@ -2079,15 +2077,9 @@ class Raids(commands.Cog, name="Trials"):
                                         return
                                     try:
                                         if confirmed is True:
+                                            new_name = generate_channel_name(raid.date, raid.raid,
+                                                                             self.bot.config["raids"]["timezone"])
                                             await ctx.send(f"Date/Time has been changed from {old_date} to {raid.date}")
-                                            new = re.sub('[^0-9]', '', raid.date)
-                                            new = int(new)
-                                            time = datetime.datetime.utcfromtimestamp(new)
-                                            tz = time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                                                tz=timezone(self.bot.config["raids"]["timezone"]))
-                                            weekday = calendar.day_name[tz.weekday()]
-                                            day = tz.day
-                                            new_name = raid.raid + "-" + weekday + "-" + str(day) + suffix(day)
                                             await channel.edit(name=new_name)
                                         await ctx.send(f"Runs have been updated")
                                         run = False
