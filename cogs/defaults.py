@@ -96,9 +96,9 @@ class Defaults(commands.Cog, name="Defaults"):
                     try:
                         rec = defaults.find_one({'userID': user_id})
                         if rec is None:
-                            await ctx.reply(f"{ctx.message.author.display_name}: No default set")
+                            await ctx.reply(f"{m.display_name}: No default set")
                         else:
-                            await ctx.reply(f"{ctx.message.author.display_name} defaults to: {rec['default']}")
+                            await ctx.reply(f"{m.display_name} defaults to: {rec['default']}")
                     except Exception as e:
                         await ctx.send(f"I was unable to access the database")
                         logging.error(f"Default error: {str(e)}")
