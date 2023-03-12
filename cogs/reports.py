@@ -7,12 +7,16 @@ import asyncio
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
-with open("mongo.yaml", 'r') as stream:
-    data_loaded = yaml.safe_load(stream)
 
-client = MongoClient(data_loaded['mongo'])
-database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
-reps = database.reports
+global reps
+
+
+def set_channels(config):
+    """Function to set the MongoDB information on cog load"""
+    global reps
+    client = MongoClient(config['mongo'])
+    database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
+    reps = database.reports
 
 
 class Reports(commands.Cog, name="Reports"):
@@ -20,8 +24,7 @@ class Reports(commands.Cog, name="Reports"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    # Start of Report Commands
+        set_channels(self.bot.config)
 
     @commands.command(name="report")
     async def create_report(self, ctx: commands.Context):
