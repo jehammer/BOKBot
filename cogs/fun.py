@@ -75,7 +75,8 @@ class Fun(commands.Cog, name="Fun"):
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
 
-    @tasks.loop(time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
+    @tasks.loop(
+        time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
     async def scheduled_good_morning(self):
         try:
             guild = self.bot.get_guild(self.bot.config['guild'])
@@ -479,13 +480,22 @@ Goodnight BOK
 
     @commands.command(name="noec")
     async def no_ec_gif(self, ctx: commands.Context):
-        """You dont have it!"""
+        """You don't have it!"""
         try:
             await ctx.send(
                 'https://cdn.discordapp.com/attachments/911730032286785536/1062132263980126250/DrakadorNoEC.gif')
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"NO EC GIF error: {str(e)}")
+
+    @commands.command(name="noquestionsasked")
+    async def no_questions_asked_gif(self, ctx: commands.Context):
+        """Absolutely none."""
+        try:
+            await ctx.send('https://tenor.com/view/dont-ask-no-questions-gif-8052545')
+        except Exception as e:
+            await ctx.send("Unable to send the gif")
+            logging.error(f"No Questions Asked GIF error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
