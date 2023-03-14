@@ -25,6 +25,7 @@ class Help(commands.Cog):
         try:
             # checks if cog parameter was given
             # if not: sending all modules and commands not associated with a cog
+            pages = None
             if not input:
 
                 # starting to build embed
@@ -68,18 +69,32 @@ class Help(commands.Cog):
                     if cog.lower() == input[0].lower():
 
                         # making title - getting description from doc-string below class
-                        emb = discord.Embed(title=f'{cog} - Commands', description=self.bot.cogs[cog].__doc__,
+                        page = discord.Embed(title=f'{cog} - Commands', description=self.bot.cogs[cog].__doc__,
                                             color=discord.Color.green())
 
-                        emb.add_field(name="", value="Use `!help <command>` for specific command information",
+                        page.add_field(name="", value="Use `!help <command>` for specific command information",
                                       inline=False)
+
+                        next_page = discord.Embed(title=f'{cog} - Commands (Cont)', description=self.bot.cogs[cog].__doc__,
+                                            color=discord.Color.green())
+
                         # getting commands from cog
+                        count = 0
+                        pages = []
+
                         for command in self.bot.get_cog(cog).get_commands():
                             # if cog is not hidden
                             if not command.hidden:
-                                emb.add_field(name=f"", value=f"`!{command.name}`\t{command.help}", inline=False)
+                                if count == 24:
+                                    pages.append(page)
+                                    count = 0
+                                    page = next_page
+                                else:
+                                    page.add_field(name=f"", value=f"`!{command.name}`\t{command.help}", inline=False)
+                                count += 1
                         # found cog - breaking loop
                         found = True
+                        pages.append(page)
                         break
                 # It is a command in a cog, iterate through and find the specific command within the cog
                 if found is False:
@@ -126,7 +141,11 @@ class Help(commands.Cog):
                                     color=discord.Color.red())
 
             # sending reply embed using our own function defined above
-            await send_embed(ctx, emb)
+            if pages is not None:
+                for i in pages:
+                    await send_embed(ctx, i)
+            else:
+                await send_embed(ctx, emb)
         except Exception as e:
             await ctx.send("I was unable to complete the help command")
             logging.error(f"Help command Error: {str(e)}")
