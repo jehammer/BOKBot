@@ -1290,8 +1290,7 @@ class Raids(commands.Cog, name="Trials"):
                 while run:
                     try:
                         total, channels = print_initial_menu(ctx)
-                        await ctx.reply("Enter a number from the list below to have the roster closed and "
-                                        "the channel deleted")
+                        await ctx.reply("Enter a number from the list below to send a mass message.")
                         await ctx.send(total)
                         #                        event = on_message without on_
                         msg = await self.bot.wait_for('message', check=check, timeout=15.0)
