@@ -47,18 +47,22 @@ def update_db(channel_id, raid):
 
 def get_raid(channel_id):
     """Loads raid information from a database or returns None if there is none"""
-    rec = raids.find_one({'channelID': channel_id})
-    if rec is None:
-        return None
-    raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
-                rec['data']['dps'],
-                rec['data']['healers'], rec['data']['tanks'],
-                rec['data']['backup_dps'],
-                rec['data']['backup_healers'], rec['data']['backup_tanks'],
-                rec['data']['dps_limit'],
-                rec['data']['healer_limit'], rec['data']['tank_limit'],
-                rec['data']['role_limit'], rec['data']['memo'])
-    return raid
+    try:
+        rec = raids.find_one({'channelID': channel_id})
+        if rec is None:
+            return None
+        raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
+                    rec['data']['dps'],
+                    rec['data']['healers'], rec['data']['tanks'],
+                    rec['data']['backup_dps'],
+                    rec['data']['backup_healers'], rec['data']['backup_tanks'],
+                    rec['data']['dps_limit'],
+                    rec['data']['healer_limit'], rec['data']['tank_limit'],
+                    rec['data']['role_limit'], rec['data']['memo'])
+        return raid
+    except Exception as e:
+        logging.error(f"Load Raid Error: {str(e)}")
+        raise IOError(f"Unable to load Raid from DB")
 
 
 def update_runs(raid):
@@ -1992,109 +1996,88 @@ class Raids(commands.Cog, name="Trials"):
                     return user == m.author
 
                 run = True
+                total, channels = print_initial_menu(ctx)
                 while run:
                     try:
-                        total, channels = print_initial_menu(ctx)
                         await ctx.reply("Enter a number from the list below to have the runs increased")
                         await ctx.send(total)
                         #                        event = on_message without on_
                         msg = await self.bot.wait_for('message', check=check, timeout=15.0)
-                        # msg = discord.Message
-                    except asyncio.TimeoutError:
-                        # at this point, the check didn't become True, let's handle it.
-                        await ctx.send(f"{ctx.author.mention}, run count has timed out")
-                        return
-                    else:
-                        # at this point the check has become True and the wait_for has done its work now we can do ours
+                        choice = int(msg.content)
+                        choice -= 1  # Need to lower it by one for the right number to get
+                        if choice == -1:
+                            await ctx.send("Exiting command")
+                            return
+                        channel_id = channels[choice]
+                        channel = ctx.guild.get_channel(channel_id)
+                        raid = get_raid(channel_id)
+                        if raid is None:
+                            await ctx.send(f"Unable to find roster information.")
+                            return
+
+                        if channel is None:
+                            await ctx.send(f"Increase count for Roster {raid.raid} - {channel_id} (y/n)?")
+                        else:
+                            await ctx.send(f"Increase count for Roster {raid.raid} - {channel.name} (y/n)?")
+                        confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
+                        yesno = confirm.content.lower()
+                        if yesno == 'n':
+                            await ctx.send(f"Exiting command")
+                            return
+                        confirmed = False
+                        if channel is not None:
+                            await ctx.send(f"Change Date too? (y/n)?")
+                            confirm = await self.bot.wait_for("message", check=check, timeout=15.0)
+                            confirm = confirm.content.lower()
+                            if confirm == "y":
+                                await ctx.send(f"Enter the new timestamp: ")
+                                confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
+                                new_date = confirm.content
+                                confirmed = True
                         try:
-                            choice = int(msg.content)
-                            choice -= 1  # Need to lower it by one for the right number to get
-                            if choice == -1:
-                                await ctx.send("Exiting command")
+                            update_runs(raid)
+                        except IOError:
+                            await ctx.send("I was unable to update the run count, exiting command")
+                            return
+                        if confirmed is True:
+                            try:
+                                formatted_date = format_date(new_date)
+                                old_date = raid.date
+                                raid.date = formatted_date
+                                update_db(channel_id, raid)
+                            except Exception as e:
+                                await ctx.send(
+                                    "I was unable to update the roster timestamp, count has been increased.")
+                                logging.error(f"Run Count Update Roster Error: {str(e)}")
                                 return
                             try:
-                                channel_id = channels[choice]
-                                try:
-                                    try:
-                                        channel = ctx.guild.get_channel(channel_id)
-                                        raid = get_raid(channel_id)
-                                        if raid is None:
-                                            await ctx.send(f"Unable to find roster information.")
-                                            return
+                                new_name = generate_channel_name(raid.date, raid.raid,
+                                                             self.bot.config["raids"]["timezone"])
+                                await ctx.send(f"Date/Time has been changed from {old_date} to {raid.date}")
+                                await channel.edit(name=new_name)
+                            except Exception as e:
+                                await ctx.send("I was unable to update the channel. The roster is updated.")
+                                logging.error(f"Run Count Channel Update: {str(e)}")
+                                return
+                        run = False
+                        await ctx.send(f"Runs have been updated")
+                    except ValueError:
+                        await ctx.send("The input was not a valid number!")
 
-                                    except Exception as e:
-                                        await ctx.send(f"Unable to get roster information.")
-                                        logging.error(f"Run Count Get Error: {str(e)}")
-                                        return
-                                    if channel is None:
-                                        await ctx.send(f"Increase count for Roster {raid.raid} - {channel_id} (y/n)?")
-                                    else:
-                                        await ctx.send(f"Increase count for Roster {raid.raid} - {channel.name} (y/n)?")
-                                    confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
-                                    yesno = confirm.content.lower()
-                                    if yesno == 'n':
-                                        await ctx.send(f"Exiting command")
-                                        return
-                                except asyncio.TimeoutError:
-                                    await ctx.send(f"{ctx.author.mention}, run count has timed out")
-                                    return
-                                else:
-                                    try:
-                                        await ctx.send(f"Change Date too? (y/n)?")
-                                        confirm = await self.bot.wait_for("message", check=check, timeout=15.0)
-                                        confirm = confirm.content.lower()
-                                    except asyncio.TimeoutError:
-                                        await ctx.send(f"{ctx.author.mention}, run count has timed out")
-                                        return
-                                    try:
-                                        if confirm == "y":
-                                            await ctx.send(f"Enter the new timestamp: ")
-                                            confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
-                                            new_date = confirm.content
-                                            confirmed = True
-                                        else:
-                                            confirmed = False
-                                    except asyncio.TimeoutError:
-                                        await ctx.send(f"{ctx.author.mention}, run count has timed out")
-                                        return
-                                    else:
-                                        try:
-                                            update_runs(raid)
-                                        except IOError:
-                                            await ctx.send("I was unable to update the run count, exiting command")
-                                            return
-                                    try:
-                                        if confirmed is True:
-                                            formatted_date = format_date(new_date)
-                                            old_date = raid.date
-                                            raid.date = formatted_date
-                                            update_db(channel_id, raid)
-                                    except Exception as e:
-                                        await ctx.send(
-                                            "I was unable to update the roster timestamp, count has been increased.")
-                                        logging.error(f"Run Count Update Roster Error: {str(e)}")
-                                        return
-                                    try:
-                                        if confirmed is True:
-                                            new_name = generate_channel_name(raid.date, raid.raid,
-                                                                             self.bot.config["raids"]["timezone"])
-                                            await ctx.send(f"Date/Time has been changed from {old_date} to {raid.date}")
-                                            await channel.edit(name=new_name)
-                                        await ctx.send(f"Runs have been updated")
-                                        run = False
-                                    except Exception as e:
-                                        await ctx.send("I was unable to update the channel. The roster is updated.")
-                                        logging.error(f"Run Count Channel Update: {str(e)}")
-                                        return
-                            except KeyError:
-                                await ctx.send("That is not a valid number, returning to menu.")
-                        except ValueError:
-                            await ctx.send("The input was not a valid number!")
+                    except KeyError:
+                        await ctx.send("That is not a valid number!")
             else:
                 await ctx.send("You do not have permission to use this command")
+
+        except asyncio.TimeoutError:
+            # at this point, the check didn't become True, let's handle it.
+            await ctx.send(f"{ctx.author.mention} run count has timed out")
+            return
+
         except Exception as e:
             logging.error(f"Run Count error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
+            return
 
     @commands.command(name="pin", aliases=["unpin"])
     async def pin_message(self, ctx: commands.Context):
@@ -2142,6 +2125,7 @@ class Raids(commands.Cog, name="Trials"):
                 except IOError as e:
                     await ctx.send(f"Unable to print menu")
                     logging.error(f"Memo Error: {str(e)}")
+                    return
 
                 try:
                     msg = await self.bot.wait_for('message', check=check, timeout=15.0)

@@ -416,22 +416,6 @@ Goodnight BOK
             await ctx.send("Unable to send the gif")
             logging.error(f"Auddy error: {str(e)}")
 
-    @commands.command(name="sr", hidden=True)
-    async def send_message_into_chat(self, ctx: commands.Context):
-        """Just a fun little thing"""
-        try:
-            if ctx.message.author.id == 212634819190849536:
-                msg = ctx.message.content
-                msg = msg.split(" ", 2)
-                guild = self.bot.get_guild(574095793414209556)
-                channel = guild.get_channel(int(msg[1]))
-                await channel.send(msg[2])
-            else:
-                await ctx.send(f"You do not have permission to do this.")
-        except Exception as e:
-            await ctx.send("Unable to send the message")
-            logging.error("sr error:" + str(e))
-
     @commands.command(name="dracus", aliases=["drac"])
     async def send_dracus_image(self, ctx: commands.Context):
         """His joke was ruined"""

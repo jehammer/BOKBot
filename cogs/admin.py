@@ -12,7 +12,7 @@ class Admin(commands.Cog, name="Admin"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name="servers", hidden=True)
     async def servers(self, ctx: commands.Context):
         """Check the servers the bot is active in, Owner only"""
         if ctx.message.author.id == 212634819190849536:
@@ -46,6 +46,23 @@ class Admin(commands.Cog, name="Admin"):
                 logging.error("Call Arma error: " + str(e))
         else:
             await ctx.send("You do not have permission to use this command.")
+
+    @commands.command(name="sr", hidden=True)
+    async def send_message_into_chat(self, ctx: commands.Context):
+        """Just a fun little thing"""
+        try:
+            if ctx.message.author.id == 212634819190849536:
+                msg = ctx.message.content
+                msg = msg.split(" ", 2)
+                guild = self.bot.get_guild(574095793414209556)
+                channel = guild.get_channel(int(msg[1]))
+                await channel.send(msg[2])
+            else:
+                await ctx.send(f"You do not have permission to do this.")
+        except Exception as e:
+            await ctx.send("Unable to send the message")
+            logging.error("sr error:" + str(e))
+
 
 
 async def setup(bot: commands.Bot):
