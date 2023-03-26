@@ -24,7 +24,7 @@ class Guides(commands.Cog, name="Guides"):
     async def as_gif(self, ctx: commands.Context):
         """Kite gif for AS"""
         try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/913342788907716628/vAS.gif")
+            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/1076198685232353360/vAS.gif")
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"AS Gif error: {str(e)}")
