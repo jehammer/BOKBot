@@ -80,6 +80,8 @@ async def load_cogs():
 async def on_ready():
     logging.info(f"Logged in as: {bot.user.name}")
     await change_playing()
+    synced = await bot.tree.sync()
+    logging.info(f"Synced {len(synced)} command(s)")
     logging.info("Bot is ready for use")
 
 

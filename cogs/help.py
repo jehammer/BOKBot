@@ -92,10 +92,19 @@ class Help(commands.Cog):
                                 else:
                                     page.add_field(name=f"", value=f"`!{command.name}`\t{command.help}", inline=False)
                                 count += 1
+                        for command in self.bot.get_cog(cog).get_app_commands():
+                            if count == 24:
+                                pages.append(page)
+                                count = 0
+                                page = next_page
+                            else:
+                                page.add_field(name=f"", value=f"`/{command.name}`\t{command.description}", inline=False)
+                            count += 1
+                        pages.append(page)
                         # found cog - breaking loop
                         found = True
-                        pages.append(page)
                         break
+
                 # It is a command in a cog, iterate through and find the specific command within the cog
                 if found is False:
                     for cog in self.bot.cogs:
@@ -117,6 +126,14 @@ class Help(commands.Cog):
                                     found = True
                                 else:
                                     break
+                        if not found:
+                            for command in self.bot.get_cog(cog).get_app_commands():
+                                if command.name.lower() == input[0].lower():
+                                    # Check for aliases or not aliases
+                                    emb = discord.Embed(title=f'{cog}: /{command.name}', color=discord.Color.blurple())
+                                    emb.add_field(name=f"", value=f"{command.description}", inline=False)
+                                    # found so break
+                                    found = True
                         if found is True:
                             break
 

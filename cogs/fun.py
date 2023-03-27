@@ -1,14 +1,32 @@
 import discord
 from discord.ext import commands, tasks
+from discord import app_commands
 import random
 import logging
 import datetime
 import calendar
+import random
 
 # For using Aliases: (name="ex", aliases=["al1", "al2"])
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
+
+def ordinalSuffix(number):
+    # 11, 12, and 13 have the suffix th:
+    if number % 100 in (11, 12, 13):
+        return str(number) + 'th'
+    # Numbers that end with 1 have the suffix st:
+    if number % 10 == 1:
+        return str(number) + 'st'
+    # Numbers that end with 2 have the suffix nd:
+    if number % 10 == 2:
+        return str(number) + 'nd'
+    # Numbers that end with 3 have the suffix rd:
+    if number % 10 == 3:
+        return str(number) + 'rd'
+    # All other numbers end with th:
+    return str(number) + 'th'
 
 class Fun(commands.Cog, name="Fun"):
     """For Fun/Event Type Things"""
@@ -480,6 +498,18 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"No Questions Asked GIF error: {str(e)}")
+
+    @app_commands.command(name="rank", description="This is an app command, use /rank @someone!")
+    async def rank_app_command(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
+        """Ranks someone out of 10000 you ping"""
+        try:
+            if member is None:
+                await interaction.response.send_message(f"Hey! You need to @ someone!")
+            ran = random.randint(1, 10000)
+            await interaction.response.send_message(f"{member.mention} ranks {ordinalSuffix(ran)}!")
+        except Exception as e:
+            await interaction.response.send_message("Sorry, I was unable to complete the command")
+            logging.error(f"Rank Command Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
