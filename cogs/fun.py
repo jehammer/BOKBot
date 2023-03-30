@@ -152,15 +152,6 @@ class Fun(commands.Cog, name="Fun"):
         """RNG In vAA HM"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
 
-    @commands.command(name="vundees")
-    async def vundees_moment(self, ctx: commands.Context):
-        """He splooged."""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730140604678204/Vundees.gif')
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Vundees error: " + str(e))
-
     @commands.command(name="fishing")
     async def fishing(self, ctx: commands.Context):
         """Glub Glub"""
@@ -195,11 +186,6 @@ class Fun(commands.Cog, name="Fun"):
     async def maja(self, ctx: commands.Context):
         """How she be after we kick her butt"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
-
-    @commands.command(name="lost")
-    async def lost(self, ctx: commands.Context):
-        """Then he was lost!"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
 
     @commands.command(name="dungeons")
     async def dungeons(self, ctx: commands.Context):
@@ -290,7 +276,9 @@ class Fun(commands.Cog, name="Fun"):
                        "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice"
                        "\nNo Cap: An expression of authenticity."
                        "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
-                       "\nBussin: Same as Baller")
+                       "\nBussin: Same as Baller."
+                       "\nFr: For Real, see: No Cap."
+                       "\nOn God: Confirming or asking one is serious.")
 
     @commands.command(name="twitch")
     async def get_twitch_url(self, ctx: commands.context):
@@ -346,30 +334,6 @@ Goodnight BOK
         """A way to say good morning to bok"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/970733506948890655/sleepy-sleep.gif')
 
-    @commands.command(name="arma")
-    async def get_arma_moment(self, ctx: commands.Context):
-        """Arma Moments"""
-        try:
-            ran = random.randint(1, 2)
-            match ran:
-                case 1:
-                    await ctx.send(
-                        'https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
-                case 2:
-                    await ctx.send('https://youtu.be/SQ9oCUNNbxc')
-        except Exception as e:
-            await ctx.send("Unable to send image")
-            logging.error("Arma error: " + str(e))
-
-    @commands.command(name="drak")
-    async def get_drak_moment(self, ctx: commands.Context):
-        """Drak Moment"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
-        except Exception as e:
-            await ctx.send("Unable to send gif")
-            logging.error("Drak error: " + str(e))
-
     @commands.command(name="mommy")
     async def mommy(self, ctx: commands.Context):
         """You know you like it, you dirty little gamer"""
@@ -387,15 +351,6 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the stuff")
             logging.error(f"R34 error: {str(e)}")
-
-    @commands.command(name="bever")
-    async def bever_moment(self, ctx: commands.Context):
-        """Bever stuff"""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/987806807386894336/Bever.png")
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Bever error: {str(e)}")
 
     @commands.command(name="wiped", aliases=["wipe"])
     async def wipe_meme(self, ctx: commands.Context):
@@ -424,24 +379,6 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the message")
             logging.error(f"Phone error: {str(e)}")
-
-    @commands.command(name="auddy")
-    async def auddy_moment(self, ctx: commands.Context):
-        """It tickled the snoot"""
-        try:
-            await ctx.send("https://media.discordapp.net/attachments/911730032286785536/911730135034646558/Auddy.gif")
-        except Exception as e:
-            await ctx.send("Unable to send the gif")
-            logging.error(f"Auddy error: {str(e)}")
-
-    @commands.command(name="dracus", aliases=["drac"])
-    async def send_dracus_image(self, ctx: commands.Context):
-        """His joke was ruined"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1046640340641271838/Dracus.png')
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Dracus Image error: {str(e)}")
 
     @commands.command(name="bocket")
     async def send_bocket_image(self, ctx: commands.Context):
