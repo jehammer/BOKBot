@@ -1131,7 +1131,7 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send("Unable to send status.")
             return
 
-    @commands.command(name="msg")
+    @commands.command(name="msg", aliases=["message"])
     async def set_message(self, ctx: commands.Context):
         """Modified your message in the roster | `!msg [message]`"""
         try:
