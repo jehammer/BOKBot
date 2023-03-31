@@ -60,7 +60,6 @@ class Shames(commands.Cog, name="Shames"):
             await ctx.send("Unable to send the image")
             logging.error(f"Bever error: {str(e)}")
 
-
     @commands.command(name="auddy")
     async def auddy_moment(self, ctx: commands.Context):
         """It tickled the snoot"""
@@ -78,6 +77,11 @@ class Shames(commands.Cog, name="Shames"):
         except Exception as e:
             await ctx.send("Unable to send the image")
             logging.error(f"Dracus Image error: {str(e)}")
+
+    @commands.command(name="rng")
+    async def rng(self, ctx: commands.Context):
+        """RNG In vAA HM"""
+        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
 
 
 async def setup(bot: commands.Bot):
