@@ -17,9 +17,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
 
-# TODO: Review delete command, why does it follow through with delete if you let there be an error for
-#   increasing runs or not
-
 # Global variables for the MongoDB channels, set by set_channels function
 global raids
 global count
@@ -1873,6 +1870,9 @@ class Raids(commands.Cog, name="Trials"):
                                                 await ctx.send(
                                                     "I was unable to update the run count, Roster not closed.")
                                                 return
+                                        elif confirm != 'n':
+                                            await ctx.send(f"Not y/n, exiting command.")
+                                            return
                                     try:
                                         to_delete = {"channelID": channel_id}
                                         raids.delete_one(to_delete)
