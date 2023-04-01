@@ -63,7 +63,31 @@ class Admin(commands.Cog, name="Admin"):
             await ctx.send("Unable to send the message")
             logging.error("sr error:" + str(e))
 
+    @commands.command(name="setjoke", hidden=True)
+    async def create_new_joke(self, ctx: commands.Context):
+        pass
 
+    @commands.command(name="deljoke", hidden=True)
+    async def delete_a_joke(self, ctx: commands.Context):
+        pass
+        # TODO: Change jokes to say "Joke #(num) at the start to make this easier
 
+    @commands.command(name="modjoke", hidden=True)
+    async def create_new_joke(self, ctx: commands.Context):
+        pass
+
+    @commands.command(name="setlore", hidden=True)
+    async def create_new_lore(self, ctx: commands.Context):
+        pass
+
+    @commands.command(name="dellore", hidden=True)
+    async def delete_a_joke(self, ctx: commands.Context):
+        pass
+        # TODO: Change jokes to say "Joke #(num) at the start to make this easier
+
+    @commands.command(name="modlore", hidden=True)
+    async def delete_a_joke(self, ctx: commands.Context):
+        pass
+        # TODO: Change jokes to say "Joke #(num) at the start to make this easier
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
