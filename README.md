@@ -3,9 +3,9 @@
 # BOKBot Discord Bot
 [![Stack](https://skillicons.dev/icons?i=python,discord,bots,mongodb)](https://skillicons.dev)
 
-<img src="https://img.shields.io/badge/discord-api-blue?style=flat&logo=discord" alt="discord.py">
-<img src="https://img.shields.io/badge/Python-3.10%2b-blue?style=flat&logo=Python">
-<img src="https://img.shields.io/badge/Mongodb-4.4%2b-blue?style=flat&logo=Mongodb">
+<img src="https://img.shields.io/badge/Discord-api-blue?style=flat&logo=discord" alt="discord.py">
+<img src="https://img.shields.io/badge/Python-3.10%2b-blue?style=flat&logo=Python&logoColor=green">
+<img src="https://img.shields.io/badge/MongoDB-4.4%2b-blue?style=flat&logo=Mongodb">
 </div>
 
 # Overview
