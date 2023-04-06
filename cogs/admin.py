@@ -3,7 +3,22 @@ from discord.ext import commands
 import logging
 import asyncio
 
+from pymongo import MongoClient
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+
+global jokes
+global lore
+
+
+def set_channels(config):
+    """Function to set the MongoDB information on cog load"""
+    global jokes
+    global lore
+    client = MongoClient(config['mongo'])
+    database = client.bot
+    jokes = database.jokes
+    lore = database.lore
 
 
 class Admin(commands.Cog, name="Admin"):
@@ -11,6 +26,7 @@ class Admin(commands.Cog, name="Admin"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        set_channels(self.bot.config)
 
     @commands.command(name="servers", hidden=True)
     async def servers(self, ctx: commands.Context):
@@ -63,31 +79,89 @@ class Admin(commands.Cog, name="Admin"):
             await ctx.send("Unable to send the message")
             logging.error("sr error:" + str(e))
 
-    @commands.command(name="setjoke", hidden=True)
-    async def create_new_joke(self, ctx: commands.Context):
-        pass
+    @commands.command(name="newjoke", hidden=True)
+    async def create_new_joke(self, ctx: commands.Context, joke=None):
+        """Command to create a new joke"""
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to create a new joke.")
+            logging.error(f"New Joke Error:{str(e)}")
 
     @commands.command(name="deljoke", hidden=True)
     async def delete_a_joke(self, ctx: commands.Context):
-        pass
+        """Command to delete a joke"""
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to delete a joke.")
+            logging.error(f"Delete Joke Error:{str(e)}")
         # TODO: Change jokes to say "Joke #(num) at the start to make this easier
 
     @commands.command(name="modjoke", hidden=True)
-    async def create_new_joke(self, ctx: commands.Context):
-        pass
+    async def modify_joke(self, ctx: commands.Context):
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to modify the joke.")
+            logging.error(f"New Joke Error:{str(e)}")
 
-    @commands.command(name="setlore", hidden=True)
+    @commands.command(name="newlore", hidden=True)
     async def create_new_lore(self, ctx: commands.Context):
-        pass
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to create new lore.")
+            logging.error(f"New Lore Error:{str(e)}")
 
     @commands.command(name="dellore", hidden=True)
-    async def delete_a_joke(self, ctx: commands.Context):
-        pass
+    async def delete_a_lore(self, ctx: commands.Context):
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to delete a lore entry.")
+            logging.error(f"Delete Lore Error:{str(e)}")
         # TODO: Change jokes to say "Joke #(num) at the start to make this easier
 
     @commands.command(name="modlore", hidden=True)
-    async def delete_a_joke(self, ctx: commands.Context):
-        pass
+    async def modify_lore(self, ctx: commands.Context):
+        try:
+            role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+            user = ctx.message.author
+            if user in role.members:
+                pass
+            else:
+                await ctx.send("You do not have permission to use this command.")
+        except Exception as e:
+            await ctx.send(f"I was unable to modify a lore entry.")
+            logging.error(f"Modify Lore Error:{str(e)}")
         # TODO: Change jokes to say "Joke #(num) at the start to make this easier
+
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
