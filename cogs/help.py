@@ -12,8 +12,8 @@ async def send_embed(ctx, embed):
         logging.error(f"Help Embed Send Error: {str(e)}")
 
 
-class Help(commands.Cog):
-    """The help functionality"""
+class Helpers(commands.Cog):
+    """Commands for Bot help and more"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -169,6 +169,15 @@ class Help(commands.Cog):
 
     # TODO: Create a function called !start or !starter that will print an embed guide for people to get setup with BOKBot.
 
+    @commands.command(name="starter", aliases=["start"], hidden=True)
+    async def send_starter_info(self, ctx: commands.Context):
+        """DM's you some BOKBot starter information"""
+        try:
+            pass
+        except discord.Forbidden as e:
+            await ctx.send(f"I do not have permission to DM you, please turn on DM's from non friends for this server.")
+            logging.error(f"Starter Error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Help(bot))
+    await bot.add_cog(Helpers(bot))
