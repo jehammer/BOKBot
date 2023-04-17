@@ -3,22 +3,7 @@ from discord.ext import commands
 import logging
 import asyncio
 
-from pymongo import MongoClient
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
-
-global jokes
-global lore
-
-
-def set_channels(config):
-    """Function to set the MongoDB information on cog load"""
-    global jokes
-    global lore
-    client = MongoClient(config['mongo'])
-    database = client.bot
-    jokes = database.jokes
-    lore = database.lore
 
 
 class Admin(commands.Cog, name="Admin"):
@@ -26,7 +11,6 @@ class Admin(commands.Cog, name="Admin"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        set_channels(self.bot.config)
 
     @commands.command(name="servers", hidden=True)
     async def servers(self, ctx: commands.Context):
