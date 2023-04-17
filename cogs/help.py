@@ -18,7 +18,7 @@ class Helpers(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name="help")
     async def help(self, ctx, *input):
         """Help system of BOKBot"""
 
@@ -169,14 +169,14 @@ class Helpers(commands.Cog):
 
     # TODO: Create a function called !start or !starter that will print an embed guide for people to get setup with BOKBot.
 
-    @commands.command(name="starter", aliases=["start"], hidden=True)
+    @commands.command(name="starter", aliases=["start"])
     async def send_starter_info(self, ctx: commands.Context):
         """DM's you some BOKBot starter information"""
         try:
             info = 'Welcome to learning BOKBot!\n' \
                    'There is a lot of things that I can do. In any channel you can make use of `!help` to get some command help.\n' \
                    'You can get further information for each section of commands, also called "cogs" or "modules" by calling ' \
-                   'that specific cog/module or command `!help [command/cog/module] (without the [] of course).\n' \
+                   'that specific cog/module or command `!help [command/cog/module]` (without the [] of course).\n' \
                    'BOKBot features its own system for Trial rosters which is the majority of its function. Something that ' \
                    'you would want to look into is the defaults system. You can set your default to be a healer, tank, or dps ' \
                    'via `!default [role]` which can be used to bypass having to specify your role when doing `!su` or `!bu` ' \
