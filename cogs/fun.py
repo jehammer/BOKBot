@@ -168,26 +168,6 @@ class Fun(commands.Cog, name="Fun"):
         """DUNGEONS"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/983363613425278997/dungeons.gif')
 
-    @commands.command(name="lore")
-    async def lore(self, ctx: commands.Context):
-        """Shows a random lore tidbit"""
-        ran = random.randint(1, 10)  # Update to account for number of files
-        grab = str(ran)
-        grab += ".txt"
-        with open('Lore/' + grab, ) as l:
-            message = l.read()
-        await ctx.send(message)
-
-    @commands.command(name="joke")
-    async def joke(self, ctx: commands.Context):
-        """Tells a Joke"""
-        ran = random.randint(1, 11)  # Update to account for number of files
-        grab = str(ran)
-        grab += ".txt"
-        with open('Jokes/' + grab, encoding="utf8") as l:
-            message = l.read()
-        await ctx.send(message)
-
     @commands.command(name="bokemon")
     async def bokemon(self, ctx: commands.Context):
         """A link to a perfect song"""
