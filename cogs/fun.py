@@ -158,9 +158,9 @@ class Fun(commands.Cog, name="Fun"):
         """Arma every other second"""
         await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/912569604973404160/Facepalm.gif')
 
-    @commands.command(name="maja")
-    async def maja(self, ctx: commands.Context):
-        """How she be after we kick her butt"""
+    @commands.command(name="fart")
+    async def fart(self, ctx: commands.Context):
+        """Explosive"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/932433681992278088/Creed.gif')
 
     @commands.command(name="dungeons")
@@ -243,15 +243,6 @@ Goodnight noises everywhere
 Goodnight BOK
 """
         await ctx.send(message)
-
-    @commands.command(name="r34")
-    async def a_very_funny_prank(self, ctx: commands.Context):
-        """Links to all the R34 that Drak has found for you dirty people"""
-        try:
-            await ctx.send("https://cdn.discordapp.com/attachments/911730032286785536/985383946718150716/yes.png")
-        except Exception as e:
-            await ctx.send("Unable to send the stuff")
-            logging.error(f"R34 error: {str(e)}")
 
     @commands.command(name="logz")
     async def logz(self, ctx: commands.Context):
