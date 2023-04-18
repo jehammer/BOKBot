@@ -1130,7 +1130,7 @@ class Raids(commands.Cog, name="Trials"):
 
     @commands.command(name="msg", aliases=["message"])
     async def set_message(self, ctx: commands.Context):
-        """Modified your message in the roster | `!msg [message]`"""
+        """Modifies your message in the roster | `!msg [message]`"""
         try:
             try:
                 channel_id = ctx.message.channel.id
@@ -1174,6 +1174,61 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send("Unable to update the roster message.")
             logging.error(f"Message Update Error: {str(e)}")
             return
+
+    @commands.command(name="count")
+    async def check_own_count(self, ctx: commands.Context):
+        """A way for people to check their number of raid runs"""
+        try:
+            user = ctx.message.author
+            counts = count.find_one({'userID': user.id})
+            if counts is not None:
+                embed = discord.Embed(
+                    title=user.display_name,
+                    color=discord.Color.orange()
+                )
+                embed.set_footer(text="Thank you for coming! Come again!")
+                embed.set_author(name=f"Runs with {ctx.guild.name}")
+                embed.add_field(name="Total Runs:", value=counts["raidCount"], inline=True)
+                embed.add_field(name="Last Ran:", value=counts["lastRaid"], inline=True)
+                embed.add_field(name="Last Date:", value=counts["lastDate"], inline=True)
+                embed.add_field(name="Stats", value="Role Runs", inline=False)
+                embed.add_field(name="DPS Runs:", value=counts["dpsRuns"], inline=True)
+                embed.add_field(name="Tank Runs:", value=counts["tankRuns"], inline=True)
+                embed.add_field(name="Healer Runs:", value=counts["healerRuns"], inline=True)
+                await ctx.send(embed=embed)
+            else:
+                new_data = {
+                    "userID": user.id,
+                    "raidCount": 0,
+                    "lastRaid": "none",
+                    "lastDate": "<t:0:f>",
+                    "dpsRuns": 0,
+                    "tankRuns": 0,
+                    "healerRuns": 0
+                }
+                try:
+                    count.insert_one(new_data)
+                except Exception as e:
+                    logging.error(f"Count empty initialization error: {str(e)}")
+                    await ctx.send("I was unable to initialize a count.")
+                    return
+                embed = discord.Embed(
+                    title=user.display_name,
+                    color=discord.Color.orange()
+                )
+                embed.set_footer(text="Thank you for coming! Come again!")
+                embed.set_author(name=f"Runs with {ctx.guild.name}")
+                embed.add_field(name="Total Runs:", value=0, inline=True)
+                embed.add_field(name="Last Ran:", value="None", inline=True)
+                embed.add_field(name="Last Date:", value="<t:0:f>", inline=True)
+                embed.add_field(name="Stats", value="Role Runs", inline=False)
+                embed.add_field(name="DPS Runs:", value="0", inline=True)
+                embed.add_field(name="Tank Runs:", value="0", inline=True)
+                embed.add_field(name="Healer Runs:", value="0", inline=True)
+                await ctx.send(embed=embed)
+        except Exception as e:
+            await ctx.send(f"Unable to check count")
+            logging.error(f"Count check error: {str(e)}")
 
     @commands.command(name="fill")
     async def roster_fill(self, ctx: commands.Context):
@@ -2169,61 +2224,6 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Memo Error: {str(e)}")
 
         # TODO: Think of adding a plaintext ` ` get of the memo
-
-    @commands.command(name="count")
-    async def check_own_count(self, ctx: commands.Context):
-        """A way for people to check their number of raid runs"""
-        try:
-            user = ctx.message.author
-            counts = count.find_one({'userID': user.id})
-            if counts is not None:
-                embed = discord.Embed(
-                    title=user.display_name,
-                    color=discord.Color.orange()
-                )
-                embed.set_footer(text="Thank you for coming! Come again!")
-                embed.set_author(name=f"Runs with {ctx.guild.name}")
-                embed.add_field(name="Total Runs:", value=counts["raidCount"], inline=True)
-                embed.add_field(name="Last Ran:", value=counts["lastRaid"], inline=True)
-                embed.add_field(name="Last Date:", value=counts["lastDate"], inline=True)
-                embed.add_field(name="Stats", value="Role Runs", inline=False)
-                embed.add_field(name="DPS Runs:", value=counts["dpsRuns"], inline=True)
-                embed.add_field(name="Tank Runs:", value=counts["tankRuns"], inline=True)
-                embed.add_field(name="Healer Runs:", value=counts["healerRuns"], inline=True)
-                await ctx.send(embed=embed)
-            else:
-                new_data = {
-                    "userID": user.id,
-                    "raidCount": 0,
-                    "lastRaid": "none",
-                    "lastDate": "<t:0:f>",
-                    "dpsRuns": 0,
-                    "tankRuns": 0,
-                    "healerRuns": 0
-                }
-                try:
-                    count.insert_one(new_data)
-                except Exception as e:
-                    logging.error(f"Count empty initialization error: {str(e)}")
-                    await ctx.send("I was unable to initialize a count.")
-                    return
-                embed = discord.Embed(
-                    title=user.display_name,
-                    color=discord.Color.orange()
-                )
-                embed.set_footer(text="Thank you for coming! Come again!")
-                embed.set_author(name=f"Runs with {ctx.guild.name}")
-                embed.add_field(name="Total Runs:", value=0, inline=True)
-                embed.add_field(name="Last Ran:", value="None", inline=True)
-                embed.add_field(name="Last Date:", value="<t:0:f>", inline=True)
-                embed.add_field(name="Stats", value="Role Runs", inline=False)
-                embed.add_field(name="DPS Runs:", value="0", inline=True)
-                embed.add_field(name="Tank Runs:", value="0", inline=True)
-                embed.add_field(name="Healer Runs:", value="0", inline=True)
-                await ctx.send(embed=embed)
-        except Exception as e:
-            await ctx.send(f"Unable to check count")
-            logging.error(f"Count check error: {str(e)}")
 
     @commands.command(name="increase")
     async def increase_raid_count(self, ctx: commands.Context, member: discord.Member = None):
