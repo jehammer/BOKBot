@@ -16,7 +16,7 @@ class Voice(commands.Cog, name="Voice"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name="nut")
     async def nut(self, ctx: commands.Context):
         """Nut hard"""
         try:
@@ -34,7 +34,7 @@ class Voice(commands.Cog, name="Voice"):
         except Exception as e:
             logging.error("Nut error: " + str(e))
 
-    @commands.command()
+    @commands.command(name="cat")
     async def cat(self, ctx: commands.Context):
         """Pop tart Cats"""
         try:
@@ -52,7 +52,7 @@ class Voice(commands.Cog, name="Voice"):
         except Exception as e:
             logging.error("Pop tart Error: " + str(e))
 
-    @commands.command()
+    @commands.command(name="respect")
     async def respect(self, ctx: commands.Context):
         """You will respect it!"""
         try:
@@ -70,7 +70,7 @@ class Voice(commands.Cog, name="Voice"):
         except Exception as e:
             logging.error("Respect Error: " + str(e))
 
-    @commands.command()
+    @commands.command(name="laundry")
     async def laundry(self, ctx: commands.Context):
         """You should do it"""
         try:
@@ -88,7 +88,7 @@ class Voice(commands.Cog, name="Voice"):
         except Exception as e:
             logging.error("Laundry Error: " + str(e))
 
-    @commands.command()
+    @commands.command(name="dc")
     async def dc(self, ctx: commands.Context):
         """Force the bot to disconnect from a chat if it is in one"""
         try:
