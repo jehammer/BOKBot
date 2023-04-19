@@ -3,12 +3,16 @@ from discord.ext import commands, tasks
 from discord import app_commands
 import logging
 import datetime
+import time
 import calendar
 import random
+from pymongo import MongoClient
 
 # For using Aliases: (name="ex", aliases=["al1", "al2"])
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+
+global ranks
 
 
 def ordinalSuffix(number):
@@ -28,12 +32,74 @@ def ordinalSuffix(number):
     return str(number) + 'th'
 
 
+def set_channels(config):
+    """Function to set the MongoDB information on cog load"""
+    global ranks
+    client = MongoClient(config['mongo'])
+    database = client['bot']
+    ranks = database.ranks
+
+
+def update_db(user_id, info):
+    rec = ranks.find_one({'userID': user_id})
+    if rec is None:
+        rec = {
+            'userID': user_id,
+            'data': info.get_data()
+        }
+        ranks.insert_one(rec)
+    else:
+        new_rec = {'$set': {'data': info.get_data()}}
+        ranks.update_one({'userID': user_id}, new_rec)
+
+
+def load_rank(user_id):
+    rec = ranks.find_one({'userID': user_id})
+    if rec is not None:
+        info = Rankings(rec['data']['count'], rec['data']['last_called'], rec['data']['lowest'], rec['data']['highest'],
+                        rec['data']['doubles'], rec['data']['singles'], rec['data']['six_nine'],
+                        rec['data']['four_twenty'], rec['data']['boob'])
+    elif rec is None:
+        info = Rankings(0, "Never", 1000000000, 0, 0, 0, 0, 0, 0)
+    return info
+
+
+class Rankings:
+    """A class object to store and manage ranking information"""
+
+    def __init__(self, count, last_called, lowest, highest, doubles, singles, six_nine, four_twenty, boob):
+        self.count = count
+        self.last_called = last_called
+        self.lowest = lowest
+        self.highest = highest
+        self.doubles = doubles
+        self.singles = singles
+        self.six_nine = six_nine
+        self.four_twenty = four_twenty
+        self.boob = boob
+
+    def get_data(self):
+        all_data = {
+            "count": self.count,
+            "last_called": self.last_called,
+            "lowest": self.lowest,
+            "highest": self.highest,
+            "doubles": self.doubles,
+            "singles": self.singles,
+            "six_nine": self.six_nine,
+            "four_twenty": self.four_twenty,
+            "boob": self.boob
+        }
+        return all_data
+
+
 class Fun(commands.Cog, name="Fun"):
     """For Fun/Event Type Things"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.scheduled_good_morning.start()
+        set_channels(self.bot.config)
 
     @commands.command(name="8ball")
     async def magic_eight_ball(self, ctx: commands.context):
@@ -298,11 +364,93 @@ Goodnight BOK
         try:
             if member is None:
                 await interaction.response.send_message(f"Hey! You need to @ someone!")
+                return
+            timestamp = int(
+                time.mktime(datetime.datetime.now().timetuple()))  # All this just for a utc timestamp integer
             ran = random.randint(1, 10000)
+
+            user_id = member.id
+
+            info = load_rank(user_id)
+
+            info.last_called = f"<t:{timestamp}:f>"
+            info.count += 1
+
+            # Lowest and Highest check
+
+            if info.lowest > ran:
+                info.lowest = ran
+            if info.highest < ran:
+                info.highest = ran
+
+            # 69 420, 8008 check
+            if ran == 69:
+                info.six_nine += 1
+            elif ran == 420:
+                info.four_twenty += 1
+            elif ran == 8008:
+                info.boob += 1
+
+            listed = [int(x) for x in str(ran)]
+
+            # Check for Singles
+            listed_set = set(listed)
+            if len(set(listed_set)) <= 1:  # This is single
+                info.singles += 1
+
+            # Check for Doubles:
+            if (len(listed) == 4 and listed[0] + listed[1] == listed[2] + listed[3]) or \
+                    (len(listed) == 2 and listed[0] == listed[1]):
+                info.doubles += 1
+
+            update_db(user_id, info)
+
             await interaction.response.send_message(f"{member.mention} ranks {ordinalSuffix(ran)}!")
+
+        except IOError as e:
+            await interaction.response.send_message(f"Sorry, I was unable to load or save your new information.")
+            logging.error(f"Rank Command Error: {str(e)}")
         except Exception as e:
             await interaction.response.send_message("Sorry, I was unable to complete the command")
             logging.error(f"Rank Command Error: {str(e)}")
+
+    @commands.command(name="kowtow")
+    async def send_rank_information(self, ctx: commands.Context, m: discord.Member = None):
+        """Prints a leaderboard for your /rank uses"""
+        try:
+            if m is None:
+                user = ctx.author
+            else:
+                user = m
+            user_id = user.id
+            rec = ranks.find_one({'userID': user_id})
+            if rec is None:
+                await ctx.send(f"{user.display_name} has not been ranked before, there is no information.")
+                return
+            info = load_rank(user_id)
+            embed = discord.Embed(
+                title=user.display_name,
+                color=discord.Color.red()
+            )
+            embed.set_footer(text="Be sure to get ranked again!")
+            embed.set_author(name=f"Rank Information Board")
+            embed.add_field(name=f"Total Times Ranked: {info.count}", value=" ", inline=False)
+            embed.add_field(name=f"Last Ranked: {info.last_called}", value=" ", inline=False)
+            embed.add_field(name=f"Lowest Rank: {info.lowest}", value=" ", inline=False)
+            embed.add_field(name=f"Highest Rank: {info.highest}", value=" ", inline=False)
+            embed.add_field(name=f"Doubles: {info.doubles}", value=" ", inline=False)
+            embed.add_field(name=f"Singles: {info.singles}", value=" ", inline=False)
+            embed.add_field(name=f"69 Count: {info.six_nine}", value=" ", inline=False)
+            embed.add_field(name=f"420 Count: {info.four_twenty}", value=" ", inline=False)
+            embed.add_field(name=f"Boob Count: {info.boob}", value=" ", inline=False)
+            await ctx.send(embed=embed)
+
+        except IOError as e:
+            await ctx.send(f"I was unable to load your rank information.")
+            logging.error(f"Kowtow Error: {str(e)}")
+        except Exception as e:
+            await ctx.send(f"Sorry, I was unable to complete the command.")
+            logging.error(f"Kowtow Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
