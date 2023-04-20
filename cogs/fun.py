@@ -398,9 +398,9 @@ Goodnight BOK
             if len(set(listed_set)) <= 1:  # This is single
                 info.singles += 1
 
-            # Check for Doubles (If the first 2 = the last 2 when summed) :
-            if (len(listed) == 4 and listed[0] + listed[1] == listed[2] + listed[3]) or \
-                    (len(listed) == 2 and listed[0] == listed[1]):
+            # Check for Doubles
+            if (len(listed) == 4 and str(listed[0]) + str(listed[1]) == str(listed[2]) + str(listed[3])) or \
+                    (len(listed) == 2 and str(listed[0]) == str(listed[1])):
                 info.doubles += 1
 
             update_db(user_id, info)
