@@ -361,32 +361,32 @@ class Raids(commands.Cog, name="Trials"):
                 channel = member.guild.get_channel(i)
                 if user_id in raid.dps.keys():
                     raid.remove_dps(user_id)
-                    await private_channel.send(f"Traitor was removed as a DPS. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a DPS from {channel.name}")
                     was_on = True
                     update_db(i, raid)
                 elif user_id in raid.backup_dps.keys():
                     raid.remove_dps(user_id)
-                    await private_channel.send(f"Traitor was removed as a backup DPS. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a backup DPS from {channel.name}")
                     was_on = True
                     update_db(i, raid)
                 elif user_id in raid.healers.keys():
                     raid.remove_healer(user_id)
-                    await private_channel.send(f"Traitor was removed as a Healer. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a Healer from {channel.name}")
                     was_on = True
                     update_db(i, raid)
                 elif user_id in raid.backup_healers.keys():
                     raid.remove_healer(user_id)
-                    await private_channel.send(f"Traitor was removed as a backup Healer. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a backup Healer from {channel.name}")
                     was_on = True
                     update_db(i, raid)
                 elif user_id in raid.tanks.keys():
                     raid.remove_tank(user_id)
-                    await private_channel.send(f"Traitor was removed as a Tank. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a Tank from {channel.name}")
                     was_on = True
                     update_db(i, raid)
                 elif user_id in raid.backup_tanks.keys():
                     raid.remove_tank(user_id)
-                    await private_channel.send(f"Traitor was removed as a backup Tank. - {channel.name}")
+                    await private_channel.send(f"Traitor was removed as a backup Tank from {channel.name}")
                     was_on = True
                     update_db(i, raid)
             if was_on:
