@@ -39,7 +39,7 @@ class Admin(commands.Cog, name="Admin"):
     @commands.command(name="getarma")
     async def get_arma(self, ctx: commands.Context):
         """Gets Arma with a series of DMs and pings in case he forgets again"""
-        role = discord.utils.get(ctx.message.author.guild.roles, name="Storm Bringers")
+        role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config["roles"]["admin"])
         user = ctx.message.author
         if user in role.members:
             try:
@@ -62,10 +62,10 @@ class Admin(commands.Cog, name="Admin"):
     async def send_message_into_chat(self, ctx: commands.Context):
         """Just a fun little thing"""
         try:
-            if ctx.message.author.id == 212634819190849536:
+            if ctx.message.author.id == self.bot.config["creator"]:
                 msg = ctx.message.content
                 msg = msg.split(" ", 2)
-                guild = self.bot.get_guild(574095793414209556)
+                guild = self.bot.get_guild(self.bot.config["guild"])
                 channel = guild.get_channel(int(msg[1]))
                 await channel.send(msg[2])
             else:
