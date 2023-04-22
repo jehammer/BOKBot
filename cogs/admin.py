@@ -54,7 +54,7 @@ class Admin(commands.Cog, name="Admin"):
                     await ctx.send("Cannot find Arma")
             except Exception as e:
                 await ctx.send("I cannot call Arma")
-                logging.error("Call Arma error: " + str(e))
+                logging.error(f"Call Arma error: {str(e)}")
         else:
             await ctx.send("You do not have permission to use this command.")
 
@@ -72,7 +72,7 @@ class Admin(commands.Cog, name="Admin"):
                 await ctx.send(f"You do not have permission to do this.")
         except Exception as e:
             await ctx.send("Unable to send the message")
-            logging.error("sr error:" + str(e))
+            logging.error(f"sr error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
