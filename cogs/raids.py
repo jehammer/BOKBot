@@ -200,9 +200,9 @@ def generate_channel_name(date, raid_name, tz_info):
     new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', date)))
     tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
         tz=timezone(tz_info))
-    weekday = calendar.day_name[tz.weekday()]
+    weekday = tz.strftime("%a")
     day = tz.day
-    new_name = raid_name + "-" + weekday + "-" + str(day) + suffix(day)
+    new_name = f"{raid_name}-{weekday}-{str(day)}{suffix(day)}"
     return new_name
 
 
