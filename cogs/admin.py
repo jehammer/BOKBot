@@ -15,7 +15,7 @@ class Admin(commands.Cog, name="Admin"):
     @commands.command(name="servers", hidden=True)
     async def servers(self, ctx: commands.Context):
         """Check the servers the bot is active in, Owner only"""
-        if ctx.message.author.id == 212634819190849536:
+        if ctx.message.author.id == self.bot.config["creator"]:
             try:
                 all_servers = list(self.bot.guilds)
                 await ctx.send(f"Connected on {str(len(all_servers))} servers:")
@@ -32,7 +32,7 @@ class Admin(commands.Cog, name="Admin"):
         user = ctx.message.author
         if user in role.members:
             try:
-                arma = ctx.message.guild.get_member(152077378317844480)
+                arma = ctx.message.guild.get_member(self.bot.config["arma"])
                 if arma:
                     for i in range(4):
                         await arma.send("It is time for your regularly scheduled event")
