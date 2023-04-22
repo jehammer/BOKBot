@@ -21,7 +21,18 @@ class Admin(commands.Cog, name="Admin"):
                 await ctx.send(f"Connected on {str(len(all_servers))} servers:")
                 await ctx.send('\n'.join(guild.name for guild in all_servers))
             except Exception as e:
-                logging.error("Server Check Error: " + str(e))
+                logging.error(f"Server Check Error: {str(e)}")
+        else:
+            await ctx.send("You do not have permission to do that.")
+
+    @commands.command(name="shutdown", hidden=True)
+    async def shutdown(self, ctx: commands.Context):
+        """Shut down the bot, Owner only"""
+        if ctx.message.author.id == self.bot.config["creator"]:
+            try:
+                await self.bot.close()
+            except Exception as e:
+                logging.error(f"Shutdown Error: {str(e)}")
         else:
             await ctx.send("You do not have permission to do that.")
 
