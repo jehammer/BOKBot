@@ -73,7 +73,7 @@ async def load_cogs():
 
             except Exception as e:
                 logging.info(f"Failed to load {filename}")
-                logging.error("cog load error: " + str(e))
+                logging.error(f"cog load error: {str(e)}")
 
 
 @bot.event
@@ -89,7 +89,6 @@ async def main():
     async with bot:
         bot.config = load_configurations()
         await load_cogs()
-        global mongo
         await bot.start(bot.config['bot']['token'])
 
 
