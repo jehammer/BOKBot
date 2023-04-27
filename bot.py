@@ -47,6 +47,8 @@ async def on_member_remove(member):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
+    elif isinstance(error, commands.MissingRole):
+        await ctx.send("You do not have permission to use this command.")
     else:
         await ctx.send("Unable to complete the command.")
         logging.error(f"Generic Error: {str(error)}")
