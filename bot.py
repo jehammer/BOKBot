@@ -48,9 +48,11 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
     elif isinstance(error, commands.MissingRole):
-        await ctx.send("You do not have permission to use this command.")
+        await ctx.send(f"You do not have permission to use this command. {str(error)}")
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send(f"You are not my creator. You may not use this command.")
     else:
-        await ctx.send("Unable to complete the command.")
+        await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")
 
 
