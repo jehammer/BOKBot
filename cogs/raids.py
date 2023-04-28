@@ -7,6 +7,7 @@ from pytz import timezone
 from enum import Enum
 from pymongo import MongoClient
 import asyncio
+import decor.perms as permissions
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
@@ -1571,45 +1572,56 @@ class Raids(commands.Cog, name="Trials"):
     async def add_to_roster(self, ctx: commands.Context, p_type, member: discord.Member):
         """For Raid Leads: Manually add to roster | `!add [role] [@ the user]`"""
         try:
-            try:
-                role = discord.utils.get(ctx.message.author.guild.roles,
-                                         name=self.bot.config['raids']['lead'])  # check if user has perms
-                user = ctx.message.author
-                if user not in role.members:
-                    await ctx.send("You do not have permission to do that.")
-                    return
-                else:
-                    channel_id = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
-                    raid = get_raid(channel_id)
-                    if raid is None:
-                        await ctx.send(f"Unable to find roster information.")
-                        return
 
-            except Exception as e:
-                await ctx.send(f"Unable to get roster information.")
-                logging.error(f"Add Raid Get Error: {str(e)}")
+            role = discord.utils.get(ctx.message.author.guild.roles,
+                                     name=self.bot.config['raids']['lead'])  # check if user has perms
+            user = ctx.message.author
+            if user not in role.members:
+                await ctx.send("You do not have permission to do that.")
                 return
-            try:
-                added_member_id = str(member.id)
-                worked = False
-                if p_type.lower() == "dps":
-                    raid.add_dps(added_member_id, self.bot.config['raids']['msg_defaults']['dps'])
-                    worked = True
-                elif p_type.lower() == "healer":
-                    raid.add_healer(added_member_id, self.bot.config['raids']['msg_defaults']['healers'])
-                    worked = True
-                elif p_type.lower() == "tank":
-                    raid.add_tank(added_member_id, self.bot.config['raids']['msg_defaults']['tanks'])
-                    worked = True
-                else:
-                    await ctx.send(f"Please specify a valid role. dps, healer, or tank.")
-                if worked:  # If True
-                    update_db(channel_id, raid)
-                    await ctx.send("Player added!")
-            except Exception as e:
-                await ctx.send(f"I was unable to update the roster information")
-                logging.error(f"Add To Roster Error: {str(e)}")
-                return
+            else:
+                channel_id = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
+                    return
+
+            def remove_for_add(member_id):
+                if member_id in raid.dps.keys() or \
+                        member_id in raid.backup_dps.keys():
+                    raid.remove_dps(member_id)
+
+                elif member_id in raid.healers.keys() or \
+                        member_id in raid.backup_healers.keys():
+                    raid.remove_healer(member_id)
+
+                elif member_id in raid.tanks.keys() or \
+                        member_id in raid.backup_tanks.keys():
+                    raid.remove_tank(member_id)
+
+            added_member_id = str(member.id)
+
+            worked = False
+            if p_type.lower() == "dps":
+                remove_for_add(added_member_id)
+                raid.add_dps(added_member_id, self.bot.config['raids']['msg_defaults']['dps'])
+                worked = True
+            elif p_type.lower() == "healer":
+                remove_for_add(added_member_id)
+                raid.add_healer(added_member_id, self.bot.config['raids']['msg_defaults']['healers'])
+                worked = True
+            elif p_type.lower() == "tank":
+                remove_for_add(added_member_id)
+                raid.add_tank(added_member_id, self.bot.config['raids']['msg_defaults']['tanks'])
+                worked = True
+            else:
+                await ctx.send(f"Please specify a valid role. dps, healer, or tank.")
+            if worked:  # If True
+                update_db(channel_id, raid)
+                await ctx.send("Player added!")
+        except IOError as e:
+            await ctx.send(f"Unable to get process information.")
+            logging.error(f"Add To Roster Raid Get Error: {str(e)}")
         except Exception as e:
             await ctx.send("Something has gone wrong.")
             logging.error(f"Add To Roster Error: {str(e)}")
@@ -2106,7 +2118,7 @@ class Raids(commands.Cog, name="Trials"):
                                 return
                             try:
                                 new_name = generate_channel_name(raid.date, raid.raid,
-                                                             self.bot.config["raids"]["timezone"])
+                                                                 self.bot.config["raids"]["timezone"])
                                 await ctx.send(f"Date/Time has been changed from {old_date} to {raid.date}")
                                 await channel.edit(name=new_name)
                             except Exception as e:
