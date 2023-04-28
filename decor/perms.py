@@ -36,7 +36,7 @@ def has_raid_lead():
 
 
 def creator_only():
-    """A decorator that checks if bot creator is the one running the command"""
+    """A decorator that checks if bot creator is the one calling the command"""
     def decorator(original_function):
         @wraps(original_function)
         async def wrapper_function(*args, **kwargs):
