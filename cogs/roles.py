@@ -1,8 +1,43 @@
 import discord
 from discord.ext import commands
 import logging
+import decor.perms as permissions
+from pymongo import MongoClient
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+
+global roles_info
+
+
+def set_roles_info(config):
+    """Function to set the role information on cog load"""
+    global roles_info
+    client = MongoClient(config['mongo'])
+    database = client.bot
+    misc = database.misc
+    roles_info = misc.find_one({'roles': "ids"})
+    if roles_info is None:
+        roles_info = {}
+        return
+    roles_info = roles_info["data"]
+
+
+def save_roles_info(config):
+    """Function to save new channels information"""
+    global roles_info
+    client = MongoClient(config['mongo'])
+    database = client.bot
+    misc = database.misc
+    old_rec = misc.find_one({'roles': "ids"})
+    if old_rec is not None:
+        new_rec = {'$set': {'data': roles_info}}
+        misc.update_one({'roles': "ids"}, new_rec)
+    else:
+        rec = {
+            'roles': "ids",
+            'data': roles_info
+        }
+        misc.insert_one(rec)
 
 
 class Roles(commands.Cog, name="Roles"):
@@ -10,12 +45,12 @@ class Roles(commands.Cog, name="Roles"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        set_roles_info(self.bot.config)
 
-    @commands.command()
+    @commands.command(name="agree")
     async def agree(self, ctx: commands.Context):
         """For agreeing with the rules of the discord | `!agree`"""
         try:
-
             role = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["roles"]["base"])
             if role != "@everyone":
                 await ctx.message.author.add_roles(role)
@@ -27,41 +62,155 @@ class Roles(commands.Cog, name="Roles"):
             await ctx.send("Unable to grant the role, please notify an Admin/Officer")
             logging.error(f"Agree Error: {str(e)}")
 
-    @commands.command()
-    async def role(self, ctx: commands.Context, role=None):
-        """use `!role [role]` to get the role. `!roles` for list"""
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        """Listener for reaction add"""
         try:
-            if role is None:
-                await ctx.send(f"Please include a role to add")
+            guild = self.bot.get_guild(self.bot.config["guild"])
+            member = discord.utils.get(guild.members, id=payload.user_id)
+            if member.bot:
                 return
-            user = ctx.author
-            total_roles = self.bot.config['roles']['vanity']
-            role_data = total_roles.get(role.lower())
-            if role_data is None:
-                await ctx.send("Unknown Role, use `!roles` to see a list of available roles.")
+
+            if int(payload.channel_id) != int(roles_info["channel"]):
                 return
-            role_name = role_data.get('role_name')
-            role = discord.utils.get(ctx.guild.roles, name=role_name)
-            if user in role.members:
-                await ctx.author.remove_roles(role)
-                await user.send(f"Removed role: {role_name}")
-            else:
-                await ctx.author.add_roles(role)
-                await user.send(f"Added role: {role_name}")
-        except discord.Forbidden:
-            await ctx.reply(f"Please enable DMs on this server, I have granted you the role for now.")
+
+            if str(payload.message_id) not in roles_info.keys():
+                print("Could not find message id")
+                return
+            role_type = roles_info[str(payload.message_id)]
+            role = self.bot.config["vanity"][role_type][str(payload.emoji)]
+            await payload.member.add_roles(discord.utils.get(payload.member.guild.roles, name=role))
+            await payload.member.send(f"Added role: {role}")
+        except discord.Forbidden as e:
+            logging.error(f"Add Role Error: Forbidden to DM {payload.member.display_name} after adding role, Message: {str(e)}")
+        except KeyError as e:
+            channel = payload.member.guild.get_channel(self.bot.config["private"])
+            await channel.send(f"User: {payload.member.display_name} attempted to add a role. but I could not find that "
+                               f"role in the config.")
+            logging.error(f"Add Role Error: {str(e)}")
         except Exception as e:
-            await ctx.send("Unable to grant roles, please notify an Admin/Officer")
+            channel = payload.member.guild.get_channel(self.bot.config["private"])
+            await channel.send(f"User: {payload.member.display_name} attempted to add a role but there was an error.")
             logging.error(f"Add Role Error: {str(e)}")
 
-    @commands.command()
-    async def roles(self, ctx: commands.Context):
-        """Lists the roles you can request from the bot"""
-        total_roles = self.bot.config['roles']['vanity']
-        msg = ""
-        for i in total_roles.keys():
-            msg += f"{i}: {total_roles.get(i)['explain']}\n"
-        await ctx.send(msg)
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+        """Listener for reaction remove"""
+        try:
+            guild = self.bot.get_guild(self.bot.config["guild"])
+            member = discord.utils.get(guild.members, id=payload.user_id)
+            if member.bot:
+                return
+
+            if int(payload.channel_id) != int(roles_info["channel"]):
+                return
+
+            if str(payload.message_id) not in roles_info.keys():
+                return
+
+            role_type = roles_info[str(payload.message_id)]
+            role = self.bot.config["vanity"][role_type][str(payload.emoji)]
+            await member.remove_roles(discord.utils.get(member.guild.roles, name=role))
+            await member.send(f"Removed role: {role}")
+        except discord.Forbidden as e:
+            logging.error(
+                f"Remove Role Error: Forbidden to DM {member.display_name} after removing role, Message: {str(e)}")
+        except KeyError as e:
+            channel = guild.get_channel(self.bot.config["private"])
+            await channel.send(f"User: {member.display_name} attempted to remove role but I could not find that role "
+                               f"in the config.")
+            logging.error(f"Remove Role Error: {str(e)}")
+        except Exception as e:
+            channel = guild.get_channel(self.bot.config["private"])
+            await channel.send(f"User: {payload.member.display_name} attempted to remove role but there was an error.")
+            logging.error(f"Remove Role Error: {str(e)}")
+
+    @commands.command(name="setrolechannel")
+    @permissions.has_officer()
+    async def setup_role_reactionaries(self, ctx: commands.Context, channel_id=None):
+        """Admin command to set up emoji role selections"""
+        try:
+            def embed_factory(message_type):
+                message_color = discord.Color.light_grey()
+                title_type = ""
+                if message_type.lower() == "tank":
+                    emote = self.bot.config['raids']['tank_emoji']
+                    message_color = discord.Color.red()
+                    title_type = "Tank"
+                elif message_type.lower() == "healer":
+                    emote = self.bot.config['raids']['healer_emoji']
+                    message_color = discord.Color.fuchsia()
+                    title_type = "Healer"
+                elif message_type.lower() == "mag":
+                    emote = self.bot.config['raids']['dps_emoji']
+                    message_color = discord.Color.blue()
+                    title_type = "Magicka DPS"
+                elif message_type.lower() == "stam":
+                    emote = self.bot.config['raids']['dps_emoji']
+                    message_color = discord.Color.green()
+                    title_type = "Stamina DPS"
+                else:
+                    emote = ""
+                    title_type = "Misc"
+                embed = discord.Embed(
+                    title=f"{message_type.capitalize()} Roles!",
+                    color=message_color
+                )
+                all_classes = ""
+                all_classes_emoji = []
+                van_dict = self.bot.config["vanity"][message_type.lower()]
+                for key in van_dict:
+                    all_classes += f"{key}{van_dict[key]}\n"
+                    all_classes_emoji.append(key)
+
+                embed.add_field(name=f"React below for what classes you play as for "
+                                     f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
+
+                return embed, all_classes_emoji
+
+            if channel_id is None:
+                channel_id = ctx.message.channel.id
+
+            new_roles_info = {"channel": channel_id}
+
+            crafted_embed, classes = embed_factory("tank")
+            message = await ctx.send(embed=crafted_embed)
+            for i in classes:
+                await message.add_reaction(i)
+            new_roles_info[str(message.id)] = "tank"
+
+            crafted_embed, classes = embed_factory("healer")
+            message = await ctx.send(embed=crafted_embed)
+            for i in classes:
+                await message.add_reaction(i)
+            new_roles_info[str(message.id)] = "healer"
+
+            crafted_embed, classes = embed_factory("mag")
+            message = await ctx.send(embed=crafted_embed)
+            for i in classes:
+                await message.add_reaction(i)
+            new_roles_info[str(message.id)] = "mag"
+
+            crafted_embed, classes = embed_factory("stam")
+            message = await ctx.send(embed=crafted_embed)
+            for i in classes:
+                await message.add_reaction(i)
+            new_roles_info[str(message.id)] = "stam"
+
+            crafted_embed, classes = embed_factory("misc")
+            message = await ctx.send(embed=crafted_embed)
+            for i in classes:
+                await message.add_reaction(i)
+            new_roles_info[str(message.id)] = "misc"
+
+            global roles_info
+            roles_info = new_roles_info
+
+            save_roles_info(self.bot.config)
+
+        except Exception as e:
+            await ctx.send("Unable to setup messages and roles.")
+            logging.error(f"Roleset Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
