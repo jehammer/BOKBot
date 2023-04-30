@@ -79,20 +79,20 @@ class Roles(commands.Cog, name="Roles"):
                 return
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
-            await payload.member.add_roles(discord.utils.get(payload.member.guild.roles, name=role))
-            await payload.member.send(f"Added role: {role}")
+            await member.add_roles(discord.utils.get(guild.roles, name=role))
+            await member.send(f"Added role: {role}")
         except discord.Forbidden as e:
             logging.error(
-                f"Add Role Error: Forbidden to DM {payload.member.display_name} after adding role, Message: {str(e)}")
+                f"Add Role Error: Forbidden to DM {member.display_name} after adding role, Message: {str(e)}")
         except KeyError as e:
-            channel = payload.member.guild.get_channel(self.bot.config["private"])
+            channel = member.guild.get_channel(self.bot.config["private"])
             await channel.send(
-                f"User: {payload.member.display_name} attempted to add a role. but I could not find that "
+                f"User: {member.display_name} attempted to add a role. but I could not find that "
                 f"role in the config.")
             logging.error(f"Add Role Error: {str(e)}")
         except Exception as e:
-            channel = payload.member.guild.get_channel(self.bot.config["private"])
-            await channel.send(f"User: {payload.member.display_name} attempted to add a role but there was an error.")
+            channel = member.guild.get_channel(self.bot.config["private"])
+            await channel.send(f"User: {member.display_name} attempted to add a role but there was an error.")
             logging.error(f"Add Role Error: {str(e)}")
 
     @commands.Cog.listener()
@@ -112,7 +112,7 @@ class Roles(commands.Cog, name="Roles"):
 
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
-            await member.remove_roles(discord.utils.get(member.guild.roles, name=role))
+            await member.remove_roles(discord.utils.get(guild.roles, name=role))
             await member.send(f"Removed role: {role}")
         except discord.Forbidden as e:
             logging.error(
@@ -124,7 +124,7 @@ class Roles(commands.Cog, name="Roles"):
             logging.error(f"Remove Role Error: {str(e)}")
         except Exception as e:
             channel = guild.get_channel(self.bot.config["private"])
-            await channel.send(f"User: {payload.member.display_name} attempted to remove role but there was an error.")
+            await channel.send(f"User: {member.display_name} attempted to remove role but there was an error.")
             logging.error(f"Remove Role Error: {str(e)}")
 
     @commands.command(name="setrolechannel")
