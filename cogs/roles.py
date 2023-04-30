@@ -82,11 +82,13 @@ class Roles(commands.Cog, name="Roles"):
             await payload.member.add_roles(discord.utils.get(payload.member.guild.roles, name=role))
             await payload.member.send(f"Added role: {role}")
         except discord.Forbidden as e:
-            logging.error(f"Add Role Error: Forbidden to DM {payload.member.display_name} after adding role, Message: {str(e)}")
+            logging.error(
+                f"Add Role Error: Forbidden to DM {payload.member.display_name} after adding role, Message: {str(e)}")
         except KeyError as e:
             channel = payload.member.guild.get_channel(self.bot.config["private"])
-            await channel.send(f"User: {payload.member.display_name} attempted to add a role. but I could not find that "
-                               f"role in the config.")
+            await channel.send(
+                f"User: {payload.member.display_name} attempted to add a role. but I could not find that "
+                f"role in the config.")
             logging.error(f"Add Role Error: {str(e)}")
         except Exception as e:
             channel = payload.member.guild.get_channel(self.bot.config["private"])
@@ -166,7 +168,7 @@ class Roles(commands.Cog, name="Roles"):
                     embed.add_field(name=f"React below for all other stuff.", value=f'{all_classes}', inline=False)
                 else:
                     embed.add_field(name=f"React below for what classes you play as for "
-                                        f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
+                                         f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
 
                 return embed, all_classes_emoji
 
@@ -213,6 +215,69 @@ class Roles(commands.Cog, name="Roles"):
         except Exception as e:
             await ctx.send("Unable to setup messages and roles.")
             logging.error(f"Roleset Error: {str(e)}")
+
+    @commands.command(name="updaterole")
+    @permissions.has_officer()
+    async def update_role_emoji(self, ctx: commands.Context, update_role_type=None):
+        try:
+            if update_role_type is None:
+                await ctx.send(f"Need to specify type to update")
+
+            def embed_factory(message_type):
+                message_color = discord.Color.light_grey()
+                title_type = ""
+                if message_type.lower() == "tank":
+                    emote = self.bot.config['raids']['tank_emoji']
+                    message_color = discord.Color.red()
+                    title_type = "Tank"
+                elif message_type.lower() == "healer":
+                    emote = self.bot.config['raids']['healer_emoji']
+                    message_color = discord.Color.fuchsia()
+                    title_type = "Healer"
+                elif message_type.lower() == "mag":
+                    emote = self.bot.config['raids']['dps_emoji']
+                    message_color = discord.Color.blue()
+                    title_type = "Magicka DPS"
+                elif message_type.lower() == "stam":
+                    emote = self.bot.config['raids']['dps_emoji']
+                    message_color = discord.Color.green()
+                    title_type = "Stamina DPS"
+                else:
+                    emote = ""
+                    title_type = "Misc"
+                embed = discord.Embed(
+                    title=f"{message_type.capitalize()} Roles!",
+                    color=message_color
+                )
+                all_classes = ""
+                all_classes_emoji = []
+                van_dict = self.bot.config["vanity"][message_type.lower()]
+                for key in van_dict:
+                    all_classes += f"{key}{van_dict[key]}\n"
+                    all_classes_emoji.append(key)
+                if title_type == "Misc":
+                    embed.add_field(name=f"React below for all other stuff.", value=f'{all_classes}', inline=False)
+                else:
+                    embed.add_field(name=f"React below for what classes you play as for "
+                                         f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
+
+                return embed, all_classes_emoji
+
+            guild = self.bot.get_guild(self.bot.config["guild"])
+            channel = guild.get_channel(int(roles_info["channel"]))
+            msg_id = 0
+            for key, value in roles_info.items():
+                if value == update_role_type.lower():
+                    msg_id = int(key)
+            message = await channel.fetch_message(msg_id)
+            new_embed, classes = embed_factory(update_role_type)
+            await message.edit(embed=new_embed)
+            for i in classes:
+                await message.add_reaction(i)
+
+        except Exception as e:
+            await ctx.send(f"Sorry, I was unable to update that.")
+            logging.error(f"Unable to update the type, Message: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
