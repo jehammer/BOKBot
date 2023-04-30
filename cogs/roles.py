@@ -41,7 +41,7 @@ def save_roles_info(config):
 
 
 class Roles(commands.Cog, name="Roles"):
-    """Receives roles commands"""
+    """Commands related to Discord roles"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
