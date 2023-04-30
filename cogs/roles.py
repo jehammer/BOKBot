@@ -130,7 +130,7 @@ class Roles(commands.Cog, name="Roles"):
     @commands.command(name="setrolechannel")
     @permissions.has_officer()
     async def setup_role_reactionaries(self, ctx: commands.Context, channel_id=None):
-        """Admin command to set up emoji role selections"""
+        """Officer command to set up emoji role selections"""
         try:
             def embed_factory(message_type):
                 message_color = discord.Color.light_grey()
@@ -219,6 +219,7 @@ class Roles(commands.Cog, name="Roles"):
     @commands.command(name="updaterole")
     @permissions.has_officer()
     async def update_role_emoji(self, ctx: commands.Context, update_role_type=None):
+        """Officer command to update selection | !updaterole [type]"""
         try:
             if update_role_type is None:
                 await ctx.send(f"Need to specify type to update")
@@ -274,6 +275,8 @@ class Roles(commands.Cog, name="Roles"):
             await message.edit(embed=new_embed)
             for i in classes:
                 await message.add_reaction(i)
+
+            await ctx.send(f"Updated everything.")
 
         except Exception as e:
             await ctx.send(f"Sorry, I was unable to update that.")
