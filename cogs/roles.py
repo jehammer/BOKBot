@@ -162,9 +162,11 @@ class Roles(commands.Cog, name="Roles"):
                 for key in van_dict:
                     all_classes += f"{key}{van_dict[key]}\n"
                     all_classes_emoji.append(key)
-
-                embed.add_field(name=f"React below for what classes you play as for "
-                                     f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
+                if title_type == "Misc":
+                    embed.add_field(name=f"React below for all other stuff.", value=f'{all_classes}', inline=False)
+                else:
+                    embed.add_field(name=f"React below for what classes you play as for "
+                                        f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
 
                 return embed, all_classes_emoji
 
