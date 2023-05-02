@@ -53,9 +53,9 @@ roles:
   default: none # role everyone gets when joining, must exist in discord
   have_lock: false # If you want someone to use !agree and agree to rules before joining the server
   unlock: none # If have_lock is true, this will let people join the rest of the server
-  vanity: # You will have to add these yourself, the bot will handle the rest. Follow the format below and check the README for help.
-    crafter:
-      role_name: Crafter
-      explain: Grants you the Crafter tag so you can help others when they need something crafted.
+vanity: # You will have to add these yourself, the bot will handle the rest.
+  type:
+    <:Emoji_Name:Emoji_ID>: Role name in Discord
+
     
 
