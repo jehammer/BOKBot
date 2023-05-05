@@ -721,7 +721,7 @@ class Raids(commands.Cog, name="Trials"):
                 await ctx.send("I was unable to save the updated roster.")
                 logging.error(f"SU Error saving new roster: {str(e)}")
                 return
-            await ctx.reply("Added!")
+            await ctx.reply(f"Added as {role.capitalize()}")
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
             logging.error(f"SU Error: {str(e)}")
@@ -908,7 +908,7 @@ class Raids(commands.Cog, name="Trials"):
                 await ctx.send("I was unable to save the updated roster.")
                 logging.error(f"BU Error saving new roster: {str(e)}")
                 return
-            await ctx.reply("Added for backup!")
+            await ctx.reply(f"Added for backup as {role.capitalize()}")
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
             logging.error(f"BU Error: {str(e)}")
