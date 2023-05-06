@@ -1849,89 +1849,68 @@ class Raids(commands.Cog, name="Trials"):
 
             run = True
             while run:
-                try:
-                    total, channels = print_initial_menu(ctx)
-                    await ctx.reply("Enter a number from the list below to have the roster closed")
-                    await ctx.send(total)
-                    #                        event = on_message without on_
-                    msg = await self.bot.wait_for('message', check=check, timeout=15.0)
-                    # msg = discord.Message
-                except asyncio.TimeoutError:
-                    # at this point, the check didn't become True, let's handle it.
-                    await ctx.send(f"{ctx.author.mention}, close has timed out")
+                total, channels = print_initial_menu(ctx)
+                await ctx.reply("Enter a number from the list below to have the roster closed")
+                await ctx.send(total)
+                #                        event = on_message without on_
+                msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                choice = int(msg.content)
+                choice -= 1  # Need to lower it by one for the right number to get
+                if choice == -1:
+                    await ctx.send("Exiting command")
+                    return
+                channel_id = channels[choice]
+                channel = ctx.guild.get_channel(channel_id)
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to find roster information.")
+                    return
+                if channel is None:
+                    await ctx.send(f"Delete Roster {raid.raid} - {str(channel_id)} (y/n)?")
+                else:
+                    await ctx.send(f"Delete Roster {raid.raid} - {channel.name} (y/n)?")
+                confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
+                yesno = confirm.content.lower()
+                if yesno == 'n':
+                    await ctx.send(f"Exiting command")
+                    return
+                elif yesno != "y":
+                    await ctx.send(f"Invalid input")
+                    return
+
+                await ctx.send(f"Increase everyone's Count (y/n)?")
+                confirm = await self.bot.wait_for("message", check=check, timeout=15.0)
+                confirm = confirm.content.lower()
+                if confirm == 'y':
+                    try:
+                        update_runs(raid)
+                    except IOError:
+                        await ctx.send(
+                            "I was unable to update the run count, Roster not closed.")
+                        return
+                elif confirm != 'n':
+                    await ctx.send(f"Not y/n, exiting command.")
                     return
                 else:
-                    # at this point the check has become True and the wait_for has done its work now we can do ours
-                    try:
-                        choice = int(msg.content)
-                        choice -= 1  # Need to lower it by one for the right number to get
-                        if choice == -1:
-                            await ctx.send("Exiting command")
-                            return
-                        try:
-                            channel_id = channels[choice]
-                            try:
-                                try:
-                                    channel = ctx.guild.get_channel(channel_id)
-                                    raid = get_raid(channel_id)
-                                    if raid is None:
-                                        await ctx.send(f"Unable to find roster information.")
-                                        return
+                    await ctx.send(f"Invalid input.")
+                    return
 
-                                except Exception as e:
-                                    await ctx.send(f"Unable to get roster information.")
-                                    logging.error(f"Close Raid Get Error: {str(e)}")
-                                    return
-                                if channel is None:
-                                    await ctx.send(f"Delete Roster {raid.raid} - {channel_id} (y/n)?")
-                                else:
-                                    await ctx.send(f"Delete Roster {raid.raid} - {channel.name} (y/n)?")
-                                confirm = await self.bot.wait_for("message", check=check, timeout=30.0)
-                                yesno = confirm.content.lower()
-                                if yesno == 'n':
-                                    await ctx.send(f"Exiting command")
-                                    return
-                            except asyncio.TimeoutError:
-                                await ctx.send(f"{ctx.author.mention}, close has timed out")
-                                return
-                            else:
-                                try:
-                                    await ctx.send(f"Increase everyone's Count (y/n)?")
-                                    confirm = await self.bot.wait_for("message", check=check, timeout=15.0)
-                                    confirm = confirm.content.lower()
-                                except asyncio.TimeoutError:
-                                    await ctx.send(f"{ctx.author.mention}, close has timed out")
-                                    return
-                                else:
-                                    if confirm == 'y':
-                                        try:
-                                            update_runs(raid)
-                                        except IOError:
-                                            await ctx.send(
-                                                "I was unable to update the run count, Roster not closed.")
-                                            return
-                                    elif confirm != 'n':
-                                        await ctx.send(f"Not y/n, exiting command.")
-                                        return
-                                try:
-                                    to_delete = {"channelID": channel_id}
-                                    raids.delete_one(to_delete)
-                                except Exception as e:
-                                    await ctx.send("I was unable to delete the roster.")
-                                    logging.error(f"Close Error deleting roster: {str(e)}")
-                                    return
-                                try:
-                                    await channel.delete()
-                                    await ctx.send("Channel deleted, roster closed.")
-                                    run = False
-                                except Exception as e:
-                                    await ctx.send("I was unable to delete the channel. The roster is closed.")
-                                    logging.error(f"Close Error Channel Delete: {str(e)}")
-                                    return
-                        except KeyError:
-                            await ctx.send("That is not a valid number, returning to menu.")
-                    except ValueError:
-                        await ctx.send("The input was not a valid number!")
+                to_delete = {"channelID": channel_id}
+                raids.delete_one(to_delete)
+
+                await channel.delete()
+                await ctx.send("Channel deleted, roster closed.")
+                run = False
+
+        except asyncio.TimeoutError:
+            await ctx.send(f"{ctx.author.mention}, close has timed out")
+            return
+        except IOError:
+            await ctx.send(f"I was unable to load the roster.")
+        except ValueError:
+            await ctx.send("The input was not a valid number!")
+        except KeyError:
+            await ctx.send("That is not a valid number, returning to menu.")
         except Exception as e:
             logging.error(f"Close error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
