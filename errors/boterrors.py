@@ -1,6 +1,10 @@
-class IORaidError(Exception):
+class IODBError(Exception):
     pass
 
 
-class IOChannelError(Exception):
+class DiscordError(Exception):
+    pass
+
+
+class UserError(Exception):
     pass
