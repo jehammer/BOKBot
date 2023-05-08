@@ -732,14 +732,9 @@ class Raids(commands.Cog, name="Trials"):
         """Signs you up as a backup | `!bu [optional role] [optional message]`"""
         try:
             channel_id = ctx.message.channel.id
-            try:
-                raid = get_raid(channel_id)
-                if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
-                    return
-            except Exception as e:
-                await ctx.send("Unable to load raid.")
-                logging.error(f"BU Load Raid Error: {str(e)}")
+            raid = get_raid(channel_id)
+            if raid is None:
+                await ctx.send(f"Could not load roster information for this channel.")
                 return
 
             if self.bot.config['raids']['use_limits'] is True:
@@ -1599,7 +1594,7 @@ class Raids(commands.Cog, name="Trials"):
                 await ctx.send(f"Please specify a valid role. dps, healer, or tank.")
             if worked:  # If True
                 update_db(channel_id, raid)
-                await ctx.send("Player added!")
+                await ctx.reply("Player added!")
         except IOError as e:
             await ctx.send(f"Unable to get process information.")
             logging.error(f"Add To Roster Raid Get Error: {str(e)}")
