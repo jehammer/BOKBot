@@ -8,6 +8,7 @@ from enum import Enum
 from pymongo import MongoClient
 import asyncio
 import decor.perms as permissions
+from errors.boterrors import *
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
@@ -39,7 +40,7 @@ def update_db(channel_id, raid):
         logging.info(f"Roster channelID: {channel_id} - {raid.raid} updated")
     except Exception as e:
         logging.error(f"Save to DB Error: {str(e)}")
-        raise IOError(f"Unable to save to DB")
+        raise IODBError(f"Unable to save to DB")
 
 
 def get_raid(channel_id):
@@ -59,7 +60,7 @@ def get_raid(channel_id):
         return raid
     except Exception as e:
         logging.error(f"Load Raid Error: {str(e)}")
-        raise IOError(f"Unable to load Raid from DB")
+        raise IODBError(f"Unable to load Raid from DB")
 
 
 def update_runs(raid):
@@ -80,7 +81,7 @@ def update_runs(raid):
                 count.insert_one(new_data)
             except Exception as e:
                 logging.error(f"Update Count Increase Error: {str(e)}")
-                raise IOError("Unable to update runs info")  # Will automatically return from here
+                raise IODBError("Unable to update runs info")  # Will automatically return from here
         else:
             counts["raidCount"] += 1
             counts["lastRaid"] = raid.raid
@@ -90,8 +91,8 @@ def update_runs(raid):
                 new_rec = {'$set': counts}
                 count.update_one({'userID': int(i)}, new_rec)
             except Exception as e:
-                logging.error(f"Update Count Decrease Error: {str(e)}")
-                raise IOError("Unable to update runs info")
+                logging.error(f"Update Count Increase Error: {str(e)}")
+                raise IODBError("Unable to update runs info")
     for i in raid.healers:
         counts = count.find_one({'userID': int(i)})
         if counts is None:
@@ -108,7 +109,7 @@ def update_runs(raid):
                 count.insert_one(new_data)
             except Exception as e:
                 logging.error(f"Update Count Increase Error: {str(e)}")
-                raise IOError("Unable to update runs info")
+                raise IODBError("Unable to update runs info")
         else:
             counts["raidCount"] += 1
             counts["lastRaid"] = raid.raid
@@ -119,7 +120,7 @@ def update_runs(raid):
                 count.update_one({'userID': int(i)}, new_rec)
             except Exception as e:
                 logging.error(f"Update Count Error: {str(e)}")
-                raise IOError("Unable to update runs info")
+                raise IODBError("Unable to update runs info")
     for i in raid.tanks:
         counts = count.find_one({'userID': int(i)})
         if counts is None:
@@ -136,7 +137,7 @@ def update_runs(raid):
                 count.insert_one(new_data)
             except Exception as e:
                 logging.error(f"Update Count Increase Error: {str(e)}")
-                raise IOError("Unable to update runs info")
+                raise IODBError("Unable to update runs info")
         else:
             counts["raidCount"] += 1
             counts["lastRaid"] = raid.raid
@@ -147,7 +148,7 @@ def update_runs(raid):
                 count.update_one({'userID': int(i)}, new_rec)
             except Exception as e:
                 logging.error(f"Update Count Error: {str(e)}")
-                raise IOError("Unable to update runs info")
+                raise IODBError("Unable to update runs info")
 
 
 def print_initial_menu(ctx):
@@ -157,19 +158,23 @@ def print_initial_menu(ctx):
         total = ""
         channels = {}
         rosters = raids.distinct("channelID")
-        for i in rosters:
-            channel = ctx.guild.get_channel(i)
-            if channel is not None:
-                total += f"{str(counter + 1)}: {channel.name}\n"
-            else:
-                total += f"{str(counter + 1)}: {i}\n"
-            channels[counter] = i
-            counter += 1
+        try:
+            for i in rosters:
+                channel = ctx.guild.get_channel(i)
+                if channel is not None:
+                    total += f"{str(counter + 1)}: {channel.name}\n"
+                else:
+                    total += f"{str(counter + 1)}: {i}\n"
+                channels[counter] = i
+                counter += 1
+        except Exception as e:
+            logging.error(f"Menu Print Error: Unable to get channel information: {str(e)}")
+            raise DiscordError("Unable to fetch Discord Channel information")
         total += f"0: Exit \n"
         return total, channels
     except Exception as e:
         logging.error(f"Unable to print initial menu: {str(e)}")
-        raise IOError("Unable to load distinct roster information")
+        raise IODBError("Unable to load distinct roster information")
 
 
 # TODO: Make a way for the raid limit to change for each role and who can join a raid.
@@ -395,7 +400,7 @@ class Raids(commands.Cog, name="Trials"):
                 await private_channel.send(f"The Traitor was not on any active rosters.")
         except Exception as e:
             logging.error(f"User Roster Exit Removal Error: {str(e)}")
-            raise IOError(f"Unable to remove user on exit from rosters.")
+            raise OSError(f"Unable to remove user on exit from rosters.")
 
     @commands.command(name="trial", aliases=["raid", "trail"])
     async def create_roster(self, ctx: commands.Context):
@@ -1595,7 +1600,7 @@ class Raids(commands.Cog, name="Trials"):
             if worked:  # If True
                 update_db(channel_id, raid)
                 await ctx.reply("Player added!")
-        except IOError as e:
+        except OSError as e:
             await ctx.send(f"Unable to get process information.")
             logging.error(f"Add To Roster Raid Get Error: {str(e)}")
         except Exception as e:
@@ -1879,7 +1884,7 @@ class Raids(commands.Cog, name="Trials"):
                 if confirm == 'y':
                     try:
                         update_runs(raid)
-                    except IOError:
+                    except OSError:
                         await ctx.send(
                             "I was unable to update the run count, Roster not closed.")
                         return
@@ -1900,7 +1905,7 @@ class Raids(commands.Cog, name="Trials"):
         except asyncio.TimeoutError:
             await ctx.send(f"{ctx.author.mention}, close has timed out")
             return
-        except IOError:
+        except OSError:
             await ctx.send(f"I was unable to load the roster.")
         except ValueError:
             await ctx.send("The input was not a valid number!")
@@ -2046,7 +2051,7 @@ class Raids(commands.Cog, name="Trials"):
                             confirmed = True
                     try:
                         update_runs(raid)
-                    except IOError:
+                    except OSError:
                         await ctx.send("I was unable to update the run count, exiting command")
                         return
                     if confirmed is True:
@@ -2125,7 +2130,7 @@ class Raids(commands.Cog, name="Trials"):
                 total, channels = print_initial_menu(ctx)
                 await ctx.reply("Enter a number from the list below to modify the memo")
                 await ctx.send(total)
-            except IOError as e:
+            except OSError as e:
                 await ctx.send(f"Unable to print menu")
                 logging.error(f"Memo Error: {str(e)}")
                 return
@@ -2159,7 +2164,7 @@ class Raids(commands.Cog, name="Trials"):
                 return
             except asyncio.TimeoutError:
                 await ctx.send(f"Memo has timed out")
-            except IOError:
+            except OSError:
                 await ctx.send("Unable to process DB changes.")
             except Exception as e:
                 await ctx.send(f"Unable to complete command")
