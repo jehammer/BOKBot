@@ -62,6 +62,16 @@ class Roles(commands.Cog, name="Roles"):
             await ctx.send("Unable to grant the role, please notify an Admin/Officer")
             logging.error(f"Agree Error: {str(e)}")
 
+    @commands.command(name="roles", aliases=["role"], hidden=True)
+    async def point_to_new_roles(self, ctx: commands.Context):
+        """If old roles commands are called points user to new location"""
+        try:
+            await ctx.reply(f"Role functionality has moved, you can go to <#1102081398136909854> and react there for "
+                            f"different roles. Remember, Kyne's Follower means you are CP 160 or higher.")
+        except Exception as e:
+            await ctx.send(f"I was unable to reply.")
+            logging.error(f"Old Roles Error: {str(e)}")
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """Listener for reaction add"""

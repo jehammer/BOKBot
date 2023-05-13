@@ -26,6 +26,7 @@ async def on_member_join(member):
             poons = discord.utils.get(guild.roles, name=bot.config["roles"]["poons"])
             other = discord.utils.get(guild.roles, name=bot.config["roles"]["other"])
             await member.add_roles(role, ranks, poons, other)
+            logging.info(f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
         await guild.system_channel.send(f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
                                         f"Please read the rules in <#847968244949844008> and follow the directions for "
                                         f"access to the rest of the server.\n"
