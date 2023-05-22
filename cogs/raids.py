@@ -1891,9 +1891,6 @@ class Raids(commands.Cog, name="Trials"):
                 elif confirm != 'n':
                     await ctx.send(f"Not y/n, exiting command.")
                     return
-                else:
-                    await ctx.send(f"Invalid input.")
-                    return
 
                 to_delete = {"channelID": channel_id}
                 raids.delete_one(to_delete)
