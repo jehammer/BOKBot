@@ -10,7 +10,7 @@ last4t = []
 def get_zone():
     loop = True
     while loop:
-        ran = random.randint(1, 11)
+        ran = random.randint(1, 12)
         if ran not in last4z:
             loop = False
     zone = ""
@@ -37,12 +37,13 @@ def get_zone():
             zone = "Gold Coast, Hew's Bane, Murkmire"
         case 11:
             zone = "Legacy of The Bretons - High Isle and Amenos, Galen and Y'ffelon"
+        case 12:
+            zone = f"Shadow Over Morrowind - Telvanni Peninsula and Apocrypha"
     if len(last4z) < 4:
         last4z.append(ran)
     else:
         last4z.pop(0)
         last4z.append(ran)
-    logging.info("Last4z overland: " + str(last4z))
     return zone
 
 
@@ -76,12 +77,13 @@ def get_trial(cap):
             trial = "Rockgrove"
         case 11:
             trial = "Dreadsail Reef"
+        case 12:
+            trial = "Sanity's Edge"
     if len(last4t) < 4:
         last4t.append(ran)
     else:
         last4t.pop(0)
         last4t.append(ran)
-    logging.info("Status of last4: " + str(last4t))
     return trial
 
 
@@ -121,14 +123,13 @@ class Events(commands.Cog, name="Events"):
     @commands.command(name="ntrial")
     async def ntrial(self, ctx: commands.Context):
         """Gives you a random normal trial to do"""
-        trial = get_trial(11)
+        trial = get_trial(12)
         await ctx.send("Normal " + trial)
-        logging.info("Random normal generated: " + trial)
 
     @commands.command(name="vtrial")
     async def vtrial(self, ctx: commands.Context):
         """Gives you a random veteran trial to do"""
-        trial = get_trial(11)
+        trial = get_trial(12)
         await ctx.send("Veteran " + trial)
 
     @commands.command(name="hmtrial")
