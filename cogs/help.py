@@ -167,8 +167,6 @@ class Helpers(commands.Cog):
             await ctx.send("I was unable to complete the help command")
             logging.error(f"Help command Error: {str(e)}")
 
-    # TODO: Create a function called !start or !starter that will print an embed guide for people to get setup with BOKBot.
-
     @commands.command(name="starter", aliases=["start"])
     async def send_starter_info(self, ctx: commands.Context):
         """DM's you some BOKBot starter information"""
