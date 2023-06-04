@@ -65,7 +65,6 @@ class Defaults(commands.Cog, name="Defaults"):
             await ctx.send("Unable to set default role")
             logging.error(f"Default Role Set Error: {str(e)}")
 
-# TODO: Fix this printing the default of the caller and not the person checked
     @commands.command(name="setdef")
     async def admin_set_default_role(self, ctx: commands.Context, m: discord.Member, role="check"):
         """Officer manually assign default role | `!setdef [@user] [role]`"""
