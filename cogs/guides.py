@@ -96,6 +96,34 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send the image and gif")
             logging.error(f"MOL Error: {str(e)}")
 
+    @commands.command(name="twins")
+    async def send_twins_commands(self, ctx: commands.Context):
+        """Tells you the two twin commands, just in case"""
+        try:
+            await ctx.send(f"For the MOL Twins, use `!mtwins`\n"
+                           f"For the DSR Twins, use `!dtwins`")
+        except Exception as e:
+            await ctx.send("Unable to send information.")
+            logging.error(f"Twins error: {str(e)}")
+
+    @commands.command(name="mtwins")
+    async def send_mol_twins_gif(self, ctx: commands.Context):
+        """Gif for MOL Twins"""
+        try:
+            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1115423531006705664/Twins_Rotate.gif")
+        except Exception as e:
+            await ctx.send("Unable to send information.")
+            logging.error(f"Twins error: {str(e)}")
+
+    @commands.command(name="dtwins")
+    async def send_dsr_twins_img(self, ctx: commands.Context):
+        """Img for DSR Twins"""
+        try:
+            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1115423536404770957/vDSRTwins.png")
+        except Exception as e:
+            await ctx.send("Unable to send information.")
+            logging.error(f"Twins error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Guides(bot))
