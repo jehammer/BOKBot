@@ -42,9 +42,8 @@ async def on_member_join(member):
 async def on_member_remove(member):
     # Lets the Admins know who has left the server.
     guild = member.guild
-    user = member
     channel = guild.get_channel(bot.config['administration']['private'])
-    await channel.send(f"{member.name}#{user.discriminator} - {member.display_name} has left the server")
+    await channel.send(f"{member.name} - {member.display_name} has left the server")
 
 
 @bot.event
