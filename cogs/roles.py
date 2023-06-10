@@ -4,7 +4,12 @@ import logging
 import decor.perms as permissions
 from pymongo import MongoClient
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 global roles_info
 

@@ -10,7 +10,12 @@ from pymongo import MongoClient
 
 # For using Aliases: (name="ex", aliases=["al1", "al2"])
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 global ranks
 

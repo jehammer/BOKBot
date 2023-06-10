@@ -3,7 +3,12 @@ from discord.ext import commands
 import logging
 from pymongo import MongoClient
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 # Connect and get values from MongoDB
 

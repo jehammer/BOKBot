@@ -10,7 +10,12 @@ import asyncio
 import decor.perms as permissions
 from errors.boterrors import *
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 # TODO:
 #   add "trail" counter for Dracus, have it suggest a dictionary when he uses it.

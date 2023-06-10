@@ -2,6 +2,14 @@ from discord.ext import commands
 import random
 import logging
 
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+
+
 last4z = []
 last4t = []
 

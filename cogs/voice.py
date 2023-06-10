@@ -7,7 +7,12 @@ import logging
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class Voice(commands.Cog, name="Voice"):

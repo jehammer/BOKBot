@@ -5,13 +5,15 @@ from discord.ext import commands
 import os
 import logging
 import yaml
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')  # , datefmt="%Y-%m-%d %H:%M:%S")
+from datetime import datetime
+import shutil
+import re
 
 intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 bot.remove_command("help")  # the help.py cog will replace the default command
+log_name = "log.log"
 
 
 # Events
@@ -26,7 +28,8 @@ async def on_member_join(member):
             poons = discord.utils.get(guild.roles, name=bot.config["roles"]["poons"])
             other = discord.utils.get(guild.roles, name=bot.config["roles"]["other"])
             await member.add_roles(role, ranks, poons, other)
-            logging.info(f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
+            logging.info(
+                f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
         await guild.system_channel.send(f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
                                         f"Please read the rules in <#847968244949844008> and follow the directions for "
                                         f"access to the rest of the server.\n"
@@ -83,6 +86,36 @@ async def load_cogs():
                 logging.error(f"cog load error: {str(e)}")
 
 
+async def startup_logging():
+    """Checks if there is logs from a bad shutdown"""
+    try:
+        date = datetime.now().strftime("%m-%d-%Y")
+        if os.path.exists(log_name):
+            file_name = f"log-{date}-crash.log"
+            os.makedirs("logs", exist_ok=True)
+            version = 1
+            while os.path.exists(os.path.join("logs", file_name)):
+                base_name, extension = os.path.splitext(file_name)
+                base_name = re.sub(r'\(\d{1,2}\)', '', base_name)
+                file_name = f"{base_name}({version}){extension}"
+                version += 1
+            path = os.path.join("logs", file_name)
+            shutil.move(log_name, path)
+        time = datetime.now().strftime("%I:%M:%S %p")
+        with open(log_name, "w") as file:
+            file.write(f"Bot stated at: {time} on {date}\n\n")
+
+        logging.basicConfig(
+            level=logging.INFO, format='%(asctime)s: %(message)s',
+            handlers=[
+                logging.FileHandler('log.log', mode='a'),
+                logging.StreamHandler()
+            ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+
+    except Exception as e:
+        logging.error(f"I was unable to set up the new logging information: {str(e)}")
+
+
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as: {bot.user.name}")
@@ -94,6 +127,7 @@ async def on_ready():
 
 async def main():
     async with bot:
+        await startup_logging()
         bot.config = load_configurations()
         await load_cogs()
         await bot.start(bot.config['bot']['token'])

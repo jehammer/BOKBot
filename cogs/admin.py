@@ -3,8 +3,16 @@ from discord.ext import commands
 import logging
 import asyncio
 import decor.perms as permissions
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+import os
+from datetime import datetime
+import shutil
+import re
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class Admin(commands.Cog, name="Admin"):
@@ -32,6 +40,22 @@ class Admin(commands.Cog, name="Admin"):
     async def shutdown(self, ctx: commands.Context):
         """Shut down the bot, Owner only"""
         try:
+            log_name = "log.log"
+            date = datetime.now().strftime("%m-%d-%Y")
+            time = datetime.now().strftime("%I:%M:%S %p")
+            logging.info(f"Shutdown command received - {time} on {date}")
+            logging.shutdown()
+            if os.path.exists(log_name):
+                file_name = f"log-{date}.log"
+                os.makedirs("logs", exist_ok=True)
+                version = 1
+                while os.path.exists(os.path.join("logs", file_name)):
+                    base_name, extension = os.path.splitext(file_name)
+                    base_name = re.sub(r'\(\d{1,2}\)', '', base_name)
+                    file_name = f"{base_name}({version}){extension}"
+                    version += 1
+                path = os.path.join("logs", file_name)
+                shutil.move(log_name, path)
             await self.bot.close()
         except Exception as e:
             logging.error(f"Shutdown Error: {str(e)}")
