@@ -33,3 +33,5 @@ cogs/_transfer.py
 _config.yaml
 cogs/_help_prac.py
 cogs/help_prac.py
+cogs/_scratchwork.py
+cogs/scratchwork.py
