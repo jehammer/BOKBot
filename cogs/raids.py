@@ -459,13 +459,13 @@ class Raids(commands.Cog, name="Trials"):
             if self.bot.config['raids']['use_limits']:
                 if len(vals) == 7:
                     leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit = vals
+                    role_limit = int(role_limit.strip())
                     if 0 > role_limit > 3:
                         await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
                     formatted_date = format_date(date)
                     dps_limit = int(dps_limit.strip())
                     healer_limit = int(healer_limit.strip())
                     tank_limit = int(tank_limit.strip())
-                    role_limit = int(role_limit.strip())
                     created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit)
                 elif len(vals) == 4:
                     leader, raid, date, role_limit = vals
@@ -513,10 +513,10 @@ class Raids(commands.Cog, name="Trials"):
             category = ctx.guild.get_channel(self.bot.config["raids"]["category"])
             new_name = generate_channel_name(date, created.raid, self.bot.config["raids"]["timezone"])
             channel = await category.create_text_channel(new_name)
-
+            limiter = discord.utils.get(ctx.message.author.guild.roles, name=created.role_limit)
             embed = discord.Embed(
                 title=f"{created.raid} {created.date}",
-                description="I hope people sign up for this.",
+                description=f"Limit: {limiter.mention}\n\nI hope people sign up for this.",
                 color=discord.Color.blue()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
