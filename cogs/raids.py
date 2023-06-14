@@ -17,7 +17,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
 # TODO: Have the bot tell you when you overflow into Backup
@@ -570,11 +569,13 @@ class Raids(commands.Cog, name="Trials"):
                     if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
                         await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
                     elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
-                        await ctx.reply(f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
-                                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
+                        await ctx.reply(
+                            f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
+                            f"and select the **Kyne's Follower** role from the Misc Roles section.")
                     else:
-                        await ctx.reply(f"You do not have the role to join this roster, please check <#933821777149329468> "
-                                        f"to see what you need to do to get the {raid.role_limit}")
+                        await ctx.reply(
+                            f"You do not have the role to join this roster, please check <#933821777149329468> "
+                            f"to see what you need to do to get the {raid.role_limit}")
                     return
 
             single = False  # A variable to check if someone just used !su
@@ -763,11 +764,13 @@ class Raids(commands.Cog, name="Trials"):
                     if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
                         await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
                     elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
-                        await ctx.reply(f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
-                                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
+                        await ctx.reply(
+                            f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
+                            f"and select the **Kyne's Follower** role from the Misc Roles section.")
                     else:
-                        await ctx.reply(f"You do not have the role to join this roster, please check <#933821777149329468> "
-                                        f"to see what you need to do to get the {raid.role_limit}")
+                        await ctx.reply(
+                            f"You do not have the role to join this roster, please check <#933821777149329468> "
+                            f"to see what you need to do to get the {raid.role_limit}")
                     return
 
             single = False  # A variable to check if someone just used !bu
@@ -2199,6 +2202,82 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Memo Error: {str(e)}")
 
         # TODO: Think of adding a plaintext ` ` get of the memo
+
+    @commands.command(name="limit")
+    @permissions.has_raid_lead()
+    async def modify_roster_limit(self, ctx: commands.Context):
+        """For Raid Leads: Updates the role limit for a roster"""
+        try:
+            user = ctx.message.author
+
+            def check(m: discord.Message):  # m = discord.Message.
+                return user == m.author
+
+            try:
+                total, channels = print_initial_menu(ctx)
+                await ctx.reply("Enter a number from the list below to modify the memo")
+                await ctx.send(total)
+            except OSError as e:
+                await ctx.send(f"Unable to print menu")
+                logging.error(f"Limit Error: {str(e)}")
+                return
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                choice = int(msg.content)
+                choice -= 1
+                if choice == -1:
+                    await ctx.send("Exiting command")
+                    return
+                channel_id = channels[choice]
+                raid = get_raid(channel_id)
+                if raid is None:
+                    await ctx.send(f"Unable to load roster information")
+                    return
+
+                limits = f"Roles and Values:\n" \
+                         f"0: Kyne's Founded\n" \
+                         f"1: Kyne's Follower\n" \
+                         f"2: Kyne's Hunters\n" \
+                         f"3: Storm Chasers\n" \
+                         f"4: Storm Riders"
+                await ctx.send(f"{limits}\nEnter the new limit number")
+                msg = await self.bot.wait_for('message', check=check, timeout=30.0)
+                new_limit_msg = int(msg.content)
+
+                if new_limit_msg == 0:
+                    new_limit = self.bot.config["raids"]["roles"]["base"]
+                elif new_limit_msg == 1:
+                    new_limit = self.bot.config["raids"]["roles"]["first"]
+                elif new_limit_msg == 2:
+                    new_limit = self.bot.config["raids"]["roles"]["second"]
+                elif new_limit_msg == 3:
+                    new_limit = self.bot.config["raids"]["roles"]["third"]
+                elif new_limit_msg == 4:
+                    new_limit = self.bot.config["raids"]["roles"]["fourth"]
+                else:
+                    await ctx.reply(f"Invalid input, enter a number between 0 and 4. Exiting.")
+                    return
+
+                raid.role_limit = new_limit
+                update_db(channel_id, raid)
+                await ctx.send(f"Limit updated to {new_limit}.")
+                return
+            except KeyError:
+                await ctx.send(f"Invalid value entered")
+                return
+            except ValueError:
+                await ctx.send(f"Invalid value entered")
+                return
+            except asyncio.TimeoutError:
+                await ctx.send(f"Limit has timed out")
+            except OSError:
+                await ctx.send("Unable to process DB changes.")
+            except Exception as e:
+                await ctx.send(f"Unable to complete command")
+                logging.error(f"Limit error: {str(e)}")
+        except Exception as e:
+            await ctx.send("An unknown error has occurred with the command")
+            logging.error(f"Limit Error: {str(e)}")
 
     @commands.command(name="increase")
     @permissions.has_raid_lead()
