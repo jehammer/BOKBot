@@ -17,11 +17,10 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-# TODO:
-#   add "trail" counter for Dracus, have it suggest a dictionary when he uses it.
 
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
+# TODO: Have the bot tell you when you overflow into Backup
 
 # Global variables for the MongoDB channels, set by set_channels function
 global raids
@@ -460,7 +459,7 @@ class Raids(commands.Cog, name="Trials"):
         try:
             if self.bot.config['raids']['use_limits']:
                 if len(vals) == 7:
-                    leader, raid, date, dps_limit, healer_limit, tank_limit, role_limit = vals
+                    leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit = vals
                     if 0 > role_limit > 3:
                         await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
                     formatted_date = format_date(date)
@@ -568,7 +567,14 @@ class Raids(commands.Cog, name="Trials"):
             if self.bot.config['raids']['use_limits'] is True:
                 limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
                 if ctx.message.author not in limiter.members:
-                    await ctx.reply("You do not have the role to join this roster.")
+                    if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
+                        await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
+                    elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
+                        await ctx.reply(f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
+                                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
+                    else:
+                        await ctx.reply(f"You do not have the role to join this roster, please check <#933821777149329468> "
+                                        f"to see what you need to do to get the {raid.role_limit}")
                     return
 
             single = False  # A variable to check if someone just used !su
@@ -754,7 +760,14 @@ class Raids(commands.Cog, name="Trials"):
             if self.bot.config['raids']['use_limits'] is True:
                 limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
                 if ctx.message.author not in limiter.members:
-                    await ctx.reply("You do not have the role to join this roster.")
+                    if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
+                        await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
+                    elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
+                        await ctx.reply(f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
+                                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
+                    else:
+                        await ctx.reply(f"You do not have the role to join this roster, please check <#933821777149329468> "
+                                        f"to see what you need to do to get the {raid.role_limit}")
                     return
 
             single = False  # A variable to check if someone just used !bu
@@ -995,8 +1008,10 @@ class Raids(commands.Cog, name="Trials"):
             tank_count = 0
             guild = self.bot.get_guild(self.bot.config['guild'])
             modified = False
+            limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
             embed = discord.Embed(
                 title=f"{raid.raid} {raid.date}",
+                description=f"Limit: {limiter.mention}",
                 color=discord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
