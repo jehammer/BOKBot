@@ -20,6 +20,7 @@ logging.basicConfig(
 # TODO: Add a command to update channel names manually for RLs
 # TODO: Command to print template for things, store in txt maybe?
 # TODO: Have the bot tell you when you overflow into Backup
+# TODO: Have bot remove anyone not meeting the new limit requirement when changing limit
 
 # Global variables for the MongoDB channels, set by set_channels function
 global raids
