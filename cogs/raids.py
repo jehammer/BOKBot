@@ -516,7 +516,7 @@ class Raids(commands.Cog, name="Trials"):
             limiter = discord.utils.get(ctx.message.author.guild.roles, name=created.role_limit)
             embed = discord.Embed(
                 title=f"{created.raid} {created.date}",
-                description=f"Limit: {limiter.mention}\n\nI hope people sign up for this.",
+                description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
                 color=discord.Color.blue()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
@@ -1014,7 +1014,7 @@ class Raids(commands.Cog, name="Trials"):
             limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
             embed = discord.Embed(
                 title=f"{raid.raid} {raid.date}",
-                description=f"Limit: {limiter.mention}",
+                description=f"Role Required: {limiter.mention}",
                 color=discord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!")
