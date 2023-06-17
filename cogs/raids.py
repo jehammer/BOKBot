@@ -2287,6 +2287,21 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send("An unknown error has occurred with the command")
             logging.error(f"Limit Error: {str(e)}")
 
+    @commands.command(name="limits")
+    @permissions.has_raid_lead()
+    async def print_limits(self, ctx: commands.Context):
+        try:
+            limits = f"Roles and Values:\n" \
+                     f"0: Kyne's Founded\n" \
+                     f"1: Kyne's Follower\n" \
+                     f"2: Kyne's Hunters\n" \
+                     f"3: Storm Chasers\n" \
+                     f"4: Storm Riders"
+            await ctx.send(f"{limits}")
+        except Exception as e:
+            await ctx.send(f"I was unable to print the limits")
+            logging.error(f"Print Limits Error: {str(e)}")
+
     @commands.command(name="increase")
     @permissions.has_raid_lead()
     async def increase_raid_count(self, ctx: commands.Context, member: discord.Member = None):
