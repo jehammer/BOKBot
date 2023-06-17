@@ -264,20 +264,26 @@ class Raid:
     def add_dps(self, n_dps, p_class=""):
         if len(self.dps) < self.dps_limit:
             self.dps[n_dps] = p_class
+            return "Added as DPS"
         else:
             self.backup_dps[n_dps] = p_class
+            return "DPS spots full, slotted for Backup"
 
     def add_healer(self, n_healer, p_class=""):
         if len(self.healers) < self.healer_limit:
             self.healers[n_healer] = p_class
+            return "Added as Healer"
         else:
             self.backup_healers[n_healer] = p_class
+            return "Healer spots full, slotted for Backup"
 
     def add_tank(self, n_tank, p_class=""):
         if len(self.tanks) < self.tank_limit:
             self.tanks[n_tank] = p_class
+            return "Added as Tank"
         else:
             self.backup_tanks[n_tank] = p_class
+            return "Tank spots full, slotted for Backup"
 
     def add_backup_dps(self, n_dps, p_class=""):
         self.backup_dps[n_dps] = p_class
@@ -580,6 +586,7 @@ class Raids(commands.Cog, name="Trials"):
                     return
 
             single = False  # A variable to check if someone just used !su
+            slotted_msg = ""
             msg = ctx.message.content
             msg = msg.split(" ", 2)
             if len(msg) == 1:
@@ -666,33 +673,33 @@ class Raids(commands.Cog, name="Trials"):
                         if len(msg) == 3:
                             # The message has a SU, a Role, and a message. Now to grab the right role
                             if role == "dps":
-                                raid.add_dps(user_id, msg[2])
+                                slotted_msg = raid.add_dps(user_id, msg[2])
                                 worked = True
                             elif role == "healer":
-                                raid.add_healer(user_id, msg[2])
+                                slotted_msg = raid.add_healer(user_id, msg[2])
                                 worked = True
                             elif role == "tank":
-                                raid.add_tank(user_id, msg[2])
+                                slotted_msg = raid.add_tank(user_id, msg[2])
                                 worked = True
                         else:
                             # The message has a SU and a Role
                             if role == "dps":
                                 if slotted == Role.DPS and msg_change:
-                                    raid.add_dps(user_id, og_msg)
+                                    slotted_msg = raid.add_dps(user_id, og_msg)
                                 else:
-                                    raid.add_dps(user_id, dps_msg)
+                                    slotted_msg = raid.add_dps(user_id, dps_msg)
                                 worked = True
                             elif role == "healer":
                                 if slotted == Role.HEALER and msg_change:
-                                    raid.add_healer(user_id, og_msg)
+                                    slotted_msg = raid.add_healer(user_id, og_msg)
                                 else:
-                                    raid.add_healer(user_id, healer_msg)
+                                    slotted_msg = raid.add_healer(user_id, healer_msg)
                                 worked = True
                             elif role == "tank":
                                 if slotted == Role.TANK and msg_change:
-                                    raid.add_tank(user_id, og_msg)
+                                    slotted_msg = raid.add_tank(user_id, og_msg)
                                 else:
-                                    raid.add_tank(user_id, tank_msg)
+                                    slotted_msg = raid.add_tank(user_id, tank_msg)
                                 worked = True
                     else:
                         # No role, need to grab default
@@ -702,34 +709,34 @@ class Raids(commands.Cog, name="Trials"):
                             msg = msg[1]
                         role = default['default']
                         if role == "dps":
-                            raid.add_dps(user_id, msg)
+                            slotted_msg = raid.add_dps(user_id, msg)
                             worked = True
                         elif role == "healer":
-                            raid.add_healer(user_id, msg)
+                            slotted_msg = raid.add_healer(user_id, msg)
                             worked = True
                         elif role == "tank":
-                            raid.add_tank(user_id, msg)
+                            slotted_msg = raid.add_tank(user_id, msg)
                             worked = True
                 else:
                     # User just called !su, no message, no role
                     role = default['default']
                     if role == "dps":
                         if slotted == Role.DPS and msg_change:
-                            raid.add_dps(user_id, og_msg)
+                            slotted_msg = raid.add_dps(user_id, og_msg)
                         else:
-                            raid.add_dps(user_id, dps_msg)
+                            slotted_msg = raid.add_dps(user_id, dps_msg)
                         worked = True
                     elif role == "healer":
                         if slotted == Role.HEALER and msg_change:
-                            raid.add_healer(user_id, og_msg)
+                            slotted_msg = raid.add_healer(user_id, og_msg)
                         else:
-                            raid.add_healer(user_id, healer_msg)
+                            slotted_msg = raid.add_healer(user_id, healer_msg)
                         worked = True
                     elif role == "tank":
                         if slotted == Role.TANK and msg_change:
-                            raid.add_tank(user_id, og_msg)
+                            slotted_msg = raid.add_tank(user_id, og_msg)
                         else:
-                            raid.add_tank(user_id, tank_msg)
+                            slotted_msg = raid.add_tank(user_id, tank_msg)
                         worked = True
             except Exception as e:
                 await ctx.send("I was unable to put you in the roster")
@@ -743,7 +750,7 @@ class Raids(commands.Cog, name="Trials"):
                 await ctx.send("I was unable to save the updated roster.")
                 logging.error(f"SU Error saving new roster: {str(e)}")
                 return
-            await ctx.reply(f"Added as {role.capitalize()}")
+            await ctx.reply(f"{slotted_msg}")
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
             logging.error(f"SU Error: {str(e)}")
