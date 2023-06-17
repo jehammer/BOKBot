@@ -118,6 +118,7 @@ class Admin(commands.Cog, name="Admin"):
                     except Exception as e:
                         logging.info(f"Failed to load {filename}")
                         logging.error(f"Cog Load error: {str(e)}")
+            logging.info(f"Cog Reload completed.")
         except Exception as e:
             logging.error(f"Cog Reload Error: {str(e)}")
 
