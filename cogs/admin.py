@@ -35,7 +35,7 @@ class Admin(commands.Cog, name="Admin"):
         else:
             await ctx.send("You do not have permission to do that.")
 
-    @commands.command(name="shutdown", hidden=True)
+    @commands.command(name="shutdown")
     @permissions.creator_only()
     async def shutdown(self, ctx: commands.Context):
         """Shut down the bot, Owner only"""
@@ -91,6 +91,35 @@ class Admin(commands.Cog, name="Admin"):
         except Exception as e:
             await ctx.send("Unable to send the message")
             logging.error(f"sr error: {str(e)}")
+
+    @commands.command(name="cogreload")
+    @permissions.creator_only()
+    async def reload_cogs(self, ctx: commands.Context):
+        """Owner Only: Reloads the cogs following an update"""
+        try:
+            logging.info("Preparing to reload cogs.")
+            for filename in os.listdir("cogs"):
+                if filename.endswith(".py") and not filename.startswith("_"):
+                    try:
+                        await self.bot.unload_extension(f"cogs.{filename[:-3]}")
+                        logging.info(f"Successfully unloaded {filename}")
+
+                    except Exception as e:
+                        logging.info(f"Failed to unload {filename}")
+                        logging.error(f"Cog Unload error: {str(e)}")
+
+            logging.info(f"Reloading Cogs after unload")
+            for filename in os.listdir("cogs"):
+                if filename.endswith(".py") and not filename.startswith("_"):
+                    try:
+                        await self.bot.load_extension(f"cogs.{filename[:-3]}")
+                        logging.info(f"Successfully loaded {filename}")
+
+                    except Exception as e:
+                        logging.info(f"Failed to load {filename}")
+                        logging.error(f"Cog Load error: {str(e)}")
+        except Exception as e:
+            logging.error(f"Cog Reload Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
