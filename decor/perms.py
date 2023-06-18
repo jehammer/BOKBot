@@ -30,7 +30,7 @@ def has_raid_lead():
             if raid_lead in ctx.author.roles:
                 return await original_function(*args, **kwargs)
             else:
-                raise commands.NotOwner
+                raise commands.MissingRole(str(raid_lead))
         return wrapper_function
     return decorator
 
