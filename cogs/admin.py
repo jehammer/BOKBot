@@ -125,9 +125,6 @@ class Admin(commands.Cog, name="Admin"):
                         logging.info(f"Failed to load {filename}")
                         logging.error(f"Cog Load error: {str(e)}")
             logging.info(f"Cog Reload completed")
-            logging.info(f"Restarting tasks")
-            self.scheduled_good_morning.start()
-            logging.info("Tasks restarted")
         except Exception as e:
             logging.error(f"Cog Reload Error: {str(e)}")
 
