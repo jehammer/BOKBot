@@ -1,12 +1,13 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import logging
 import asyncio
 import decor.perms as permissions
 import os
-from datetime import datetime
+import datetime
 import shutil
 import re
+
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
     handlers=[
@@ -20,6 +21,7 @@ class Admin(commands.Cog, name="Admin"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.scheduled_good_morning.start()
 
     @commands.command(name="servers", hidden=True)
     @permissions.creator_only()
@@ -41,10 +43,11 @@ class Admin(commands.Cog, name="Admin"):
         """Shut down the bot, Owner only"""
         try:
             log_name = "log.log"
-            date = datetime.now().strftime("%m-%d-%Y")
-            time = datetime.now().strftime("%I:%M:%S %p")
+            date = datetime.datetime.now().strftime("%m-%d-%Y")
+            time = datetime.datetime.now().strftime("%I:%M:%S %p")
             logging.info(f"Shutdown command received - {time} on {date}")
             logging.shutdown()
+            self.scheduled_good_morning.stop()
             if os.path.exists(log_name):
                 file_name = f"log-{date}.log"
                 os.makedirs("logs", exist_ok=True)
@@ -92,12 +95,15 @@ class Admin(commands.Cog, name="Admin"):
             await ctx.send("Unable to send the message")
             logging.error(f"sr error: {str(e)}")
 
-    @commands.command(name="cogreload")
+    @commands.command(name="cogreload", aliases=["reload", "reloadcog"])
     @permissions.creator_only()
     async def reload_cogs(self, ctx: commands.Context):
         """Owner Only: Reloads the cogs following an update"""
         try:
-            logging.info("Preparing to reload cogs.")
+            logging.info(f"Stopping tasks")
+            self.scheduled_good_morning.cancel()
+            logging.info(f"Stopped tasks")
+            logging.info("Preparing to reload cogs")
             for filename in os.listdir("cogs"):
                 if filename.endswith(".py") and not filename.startswith("_"):
                     try:
@@ -118,9 +124,38 @@ class Admin(commands.Cog, name="Admin"):
                     except Exception as e:
                         logging.info(f"Failed to load {filename}")
                         logging.error(f"Cog Load error: {str(e)}")
-            logging.info(f"Cog Reload completed.")
+            logging.info(f"Cog Reload completed")
+            logging.info(f"Restarting tasks")
+            self.scheduled_good_morning.start()
+            logging.info("Tasks restarted")
         except Exception as e:
             logging.error(f"Cog Reload Error: {str(e)}")
+
+    # AUTOMATED TASKS
+    @tasks.loop(
+        time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
+    async def scheduled_good_morning(self):
+        try:
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            channel = guild.get_channel(self.bot.config['morning_channel'])
+            await channel.send(self.bot.config['morning'])
+            try:
+                today = datetime.datetime.today()
+                today_month = today.month
+                today_day = today.day
+                today_year = today.year
+                for member in guild.members:
+                    joined = member.joined_at
+                    joined_month = joined.month
+                    joined_day = joined.day
+                    joined_year = joined.year
+                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
+                        await channel.send(f"{member.mention} Happy Anniversary!")
+            except Exception as e:
+                await channel.send("Unable to get the Anniversaries.")
+                logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
+        except Exception as e:
+            logging.error(f"Good Morning Task Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):

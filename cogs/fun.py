@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord import app_commands
 import logging
 import datetime
@@ -103,7 +103,6 @@ class Fun(commands.Cog, name="Fun"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.scheduled_good_morning.start()
         set_channels(self.bot.config)
 
     @commands.command(name="8ball")
@@ -163,31 +162,6 @@ class Fun(commands.Cog, name="Fun"):
         except Exception as e:
             await ctx.send("Unable to use the magic, something is blocking it!")
             logging.error("Magic 8 Ball Error: " + str(e))
-
-    @tasks.loop(
-        time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
-    async def scheduled_good_morning(self):
-        try:
-            guild = self.bot.get_guild(self.bot.config['guild'])
-            channel = guild.get_channel(self.bot.config['morning_channel'])
-            await channel.send(self.bot.config['morning'])
-            try:
-                today = datetime.datetime.today()
-                today_month = today.month
-                today_day = today.day
-                today_year = today.year
-                for member in guild.members:
-                    joined = member.joined_at
-                    joined_month = joined.month
-                    joined_day = joined.day
-                    joined_year = joined.year
-                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
-                        await channel.send(f"{member.mention} Happy Anniversary!")
-            except Exception as e:
-                await channel.send("Unable to get the Anniversaries.")
-                logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
-        except Exception as e:
-            logging.error(f"Good Morning Task Error: {str(e)}")
 
     @commands.command(name="joined")
     async def joined(self, ctx: commands.context, m: discord.Member = None):
