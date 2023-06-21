@@ -582,7 +582,7 @@ class Raids(commands.Cog, name="Trials"):
                     else:
                         await ctx.reply(
                             f"You do not have the role to join this roster, please check <#933821777149329468> "
-                            f"to see what you need to do to get the {raid.role_limit}")
+                            f"to see what you need to do to get the {raid.role_limit} role")
                     return
 
             single = False  # A variable to check if someone just used !su
@@ -1933,9 +1933,11 @@ class Raids(commands.Cog, name="Trials"):
 
                 to_delete = {"channelID": channel_id}
                 raids.delete_one(to_delete)
-
-                await channel.delete()
-                await ctx.send("Channel deleted, roster closed.")
+                if channel is not None:
+                    await channel.delete()
+                    await ctx.send("Channel deleted, roster closed.")
+                else:
+                    await ctx.send("Roster closed")
                 run = False
 
         except asyncio.TimeoutError:
