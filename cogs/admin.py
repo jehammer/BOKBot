@@ -7,6 +7,7 @@ import os
 import datetime
 import shutil
 import re
+import yaml
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -125,8 +126,25 @@ class Admin(commands.Cog, name="Admin"):
                         logging.info(f"Failed to load {filename}")
                         logging.error(f"Cog Load error: {str(e)}")
             logging.info(f"Cog Reload completed")
+            await ctx.send(f"Cog Reload completed")
         except Exception as e:
             logging.error(f"Cog Reload Error: {str(e)}")
+            await ctx.send(f"There was an issue reloading the cogs, check the logs for more info.")
+
+    @commands.command(name="configreload", aliases=["config", "reset", "configreset", "resetconfig", "reloadconfig"])
+    @permissions.creator_only()
+    async def reload_config(self, ctx: commands.Context):
+        """Owner Only: Reloads the config following an update"""
+        try:
+            logging.info(f"Loading new config")
+            with open("config.yaml", 'r') as stream:
+                data_loaded = yaml.safe_load(stream)
+            self.bot.config = data_loaded
+            logging.info(f"New config loaded")
+            await ctx.send(f"Config loaded")
+        except Exception as e:
+            logging.error(f"Config Reload Error: {str(e)}")
+            await ctx.send(f"There was an issue reloading the config, check the logs for more info.")
 
     # AUTOMATED TASKS
     @tasks.loop(

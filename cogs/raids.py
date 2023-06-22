@@ -206,6 +206,11 @@ def suffix(d):
 
 def generate_channel_name(date, raid_name, tz_info):
     """Function to generate channel names on changed information"""
+    date = date.strip()
+    if date.upper() == "ASAP":
+        new_name = f"{raid_name}-ASAP"
+        return new_name
+
     new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', date)))
     tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
         tz=timezone(tz_info))
@@ -217,6 +222,10 @@ def generate_channel_name(date, raid_name, tz_info):
 
 def format_date(date):
     """Formats the timestamp date to the correct version"""
+    date = date.strip()
+    if date.upper() == "ASAP":
+        return date
+
     formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
     return formatted_date
 
