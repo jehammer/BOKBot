@@ -224,7 +224,7 @@ def format_date(date):
     """Formats the timestamp date to the correct version"""
     date = date.strip()
     if date.upper() == "ASAP":
-        return date
+        return date.upper()
 
     formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
     return formatted_date
