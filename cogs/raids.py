@@ -2301,6 +2301,7 @@ class Raids(commands.Cog, name="Trials"):
     @commands.command(name="limits")
     @permissions.has_raid_lead()
     async def print_limits(self, ctx: commands.Context):
+        """Prints a list of the role limits and their values for making a roster."""
         try:
             limits = f"Roles and Values:\n" \
                      f"0: Kyne's Founded\n" \
