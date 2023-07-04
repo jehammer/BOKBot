@@ -610,15 +610,15 @@ class Raids(commands.Cog, name="Trials"):
                 default = defaults.find_one({'userID': int(user_id)})
                 if default is None and single is True:
                     await ctx.reply(
-                        "You have no default set, please specify a role or set a default. An example is `!default dps`"
-                        "\nThen sign up again.")
+                        "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                        " then sign up again.")
                     return
                 elif default is None and single is False:
                     role = msg[1].lower()
                     if role != "dps" and role != "healer" and role != "tank":
                         await ctx.reply(
-                            "You have no default set, please specify a role or set a default. An example is `!default dps`"
-                            "\nThen sign up again.")
+                            "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                            " then sign up again.")
                         return
             except Exception as e:
                 await ctx.send("Unable to check user default data.")
@@ -805,15 +805,15 @@ class Raids(commands.Cog, name="Trials"):
                 default = defaults.find_one({'userID': int(user_id)})
                 if default is None and single is True:
                     await ctx.reply(
-                        "You have no default set, please specify a role or set a default. An example is `!default dps`"
-                        "\nThen sign up again.")
+                        "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                        " then sign up again.")
                     return
                 elif default is None and single is False:
                     role = msg[1].lower()
                     if role != "dps" and role != "healer" and role != "tank":
                         await ctx.reply(
-                            "You have no default set, please specify a role or set a default. An example is `!default dps`"
-                            "\nThen sign up again.")
+                            "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                            " then sign up again.")
                         return
             except Exception as e:
                 await ctx.send("Unable to check user default data.")
