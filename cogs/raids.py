@@ -615,6 +615,8 @@ class Raids(commands.Cog, name="Trials"):
                     return
                 elif default is None and single is False:
                     role = msg[1].lower()
+                    if role.lower() == "heal" or role.lower() == "heals":
+                        role = "healer"
                     if role != "dps" and role != "healer" and role != "tank":
                         await ctx.reply(
                             "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
@@ -677,6 +679,8 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 if not single:
                     role = msg[1].lower()
+                    if role.lower() == "heal" or role.lower() == "heals":
+                        role = "healer"
                     if role == "dps" or role == "healer" or role == "tank":
                         # Check if there is an optional message or not
                         if len(msg) == 3:
@@ -805,14 +809,16 @@ class Raids(commands.Cog, name="Trials"):
                 default = defaults.find_one({'userID': int(user_id)})
                 if default is None and single is True:
                     await ctx.reply(
-                        "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                        "You have no default set, please specify a role (ex: `!bu dps`) or set a default (ex: `!default dps`)"
                         " then sign up again.")
                     return
                 elif default is None and single is False:
                     role = msg[1].lower()
+                    if role.lower() == "heal" or role.lower() == "heals":
+                        role = "healer"
                     if role != "dps" and role != "healer" and role != "tank":
                         await ctx.reply(
-                            "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
+                            "You have no default set, please specify a role (ex: `!bu dps`) or set a default (ex: `!default dps`)"
                             " then sign up again.")
                         return
             except Exception as e:
@@ -872,6 +878,8 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 if not single:
                     role = msg[1].lower()
+                    if role.lower() == "heal" or role.lower() == "heals":
+                        role = "healer"
                     if role == "dps" or role == "healer" or role == "tank":
                         # Check if there is an optional message or not
                         if len(msg) == 3:
