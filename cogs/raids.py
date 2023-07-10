@@ -1,5 +1,6 @@
 import datetime
 import re
+import time
 import discord
 from discord.ext import commands
 import logging
@@ -376,6 +377,7 @@ class Raids(commands.Cog, name="Trials"):
     async def on_member_remove(self, member):
         """Event listener for when someone leaves the server to remove them from all rosters they are on."""
         try:
+            time.sleep(10 / 1000)
             was_on = False
             user_id = str(member.id)
             rosters = raids.distinct("channelID")
@@ -422,19 +424,12 @@ class Raids(commands.Cog, name="Trials"):
             raise OSError(f"Unable to remove user on exit from rosters.")
 
     @commands.command(name="trial", aliases=["raid", "trail"])
+    @permissions.has_raid_lead()
     async def create_roster(self, ctx: commands.Context):
-        """Creates a new roster | `!trial [leader],[trial],[date info]`"""
-        try:
-            role = discord.utils.get(ctx.message.author.guild.roles, name=self.bot.config['raids']['lead'])
-            if role != "@everyone" and ctx.message.author not in role.members:
-                await ctx.reply(f"You do not have permission to use this command")
-                return
-        except Exception as e:
-            await ctx.send(f"Unable to verify roles, check that the config is spelled the same as the discord role.")
-            logging.error(f"creation error on role verification: {str(e)}")
+        """Creates a new roster | `!trial [leader],[trial],[date info],[limit]`"""
 
         def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-                    fact_role_limit):
+                    fact_role_limit, fact_memo):
             try:
                 if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
                     fact_dps_limit = self.bot.config["raids"]["roster_defaults"]["dps"]
@@ -456,7 +451,8 @@ class Raids(commands.Cog, name="Trials"):
 
                 dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
                 return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                            backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit)
+                            backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
+                            fact_memo)
             except Exception as e2:
                 ctx.send(f"Error on getting the role limits, please check the config is correct")
                 logging.error(f"Factory Failure: {str(e2)}")
@@ -466,65 +462,46 @@ class Raids(commands.Cog, name="Trials"):
             msg = ctx.message.content
             msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
             vals = msg[1].split(",")  # drop the command
-            # Check whether the bot creates limits for the roster or not
-        except Exception as e:
-            await ctx.send("Error: Unable to separate values from command input")
-            logging.error(f"Raid Creation Error: {str(e)}")
-            return
-        try:
-            if self.bot.config['raids']['use_limits']:
-                if len(vals) == 7:
-                    leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit = vals
-                    role_limit = int(role_limit.strip())
-                    if 0 > role_limit > 3:
-                        await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
-                    formatted_date = format_date(date)
-                    dps_limit = int(dps_limit.strip())
-                    healer_limit = int(healer_limit.strip())
-                    tank_limit = int(tank_limit.strip())
-                    created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit)
-                elif len(vals) == 4:
-                    leader, raid, date, role_limit = vals
-                    role_limit = int(role_limit.strip())
-                    if 0 > role_limit > 3:
-                        await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
-                    dps_limit, healer_limit, tank_limit = None, None, None
-                    formatted_date = format_date(date)
-                    created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit)
-                else:
-                    if len(vals) > 7:
-                        await ctx.reply(f"Invalid input, you have too many parameters.")
-                        return
-                    elif len(vals) > 4:
-                        await ctx.reply(f"Invalid input, if you want to specify the limits you have too few parameters."
-                                        f" If you do not then you have too many.")
-                        return
-                    else:
-                        await ctx.reply("Invalid input, you have too few parameters.")
-                        return
-            else:
-                if len(vals) == 6:
-                    leader, raid, date, dps_limit, healer_limit, tank_limit = vals
-                    formatted_date = format_date(date)
-                    dps_limit = int(dps_limit.strip())
-                    healer_limit = int(healer_limit.strip())
-                    tank_limit = int(tank_limit.strip())
-                    created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, 0)
-                elif len(vals) == 3:
-                    leader, raid, date = vals
-                    dps_limit, healer_limit, tank_limit = None, None, None
-                    formatted_date = format_date(date)
-                    created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, 0)
-                else:
-                    await ctx.reply("Role Limits are not configured, please do not include them.")
-                    logging.info(f"Attempted to create roster with role limits that are not configured.")
-                    return
-        except Exception as e:
-            await ctx.send(f"I was unable to create the roster.")
-            logging.error(f"Raid Creation Error: {str(e)}")
-            return
 
-        try:
+            if len(vals) == 8:
+                leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit, memo = vals
+                dps_limit = int(dps_limit.strip())
+                healer_limit = int(healer_limit.strip())
+                tank_limit = int(tank_limit.strip())
+            elif len(vals) == 7:
+                leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit = vals
+                memo = "delete"
+                dps_limit = int(dps_limit.strip())
+                healer_limit = int(healer_limit.strip())
+                tank_limit = int(tank_limit.strip())
+            elif len(vals) == 5:
+                leader, raid, date, role_limit, memo = vals
+                dps_limit, healer_limit, tank_limit = None, None, None
+            elif len(vals) == 4:
+                leader, raid, date, role_limit = vals
+                memo = "delete"
+                dps_limit, healer_limit, tank_limit = None, None, None
+            else:
+                if len(vals) > 8:
+                    await ctx.reply(f"Invalid input, you have too many parameters.")
+                    return
+                elif len(vals) > 5:
+                    await ctx.reply(f"Invalid input, if you want to specify the limits you have too few parameters."
+                                    f" If you do not and you are adding a memo then you have too many.")
+                    return
+                else:
+                    await ctx.reply("Invalid input, you have too few parameters.")
+                    return
+
+            role_limit = int(role_limit.strip())
+            if role_limit < 0 or role_limit > 4:
+                await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
+                return
+
+            formatted_date = format_date(date)
+
+            created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, memo)
+
             logging.info(f"Creating new channel.")
             category = ctx.guild.get_channel(self.bot.config["raids"]["category"])
             new_name = generate_channel_name(date, created.raid, self.bot.config["raids"]["timezone"])
@@ -535,11 +512,20 @@ class Raids(commands.Cog, name="Trials"):
                 description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
                 color=discord.Color.blue()
             )
-            embed.set_footer(text="Remember to spay or neuter your support!")
+            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
             embed.set_author(name="Raid Lead: " + leader)
             embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
             embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
             embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
+
+            if memo != "delete":
+                embed_memo = discord.Embed(
+                    title=" ",
+                    color=discord.Color.dark_gray()
+                )
+                embed_memo.add_field(name=" ", value=memo, inline=True)
+                embed_memo.set_footer(text="This is very important!")
+                await channel.send(embed=embed_memo)
             await channel.send(embed=embed)
             await ctx.reply("Channel and Roster created")
             logging.info(f"Created Channel: channelID: {str(channel.id)}")
@@ -1042,7 +1028,7 @@ class Raids(commands.Cog, name="Trials"):
                 description=f"Role Required: {limiter.mention}",
                 color=discord.Color.green()
             )
-            embed.set_footer(text="Remember to spay or neuter your support!")
+            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
             embed.set_author(name="Raid Lead: " + raid.leader)
             names = ""
             if not len(raid.healers) == 0:
