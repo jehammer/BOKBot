@@ -1,6 +1,5 @@
 import datetime
 import re
-import time
 import discord
 from discord.ext import commands
 import logging
@@ -377,11 +376,11 @@ class Raids(commands.Cog, name="Trials"):
     async def on_member_remove(self, member):
         """Event listener for when someone leaves the server to remove them from all rosters they are on."""
         try:
-            time.sleep(10 / 1000)
             was_on = False
             user_id = str(member.id)
             rosters = raids.distinct("channelID")
             private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
+            await private_channel.send(f"{member.name} - {member.display_name} has left the server")
             for i in rosters:
                 raid = get_raid(i)
                 channel = member.guild.get_channel(i)

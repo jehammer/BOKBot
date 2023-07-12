@@ -42,14 +42,6 @@ async def on_member_join(member):
 
 
 @bot.event
-async def on_member_remove(member):
-    # Lets the Admins know who has left the server.
-    guild = member.guild
-    channel = guild.get_channel(bot.config['administration']['private'])
-    await channel.send(f"{member.name} - {member.display_name} has left the server")
-
-
-@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
