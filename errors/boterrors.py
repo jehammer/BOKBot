@@ -8,3 +8,12 @@ class DiscordError(Exception):
 
 class UserError(Exception):
     pass
+
+class NoDefaultError(Exception):
+    pass
+
+class DefaultIOError(Exception):
+    pass
+
+class UnknownError(Exception):
+    pass
