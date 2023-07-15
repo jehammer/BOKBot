@@ -591,7 +591,8 @@ class Raids(commands.Cog, name="Trials"):
                     return
                 elif len(vals) > 5:
                     await ctx.reply(f"Invalid input, if you want to specify the limits you have too few parameters."
-                                    f" If you do not and you are adding a memo then you have too many.")
+                                    f" If you do not and you are adding a memo then you have too many.\n"
+                                    f"Please do not use a comma in your memo as there is a temporary bug with that.")
                     return
                 else:
                     await ctx.reply("Invalid input, you have too few parameters.")
