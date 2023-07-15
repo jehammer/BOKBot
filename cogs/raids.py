@@ -180,10 +180,6 @@ def print_initial_menu(ctx):
         logging.error(f"Unable to print initial menu: {str(e)}")
         raise IODBError("Unable to load distinct roster information")
 
-
-# TODO: Make a way for the raid limit to change for each role and who can join a raid.
-
-
 def set_channels(config):
     """Function to set the MongoDB information on cog load"""
     global raids
