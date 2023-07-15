@@ -229,7 +229,7 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
     if use_default is True:
         default = defaults.find_one({'userID': user_id})
         if default is None:
-            raise NoDefaultError
+            return Role.NONE, None
         selected_role = default['default']
     elif use_default is False:
         selected_role = cmd_vals[1].lower()
@@ -240,7 +240,7 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
     elif selected_role == "heal" or selected_role == "heals" or selected_role == "healer":
         role = Role.HEALER
     else:
-        raise NoDefaultError
+        return Role.NONE, None
 
     user_id = str(user_id)
 
@@ -686,6 +686,8 @@ class Raids(commands.Cog, name="Trials"):
                 return
 
             result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
+            if result == Role.NONE:
+                raise NoDefaultError
 
             try:
                 update_db(channel_id, raid)
@@ -736,6 +738,8 @@ class Raids(commands.Cog, name="Trials"):
                 return
 
             result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
+            if result == Role.NONE:
+                raise NoDefaultError
 
             try:
                 update_db(channel_id, raid)
