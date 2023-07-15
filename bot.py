@@ -9,6 +9,8 @@ from datetime import datetime
 import shutil
 import re
 
+import errors.boterrors
+
 intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
@@ -49,6 +51,12 @@ async def on_command_error(ctx, error):
         await ctx.send(f"You do not have permission to use this command. {str(error)}")
     elif isinstance(error, commands.NotOwner):
         await ctx.send(f"You are not my creator. You may not use this command.")
+    elif isinstance(error, errors.boterrors.UnknownError):
+        logging.error(f"UNKNOWN ERROR REACHED: {str(error)}")
+        await ctx.send(f"Unreachable code has been reached. Logging details. Alerting Creator.")
+        guild = bot.get_guild(bot.config['guild'])
+        creator = guild.get_member(bot.config["creator"])
+        await creator.send(f"{str(error)}")
     else:
         await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")

@@ -1,3 +1,5 @@
+from discord.ext import commands
+
 class IODBError(Exception):
     pass
 
@@ -15,5 +17,5 @@ class NoDefaultError(Exception):
 class DefaultIOError(Exception):
     pass
 
-class UnknownError(Exception):
+class UnknownError(commands.CommandError):
     pass
