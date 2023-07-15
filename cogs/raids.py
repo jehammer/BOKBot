@@ -8,7 +8,6 @@ from enum import Enum
 from pymongo import MongoClient
 import asyncio
 import decor.perms as permissions
-import errors.boterrors
 from errors.boterrors import *
 
 logging.basicConfig(
@@ -292,7 +291,7 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
         elif role == Role.HEALER:
             result = raid.add_healer(user_id, msg)
         else:
-            raise errors.boterrors.UnknownError(f"Roster Setup Unknown Error: ISSU TRUE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
+            raise UnknownError(f"Roster Setup Unknown Error: ISSU TRUE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
     elif issu is False:
         if role == Role.DPS:
             result = raid.add_backup_dps(user_id, msg)
@@ -301,9 +300,9 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
         elif role == Role.HEALER:
             result = raid.add_backup_healer(user_id, msg)
         else:
-            raise errors.boterrors.UnknownError(f"Roster Setup Unknown Error: ISSU FALSE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
+            raise UnknownError(f"Roster Setup Unknown Error: ISSU FALSE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
     else:
-        raise errors.boterrors.UnknownError(f"Roster Setup Unknown Error: ISSU TRUE OR FALSE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
+        raise UnknownError(f"Roster Setup Unknown Error: ISSU TRUE OR FALSE ELSE REACHED INPUTS = {og_cmd} FROM {user.display_name}")
 
     return result, raid
 
@@ -696,7 +695,7 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"SU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except errors.boterrors.UnknownError as e:
+        except UnknownError as e:
             raise e
         except NoDefaultError:
             await ctx.reply(
@@ -748,7 +747,7 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"BU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except errors.boterrors.UnknownError as e:
+        except UnknownError as e:
             raise e
         except NoDefaultError:
             await ctx.reply(
