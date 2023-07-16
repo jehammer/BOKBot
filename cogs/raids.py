@@ -666,7 +666,7 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 raid = get_raid(channel_id)
                 if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
@@ -711,7 +711,7 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 raid = get_raid(channel_id)
                 if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
@@ -758,7 +758,7 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 raid = get_raid(channel_id)
                 if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
@@ -804,7 +804,7 @@ class Raids(commands.Cog, name="Trials"):
             try:
                 raid = get_raid(channel_id)
                 if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
@@ -972,7 +972,7 @@ class Raids(commands.Cog, name="Trials"):
                 channel_id = ctx.message.channel.id
                 raid = get_raid(channel_id)
                 if raid is None:
-                    await ctx.send(f"Unable to find roster information.")
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
@@ -1403,7 +1403,7 @@ class Raids(commands.Cog, name="Trials"):
             channel_id = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
             raid = get_raid(channel_id)
             if raid is None:
-                await ctx.send(f"Unable to find roster information.")
+                await ctx.send(f"Sorry! This command only works in a roster channel!")
                 return
 
             def remove_for_add(member_id):
