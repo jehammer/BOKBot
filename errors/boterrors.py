@@ -11,7 +11,7 @@ class DiscordError(Exception):
 class UserError(Exception):
     pass
 
-class NoDefaultError(Exception):
+class NoDefaultError(commands.CommandError):
     pass
 
 class DefaultIOError(Exception):

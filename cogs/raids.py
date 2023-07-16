@@ -223,12 +223,15 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
             msg = cmd_vals[1] + " " + cmd_vals[2]
     user_id = user.id
 
+    default_error_msg = f"You have no default set, please specify a role (ex: `{cmd_vals[0].lower()} dps`) or set a default "\
+                        f"(ex: `!default dps`) then sign up again."
+
     # Role handling
     selected_role = None
     if use_default is True:
         default = defaults.find_one({'userID': user_id})
         if default is None:
-            return Role.NONE, None
+            raise NoDefaultError(default_error_msg)
         selected_role = default['default']
     elif use_default is False:
         selected_role = cmd_vals[1].lower()
@@ -239,7 +242,7 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
     elif selected_role == "heal" or selected_role == "heals" or selected_role == "healer":
         role = Role.HEALER
     else:
-        return Role.NONE, None
+        raise NoDefaultError(default_error_msg)
 
     user_id = str(user_id)
 
@@ -685,8 +688,6 @@ class Raids(commands.Cog, name="Trials"):
                 return
 
             result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
-            if result == Role.NONE:
-                raise NoDefaultError
 
             try:
                 update_db(channel_id, raid)
@@ -695,13 +696,8 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"SU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except UnknownError as e:
+        except (UnknownError, NoDefaultError) as e:
             raise e
-        except NoDefaultError:
-            await ctx.reply(
-                "You have no default set, please specify a role (ex: `!su dps`) or set a default (ex: `!default dps`)"
-                " then sign up again.")
-            return
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
             logging.error(f"SU Error: {str(e)}")
@@ -737,8 +733,6 @@ class Raids(commands.Cog, name="Trials"):
                 return
 
             result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
-            if result == Role.NONE:
-                raise NoDefaultError
 
             try:
                 update_db(channel_id, raid)
@@ -747,13 +741,8 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"BU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except UnknownError as e:
+        except (UnknownError, NoDefaultError) as e:
             raise e
-        except NoDefaultError:
-            await ctx.reply(
-                "You have no default set, please specify a role (ex: `!bu dps`) or set a default (ex: `!default dps`)"
-                " then sign up again.")
-            return
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
             logging.error(f"BU Error: {str(e)}")
