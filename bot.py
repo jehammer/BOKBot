@@ -2,6 +2,7 @@
 import asyncio
 import discord
 from discord.ext import commands
+from discord import app_commands
 import os
 import logging
 import yaml
@@ -62,6 +63,15 @@ async def on_command_error(ctx, error):
         await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")
 
+async def on_tree_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.MissingPermissions):
+        return await interaction.response.send_message(f"You're missing permissions to use that")
+    elif isinstance(error, app_commands.MissingRole):
+        return await interaction.response.send_message(f"{str(error)}")
+    else:
+        await interaction.response.send_message("test")
+
+bot.tree.on_error = on_tree_error
 
 def load_configurations():
     with open("config.yaml", 'r') as stream:

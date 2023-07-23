@@ -2,6 +2,7 @@ import datetime
 import re
 import discord
 from discord.ext import commands
+from discord import ui, app_commands
 import logging
 from pytz import timezone
 from enum import Enum
@@ -471,7 +472,152 @@ class Raid:
             logging.info(f"Spots filled in raid id {str(num)}")
         except Exception as e:
             logging.error(f"Fill Spots error: {str(e)}")
+class TrialModal(discord.ui.Modal):
+    def __init__(self, raid: Raid, interaction: discord.Interaction, config ):
+        self.config = config
+        self.leader_trial_val = None
+        self.date_val = None
+        self.limit_val = None
+        self.role_nums_val = "8,2,2"
+        self.memo_val = "None"
+        self.new_roster = True
+        if raid is not None:
+            self.new_roster = False
+            self.leader_trial_val = f"{raid.leader},{raid.raid}"
+            self.date_val = f"{raid.date}"
+            self.limit_val = f"{raid.role_limit}"
+            self.role_nums_val = f"{raid.dps_limit},{raid.healer_limit},{raid.tank_limit}"
+            self.memo_val = f"{raid.memo}"
+        super().__init__(title='Trial Manager')
+        self.initialize()
 
+    def initialize(self):
+        # Add all the items here based on what is above
+        self.leader_trial =  discord.ui.TextInput(
+            label='Raid Lead and Trial',
+            placeholder='Format: Raid Lead, Trial',
+            default = self.leader_trial_val,
+            required=True
+        )
+        self.date = discord.ui.TextInput(
+            label="Date",
+            placeholder="Put Timestamp here",
+            default = self.date_val,
+            required=True
+        )
+        self.limit = discord.ui.TextInput(
+            label="Role Limit",
+            placeholder="Put Role Limit here",
+            default=self.limit_val,
+            required=True,
+        )
+        self.role_nums = discord.ui.TextInput(
+            label="DPS/Healer/Tank Role Nums",
+            default=self.role_nums_val,
+            required=True
+        )
+        self.memo = discord.ui.TextInput(
+            label="Memo",
+            default=self.memo_val,
+            placeholder="Type None if you do not want a memo.",
+            style=discord.TextStyle.long,
+            required=True
+        )
+        self.add_item(self.leader_trial)
+        self.add_item(self.date)
+        self.add_item(self.limit)
+        self.add_item(self.role_nums)
+        self.add_item(self.memo)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
+                    fact_role_limit, fact_memo, config):
+            if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
+                fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
+                fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
+                fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
+            if fact_role_limit == 0:
+                fact_role_limit = config["raids"]["roles"]["base"]
+            elif fact_role_limit == 1:
+                fact_role_limit = config["raids"]["roles"]["first"]
+            elif fact_role_limit == 2:
+                fact_role_limit = config["raids"]["roles"]["second"]
+            elif fact_role_limit == 3:
+                fact_role_limit = config["raids"]["roles"]["third"]
+            elif fact_role_limit == 4:
+                fact_role_limit = config["raids"]["roles"]["fourth"]
+            else:
+                raise UnknownError("Error: Somehow the code reached this in theory unreachable spot. Time to panic!")
+
+            dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
+            return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
+                        backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
+                        fact_memo)
+
+        try:
+            # Split the values:
+            role_limit = int(self.limit.value)
+            if role_limit < 0 or role_limit > 4:
+                await interaction.response.send_message(f"Invalid input, the role_limits must be between 0 and 4")
+                return
+            leader, raid = self.leader_trial.value.split(",")
+            dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
+            dps_limit = int(dps_limit.strip())
+            healer_limit = int(healer_limit.strip())
+            tank_limit = int(tank_limit.strip())
+            formatted_date = format_date(self.date.value)
+
+            created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
+
+            logging.info(f"Creating new channel.")
+            category = interaction.guild.get_channel(self.config["raids"]["category"])
+            new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
+            channel = await category.create_text_channel(new_name)
+            limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
+            embed = discord.Embed(
+                title=f"{created.raid} {created.date}",
+                description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
+                color=discord.Color.blue()
+            )
+            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
+            embed.set_author(name="Raid Lead: " + leader)
+            embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+            embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+            embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
+
+            if created.memo != "None":
+                embed_memo = discord.Embed(
+                    title=" ",
+                    color=discord.Color.dark_gray()
+                )
+                embed_memo.add_field(name=" ", value=created.memo, inline=True)
+                embed_memo.set_footer(text="This is very important!")
+                await channel.send(embed=embed_memo)
+            await channel.send(embed=embed)
+            logging.info(f"Created Channel: channelID: {str(channel.id)}")
+        except Exception as e:
+            await interaction.response.send_message(
+                f"Error in creating category channel and sending embed. Please make sure all your inputs are correct.")
+            logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
+            return
+
+        # Save raid info to MongoDB
+        try:
+            logging.info(f"Saving Roster channelID: {str(channel.id)}")
+            rec = {
+                'channelID': channel.id,
+                'data': created.get_data()
+            }
+            raids.insert_one(rec)
+            logging.info(f"Saved Roster channelID: {str(channel.id)}")
+        except Exception as e:
+            await interaction.response.send_message("Error in saving information to MongoDB, roster was not saved.")
+            logging.error(f"Raid Creation MongoDB Error: {str(e)}")
+            return
+        await interaction.response.send_message(f"Created Roster and Channel")
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
+        logging.error(f"Trial Creation Error: {str(error)}")
 
 class Raids(commands.Cog, name="Trials"):
     """Commands related to Raids/Trials"""
@@ -530,133 +676,15 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"User Roster Exit Removal Error: {str(e)}")
             raise OSError(f"Unable to remove user on exit from rosters.")
 
-    @commands.command(name="trial", aliases=["raid", "trail"])
-    @permissions.has_raid_lead()
-    async def create_roster(self, ctx: commands.Context):
-        """Creates a new roster | `!trial [leader],[trial],[date info],[limit]`"""
+    @app_commands.command(name="trial", description="For Raid Leads: Opens Trial Creation Modal")
+    @permissions.application_has_raid_lead()
+    async def create_roster(self, interaction: discord.Interaction) -> None:
+        raid = None
+        await interaction.response.send_modal(TrialModal(raid, interaction, self.bot.config))
 
-        def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-                    fact_role_limit, fact_memo):
-            try:
-                if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
-                    fact_dps_limit = self.bot.config["raids"]["roster_defaults"]["dps"]
-                    fact_healer_limit = self.bot.config["raids"]["roster_defaults"]["healers"]
-                    fact_tank_limit = self.bot.config["raids"]["roster_defaults"]["tanks"]
-                if fact_role_limit == 0:
-                    fact_role_limit = self.bot.config["raids"]["roles"]["base"]
-                elif fact_role_limit == 1:
-                    fact_role_limit = self.bot.config["raids"]["roles"]["first"]
-                elif fact_role_limit == 2:
-                    fact_role_limit = self.bot.config["raids"]["roles"]["second"]
-                elif fact_role_limit == 3:
-                    fact_role_limit = self.bot.config["raids"]["roles"]["third"]
-                elif fact_role_limit == 4:
-                    fact_role_limit = self.bot.config["raids"]["roles"]["fourth"]
-                else:
-                    ctx.reply("Error: Somehow the code reached this in theory unreachable spot. Time to panic!")
-                    logging.error("You done goofed.")
-
-                dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
-                return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                            backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
-                            fact_memo)
-            except Exception as e2:
-                ctx.send(f"Error on getting the role limits, please check the config is correct")
-                logging.error(f"Factory Failure: {str(e2)}")
-                return
-
-        try:
-            msg = ctx.message.content
-            msg = msg.split(" ", 1)  # Split into 2 parts of a list, the first space then the rest
-            vals = msg[1].split(",")  # drop the command
-
-            if len(vals) == 8:
-                leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit, memo = vals
-                dps_limit = int(dps_limit.strip())
-                healer_limit = int(healer_limit.strip())
-                tank_limit = int(tank_limit.strip())
-            elif len(vals) == 7:
-                leader, raid, date, role_limit, dps_limit, healer_limit, tank_limit = vals
-                memo = "delete"
-                dps_limit = int(dps_limit.strip())
-                healer_limit = int(healer_limit.strip())
-                tank_limit = int(tank_limit.strip())
-            elif len(vals) == 5:
-                leader, raid, date, role_limit, memo = vals
-                dps_limit, healer_limit, tank_limit = None, None, None
-            elif len(vals) == 4:
-                leader, raid, date, role_limit = vals
-                memo = "delete"
-                dps_limit, healer_limit, tank_limit = None, None, None
-            else:
-                if len(vals) > 8:
-                    await ctx.reply(f"Invalid input, you have too many parameters.")
-                    return
-                elif len(vals) > 5:
-                    await ctx.reply(f"Invalid input, if you want to specify the limits you have too few parameters."
-                                    f" If you do not and you are adding a memo then you have too many.\n"
-                                    f"Please do not use a comma in your memo as there is a temporary bug with that.")
-                    return
-                else:
-                    await ctx.reply("Invalid input, you have too few parameters.")
-                    return
-
-            role_limit = int(role_limit.strip())
-            if role_limit < 0 or role_limit > 4:
-                await ctx.send(f"Invalid input, the role_limits must be between 0 and 4")
-                return
-
-            formatted_date = format_date(date)
-
-            created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, memo)
-
-            logging.info(f"Creating new channel.")
-            category = ctx.guild.get_channel(self.bot.config["raids"]["category"])
-            new_name = generate_channel_name(date, created.raid, self.bot.config["raids"]["timezone"])
-            channel = await category.create_text_channel(new_name)
-            limiter = discord.utils.get(ctx.message.author.guild.roles, name=created.role_limit)
-            embed = discord.Embed(
-                title=f"{created.raid} {created.date}",
-                description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
-                color=discord.Color.blue()
-            )
-            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
-            embed.set_author(name="Raid Lead: " + leader)
-            embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
-            embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
-            embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
-
-            if memo != "delete":
-                embed_memo = discord.Embed(
-                    title=" ",
-                    color=discord.Color.dark_gray()
-                )
-                embed_memo.add_field(name=" ", value=memo, inline=True)
-                embed_memo.set_footer(text="This is very important!")
-                await channel.send(embed=embed_memo)
-            await channel.send(embed=embed)
-            await ctx.reply("Channel and Roster created")
-            logging.info(f"Created Channel: channelID: {str(channel.id)}")
-        except Exception as e:
-            await ctx.send(
-                f"Error in creating category channel and sending embed. Please make sure config is correct and"
-                " perms for the bot are set to allow this to take place.")
-            logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
-            return
-
-        # Save raid info to MongoDB
-        try:
-            logging.info(f"Saving Roster channelID: {str(channel.id)}")
-            rec = {
-                'channelID': channel.id,
-                'data': created.get_data()
-            }
-            raids.insert_one(rec)
-            logging.info(f"Saved Roster channelID: {str(channel.id)}")
-        except Exception as e:
-            await ctx.send("Error in saving information to MongoDB, roster was not saved.")
-            logging.error(f"Raid Creation MongoDB Error: {str(e)}")
-            return
+    @commands.command(name="trial", hidden=True)
+    async def old_trial_alert(self, ctx: commands.Context):
+        await ctx.reply(f"This command has moved to an application command, look for /trial instead!")
 
     @commands.command(name="su")
     async def su(self, ctx: commands.Context):

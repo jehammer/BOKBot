@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 from functools import wraps
 
 
@@ -34,6 +35,20 @@ def has_raid_lead():
         return wrapper_function
     return decorator
 
+def application_has_raid_lead():
+    """A decorator that validates if someone has the raid lead role"""
+    def decorator(original_function):
+        @wraps(original_function)
+        async def wrapper_function(*args, **kwargs):
+            interaction = args[1]
+            self = args[0]
+            raid_lead = discord.utils.get(interaction.guild.roles, name=self.bot.config["raids"]["lead"])
+            if raid_lead in interaction.user.roles:
+                return await original_function(*args, **kwargs)
+            else:
+                raise app_commands.MissingRole(str(raid_lead))
+        return wrapper_function
+    return decorator
 
 def creator_only():
     """A decorator that checks if bot creator is the one calling the command"""
