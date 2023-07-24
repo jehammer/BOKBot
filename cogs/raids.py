@@ -472,8 +472,46 @@ class Raid:
             logging.info(f"Spots filled in raid id {str(num)}")
         except Exception as e:
             logging.error(f"Fill Spots error: {str(e)}")
+
+class RosterSelect(discord.ui.Select):
+    def __init__(self, interaction: discord.Interaction, config):
+        self.channels = {}
+        self.config = config
+        rosters = raids.distinct("channelID")
+        options = []
+        for i in rosters:
+            channel = interaction.guild.get_channel(i)
+            if channel is not None:
+                options.append(discord.SelectOption(label=channel.name))
+                self.channels[channel.name] = i
+            #else:
+                #total += f"{str(counter + 1)}: {i}\n"
+
+        #discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
+        super().__init__(placeholder="Select a roster to modify",max_values=1,min_values=1,options=options)
+    async def callback(self, interaction: discord.Interaction):
+        selected = self.values[0]
+        raid = get_raid(self.channels[selected])
+        await interaction.response.send_modal(TrialModal(raid, interaction, self.config, self.channels[selected]))
+
+class RosterSelectView(discord.ui.View):
+    def __init__(self,interaction: discord.Interaction, bot, caller, *, timeout = 30):
+        super().__init__(timeout=timeout)
+        self.caller = caller
+        self.bot = bot
+        self.add_item(RosterSelect(interaction, bot.config))
+
+    async def interaction_check(self, interaction: discord.Interaction):
+        if interaction.user.id != self.caller.id:
+            await interaction.response.send_message(f"You need to be the caller of the command to interact with it.", ephemeral=True)
+            return False
+        return True
+    async def on_timeout(self):
+        self.clear_items()
+        self.stop()
+
 class TrialModal(discord.ui.Modal):
-    def __init__(self, raid: Raid, interaction: discord.Interaction, config ):
+    def __init__(self, raid: Raid, interaction: discord.Interaction, config, channel=None ):
         self.config = config
         self.leader_trial_val = None
         self.date_val = None
@@ -482,10 +520,25 @@ class TrialModal(discord.ui.Modal):
         self.memo_val = "None"
         self.new_roster = True
         if raid is not None:
+            self.map_dict = {
+                self.config["raids"]["roles"]["base"]: 0,
+                self.config["raids"]["roles"]["first"]: 1,
+                self.config["raids"]["roles"]["second"]: 2,
+                self.config["raids"]["roles"]["third"]: 3,
+                self.config["raids"]["roles"]["fourth"]: 4,
+                0 : self.config["raids"]["roles"]["base"],
+                1 : self.config["raids"]["roles"]["first"],
+                2 : self.config["raids"]["roles"]["second"],
+                3 : self.config["raids"]["roles"]["third"],
+                4 : self.config["raids"]["roles"]["fourth"]
+            }
+            mapped_limit = self.map_dict[raid.role_limit]
+            self.channel= channel
             self.new_roster = False
+            self.raid = raid
             self.leader_trial_val = f"{raid.leader},{raid.raid}"
             self.date_val = f"{raid.date}"
-            self.limit_val = f"{raid.role_limit}"
+            self.limit_val = f"{mapped_limit}"
             self.role_nums_val = f"{raid.dps_limit},{raid.healer_limit},{raid.tank_limit}"
             self.memo_val = f"{raid.memo}"
         super().__init__(title='Trial Manager')
@@ -530,94 +583,106 @@ class TrialModal(discord.ui.Modal):
         self.add_item(self.memo)
 
     async def on_submit(self, interaction: discord.Interaction):
-        def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-                    fact_role_limit, fact_memo, config):
-            if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
-                fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
-                fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
-                fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
-            if fact_role_limit == 0:
-                fact_role_limit = config["raids"]["roles"]["base"]
-            elif fact_role_limit == 1:
-                fact_role_limit = config["raids"]["roles"]["first"]
-            elif fact_role_limit == 2:
-                fact_role_limit = config["raids"]["roles"]["second"]
-            elif fact_role_limit == 3:
-                fact_role_limit = config["raids"]["roles"]["third"]
-            elif fact_role_limit == 4:
-                fact_role_limit = config["raids"]["roles"]["fourth"]
-            else:
-                raise UnknownError("Error: Somehow the code reached this in theory unreachable spot. Time to panic!")
+        # Split the values:
+        role_limit = int(self.limit.value)
+        if role_limit < 0 or role_limit > 4:
+            await interaction.response.send_message(f"Invalid input, the role_limits must be between 0 and 4")
+            return
+        mapped_limit = self.map_dict[role_limit]
+        leader, raid = self.leader_trial.value.split(",")
+        dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
+        dps_limit = int(dps_limit.strip())
+        healer_limit = int(healer_limit.strip())
+        tank_limit = int(tank_limit.strip())
+        formatted_date = format_date(self.date.value)
 
-            dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
-            return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                        backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
-                        fact_memo)
+        if self.new_roster is False:
+            # Update all values then update the DB
+            self.raid.raid = raid
+            self.raid.leader = leader
+            self.raid.dps_limit = dps_limit
+            self.raid.healer_limit = healer_limit
+            self.raid.tank_limit = tank_limit
+            self.raid.date = formatted_date
+            self.raid.memo = self.memo.value
+            self.raid.role_limit = mapped_limit
 
-        try:
-            # Split the values:
-            role_limit = int(self.limit.value)
-            if role_limit < 0 or role_limit > 4:
-                await interaction.response.send_message(f"Invalid input, the role_limits must be between 0 and 4")
-                return
-            leader, raid = self.leader_trial.value.split(",")
-            dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
-            dps_limit = int(dps_limit.strip())
-            healer_limit = int(healer_limit.strip())
-            tank_limit = int(tank_limit.strip())
-            formatted_date = format_date(self.date.value)
+            update_db(self.channel, self.raid)
+            new_name = generate_channel_name(formatted_date, raid, self.config["raids"]["timezone"])
+            modify_channel = interaction.guild.get_channel(int(self.channel))
+            await modify_channel.edit(name=new_name)
+            await interaction.response.send_message(f"Roster and Channel updated.")
+            return
 
-            created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
+        elif self.new_roster is True:
+            def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
+                        fact_role_limit, fact_memo, config):
+                if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
+                    fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
+                    fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
+                    fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
+                fact_role_limit = self.map_dict[fact_role_limit]
+                dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
+                return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
+                            backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
+                            fact_memo)
+            try:
+                created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
 
-            logging.info(f"Creating new channel.")
-            category = interaction.guild.get_channel(self.config["raids"]["category"])
-            new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
-            channel = await category.create_text_channel(new_name)
-            limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
-            embed = discord.Embed(
-                title=f"{created.raid} {created.date}",
-                description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
-                color=discord.Color.blue()
-            )
-            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
-            embed.set_author(name="Raid Lead: " + leader)
-            embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
-            embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
-            embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
-
-            if created.memo != "None":
-                embed_memo = discord.Embed(
-                    title=" ",
-                    color=discord.Color.dark_gray()
+                logging.info(f"Creating new channel.")
+                category = interaction.guild.get_channel(self.config["raids"]["category"])
+                new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
+                channel = await category.create_text_channel(new_name)
+                limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
+                embed = discord.Embed(
+                    title=f"{created.raid} {created.date}",
+                    description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
+                    color=discord.Color.blue()
                 )
-                embed_memo.add_field(name=" ", value=created.memo, inline=True)
-                embed_memo.set_footer(text="This is very important!")
-                await channel.send(embed=embed_memo)
-            await channel.send(embed=embed)
-            logging.info(f"Created Channel: channelID: {str(channel.id)}")
-        except Exception as e:
-            await interaction.response.send_message(
-                f"Error in creating category channel and sending embed. Please make sure all your inputs are correct.")
-            logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
-            return
+                embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
+                embed.set_author(name="Raid Lead: " + leader)
+                embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+                embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+                embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
 
-        # Save raid info to MongoDB
-        try:
-            logging.info(f"Saving Roster channelID: {str(channel.id)}")
-            rec = {
-                'channelID': channel.id,
-                'data': created.get_data()
-            }
-            raids.insert_one(rec)
-            logging.info(f"Saved Roster channelID: {str(channel.id)}")
-        except Exception as e:
-            await interaction.response.send_message("Error in saving information to MongoDB, roster was not saved.")
-            logging.error(f"Raid Creation MongoDB Error: {str(e)}")
+                if created.memo != "None":
+                    embed_memo = discord.Embed(
+                        title=" ",
+                        color=discord.Color.dark_gray()
+                    )
+                    embed_memo.add_field(name=" ", value=created.memo, inline=True)
+                    embed_memo.set_footer(text="This is very important!")
+                    await channel.send(embed=embed_memo)
+                await channel.send(embed=embed)
+                logging.info(f"Created Channel: channelID: {str(channel.id)}")
+            except Exception as e:
+                await interaction.response.send_message(
+                    f"Error in creating category channel and sending embed. Please make sure all your inputs are correct.")
+                logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
+                return
+
+            # Save raid info to MongoDB
+            try:
+                logging.info(f"Saving Roster channelID: {str(channel.id)}")
+                rec = {
+                    'channelID': channel.id,
+                    'data': created.get_data()
+                }
+                raids.insert_one(rec)
+                logging.info(f"Saved Roster channelID: {str(channel.id)}")
+            except Exception as e:
+                await interaction.response.send_message("Error in saving information to MongoDB, roster was not saved.")
+                logging.error(f"Raid Creation MongoDB Error: {str(e)}")
+                return
+            await interaction.response.send_message(f"Created Roster and Channel")
             return
-        await interaction.response.send_message(f"Created Roster and Channel")
+        else:
+            await interaction.response.send_message(f"Hey uh, you reached an unreachable part of the code lol.")
+            return
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
         logging.error(f"Trial Creation Error: {str(error)}")
+        return
 
 class Raids(commands.Cog, name="Trials"):
     """Commands related to Raids/Trials"""
@@ -682,9 +747,18 @@ class Raids(commands.Cog, name="Trials"):
         raid = None
         await interaction.response.send_modal(TrialModal(raid, interaction, self.bot.config))
 
+    @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
+    @permissions.application_has_raid_lead()
+    async def modify_roster(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message("Select the roster", view=RosterSelectView(interaction, self.bot, interaction.user))
+
     @commands.command(name="trial", hidden=True)
     async def old_trial_alert(self, ctx: commands.Context):
         await ctx.reply(f"This command has moved to an application command, look for /trial instead!")
+
+    @commands.command(name="modify", hidden=True)
+    async def modify_alert(self, ctx: commands.Context):
+        await ctx.reply(f"This command has moved to an application command, look for /modify instead!")
 
     @commands.command(name="su")
     async def su(self, ctx: commands.Context):
@@ -971,7 +1045,7 @@ class Raids(commands.Cog, name="Trials"):
                 names = f"Healers: {str(healer_count)}\nTanks: {str(tank_count)}\nDPS: {str(dps_count)}"
                 embed.add_field(name="Total Backups", value=names, inline=False)
 
-            if raid.memo != "delete":
+            if raid.memo != "None":
                 embed_memo = discord.Embed(
                     title=" ",
                     color=discord.Color.dark_gray()
