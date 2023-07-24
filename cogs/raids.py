@@ -520,19 +520,19 @@ class TrialModal(discord.ui.Modal):
         self.role_nums_val = "8,2,2"
         self.memo_val = "None"
         self.new_roster = True
+        self.map_dict = {
+            self.config["raids"]["roles"]["base"]: 0,
+            self.config["raids"]["roles"]["first"]: 1,
+            self.config["raids"]["roles"]["second"]: 2,
+            self.config["raids"]["roles"]["third"]: 3,
+            self.config["raids"]["roles"]["fourth"]: 4,
+            0: self.config["raids"]["roles"]["base"],
+            1: self.config["raids"]["roles"]["first"],
+            2: self.config["raids"]["roles"]["second"],
+            3: self.config["raids"]["roles"]["third"],
+            4: self.config["raids"]["roles"]["fourth"]
+        }
         if raid is not None:
-            self.map_dict = {
-                self.config["raids"]["roles"]["base"]: 0,
-                self.config["raids"]["roles"]["first"]: 1,
-                self.config["raids"]["roles"]["second"]: 2,
-                self.config["raids"]["roles"]["third"]: 3,
-                self.config["raids"]["roles"]["fourth"]: 4,
-                0 : self.config["raids"]["roles"]["base"],
-                1 : self.config["raids"]["roles"]["first"],
-                2 : self.config["raids"]["roles"]["second"],
-                3 : self.config["raids"]["roles"]["third"],
-                4 : self.config["raids"]["roles"]["fourth"]
-            }
             mapped_limit = self.map_dict[raid.role_limit]
             self.channel= channel
             self.new_roster = False
