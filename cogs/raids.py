@@ -607,7 +607,7 @@ class TrialModal(discord.ui.Modal):
             new_name = generate_channel_name(formatted_date, raid, self.config["raids"]["timezone"])
             modify_channel = interaction.guild.get_channel(int(self.channel))
             await modify_channel.edit(name=new_name)
-            await interaction.response.send_message(f"Roster and Channel updated.")
+            await interaction.response.send_message(f"Roster {new_name} and Channel updated.")
             return
 
         elif self.new_roster is True:
@@ -670,7 +670,7 @@ class TrialModal(discord.ui.Modal):
                 await interaction.response.send_message("Error in saving information to MongoDB, roster was not saved.")
                 logging.error(f"Raid Creation MongoDB Error: {str(e)}")
                 return
-            await interaction.response.send_message(f"Created Roster and Channel")
+            await interaction.response.send_message(f"Created Roster and Channel {channel.name}")
             return
         else:
             await interaction.response.send_message(f"Hey uh, you reached an unreachable part of the code lol.")
@@ -722,7 +722,7 @@ class CallModal(discord.ui.Modal):
         if len(self.raid.dps) == 0:
             names += "None" + "\n"
         await self.channel.send(f"A MESSAGE FOR:\n{names}\n{self.call.value}")
-        await interaction.response.send_message(f"Message sent.")
+        await interaction.response.send_message(f"{self.channel.name} Message sent.")
         return
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
@@ -762,11 +762,12 @@ class CloseModal(discord.ui.Modal):
         runs_increased = "Runs not increased"
         if self.runs.value.strip().lower() == "y":
             update_runs(self.raid)
-            runs_increased = "Runs Increased"
+            runs_increased = "Runs increased"
         to_delete = {"channelID": self.channel_id}
         raids.delete_one(to_delete)
+        name = self.channel.name
         await self.channel.delete()
-        await interaction.response.send_message(f"Roster Closed and {runs_increased}")
+        await interaction.response.send_message(f"Roster {name} Closed and {runs_increased}")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
@@ -797,7 +798,7 @@ class FillModal(discord.ui.Modal):
             return
         self.raid.fill_spots(self.channel_id)
         update_db(self.channel_id, self.raid)
-        await interaction.response.send_message(f"Roles filled")
+        await interaction.response.send_message(f"{self.channel.name} Roles filled")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
@@ -839,9 +840,9 @@ class RunCountModal(discord.ui.Modal):
             new_name = generate_channel_name(self.raid.date, self.raid.raid,
                                              self.config["raids"]["timezone"])
             await self.channel.edit(name=new_name)
-            await interaction.response.send_message(f"Runs and Date updated")
+            await interaction.response.send_message(f"{self.channel.name} Runs and Date updated")
             return
-        await interaction.response.send_message(f"Runs updated")
+        await interaction.response.send_message(f"{self.channel.name} Runs updated")
         return
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
@@ -904,20 +905,24 @@ class RemoveModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         to_remove = [int(i)-1 for i in self.options.value.split(',')]
         to_remove_keys = []
+        names = ""
         for i in range(len(self.roster)):
             if i in to_remove:
                 to_remove_keys.append(self.roster[i])
         for i in to_remove_keys:
             if i in self.raid.dps.keys() or i in self.raid.backup_dps.keys():
                 self.raid.remove_dps(i)
+                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
             elif i in self.raid.healers.keys() or \
                     i in self.raid.backup_healers.keys():
                 self.raid.remove_healer(i)
+                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
             elif i in self.raid.tanks.keys() or \
                     i in self.raid.backup_tanks.keys():
                 self.raid.remove_tank(i)
+                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
         update_db(self.channel_id, self.raid)
-        await interaction.response.send_message(f"User(s) have been removed from roster.")
+        await interaction.response.send_message(f"User(s) have been removed from roster {self.channel.name}.\n{names}")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
