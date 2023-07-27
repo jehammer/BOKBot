@@ -155,30 +155,6 @@ def update_runs(raid, num=1):
             except Exception as e:
                 logging.error(f"Update Count Error: {str(e)}")
                 raise IODBError("Unable to update runs info")
-def print_initial_menu(ctx):
-    """Prints the initial startup menu"""
-    try:
-        counter = 0
-        total = ""
-        channels = {}
-        rosters = raids.distinct("channelID")
-        try:
-            for i in rosters:
-                channel = ctx.guild.get_channel(i)
-                if channel is not None:
-                    total += f"{str(counter + 1)}: {channel.name}\n"
-                else:
-                    total += f"{str(counter + 1)}: {i}\n"
-                channels[counter] = i
-                counter += 1
-        except Exception as e:
-            logging.error(f"Menu Print Error: Unable to get channel information: {str(e)}")
-            raise DiscordError("Unable to fetch Discord Channel information")
-        total += f"0: Exit \n"
-        return total, channels
-    except Exception as e:
-        logging.error(f"Unable to print initial menu: {str(e)}")
-        raise IODBError("Unable to load distinct roster information")
 
 def set_channels(config):
     """Function to set the MongoDB information on cog load"""
