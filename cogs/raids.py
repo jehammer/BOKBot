@@ -460,8 +460,9 @@ class RosterSelect(discord.ui.Select):
             if channel is not None:
                 options.append(discord.SelectOption(label=channel.name))
                 self.channels[channel.name] = i
-            #else:
-                #total += f"{str(counter + 1)}: {i}\n"
+            else:
+                options.append(discord.SelectOption(label=i))
+                self.channels[str(i)] = i
 
         #discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
         super().__init__(placeholder="Select the roster you wish to use",max_values=1,min_values=1,options=options)
@@ -735,13 +736,17 @@ class CloseModal(discord.ui.Modal):
         self.config = config
         self.channel_id = channel
         self.channel = interaction.guild.get_channel(int(self.channel_id))
+        if self.channel is None:
+            self.name = self.channel_id
+        else:
+            self.name = self.channel.name
         self.raid = raid
         super().__init__(title='Close Roster')
         self.initialize()
     def initialize(self):
         # Add all the items here based on what is above
         self.confirm = discord.ui.TextInput(
-            label=f"Close {self.channel.name}",
+            label=f"Close {self.name}",
             placeholder="Y or N? Click cancel to close this",
             style=discord.TextStyle.short,
             required=True
@@ -752,8 +757,16 @@ class CloseModal(discord.ui.Modal):
             style=discord.TextStyle.short,
             required=True
         )
+        self.runscount = discord.ui.TextInput(
+            label=f"If Yes enter number of runs to increase by",
+            placeholder="I mean it defaults to 1...",
+            default="1",
+            style=discord.TextStyle.short,
+            required=True
+        )
         self.add_item(self.confirm)
         self.add_item(self.runs)
+        self.add_item(self.runscount)
 
     async def on_submit(self, interaction: discord.Interaction):
         if self.confirm.value.strip().lower() != "y":
@@ -761,13 +774,13 @@ class CloseModal(discord.ui.Modal):
             return
         runs_increased = "Runs not increased"
         if self.runs.value.strip().lower() == "y":
-            update_runs(self.raid)
+            update_runs(self.raid, int(self.runscount.value))
             runs_increased = "Runs increased"
         to_delete = {"channelID": self.channel_id}
         raids.delete_one(to_delete)
-        name = self.channel.name
-        await self.channel.delete()
-        await interaction.response.send_message(f"Roster {name} Closed and {runs_increased}")
+        if self.channel is not None:
+            await self.channel.delete()
+        await interaction.response.send_message(f"Roster {self.name} Closed and {runs_increased}")
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
