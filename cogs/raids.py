@@ -1015,7 +1015,7 @@ class Raids(commands.Cog, name="Trials"):
     async def send_message_to_everyone(self, ctx: commands.Context):
         """For Raid Leads: A way to send a ping to everyone in a roster."""
         try:
-            await ctx.reply(f"This command have moved to an application command, use /call instead!")
+            await ctx.reply(f"This command has moved to an application command, use /call instead!")
         except Exception as e:
             logging.error(f"Call error: {str(e)}")
             return
@@ -1028,7 +1028,7 @@ class Raids(commands.Cog, name="Trials"):
     async def roster_fill_old(self, ctx: commands.Context):
         """ For Raid Leads: Lets you select the raid to fill the main list from backups."""
         try:
-            await ctx.reply(f"This command have moved to an application command, use /fill instead!")
+            await ctx.reply(f"This command has moved to an application command, use /fill instead!")
         except Exception as e:
             await ctx.send(f"Unable to process the command")
             logging.error(f"Fill Roster Error: {str(e)}")
@@ -1044,7 +1044,7 @@ class Raids(commands.Cog, name="Trials"):
     async def close_roster_old(self, ctx: commands.Context):
         """For Raid Leads: Closes out a roster"""
         try:
-            await ctx.reply(f"This command have moved to an application command, use /close instead!")
+            await ctx.reply(f"This command has moved to an application command, use /close instead!")
         except Exception as e:
             logging.error(f"Close error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
@@ -1059,7 +1059,7 @@ class Raids(commands.Cog, name="Trials"):
     async def increase_run_count_old(self, ctx: commands.Context):
         """For Raid Leads: Increase rosters run count"""
         try:
-            await ctx.reply(f"This command have moved to an application command, use /runcount instead!")
+            await ctx.reply(f"This command has moved to an application command, use /runcount instead!")
         except Exception as e:
             logging.error(f"Run Count error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
@@ -1075,7 +1075,7 @@ class Raids(commands.Cog, name="Trials"):
     async def remove_from_roster(self, ctx: commands.Context):
         """For Raid Leads: Removes someone from the roster"""
         try:
-            await ctx.reply(f"This command have moved to an application command, use /remove instead!")
+            await ctx.reply(f"This command has moved to an application command, use /remove instead!")
         except Exception as e:
             logging.error(f"Remove error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
