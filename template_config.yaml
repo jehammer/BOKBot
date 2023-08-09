@@ -27,7 +27,6 @@ raids:
   category: # Category ID where you want new rosters created under
   lead: @everyone # Lead config is for the roles that are allowed to make new rosters.
   timezone: US/Central # NOTE: Use Python timezones from this package: https://pypi.org/project/pytz/
-  use_limits: false # if set to true, when creating a roster the associated rank limit will be used. Otherwise, open to all.
   roles: # Note: THE ROLES ARE CASE SENSITIVE
     base: @everyone # the base rank to join in on raids. If everyone use "@everyone"
     first: none

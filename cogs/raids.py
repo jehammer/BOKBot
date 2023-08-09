@@ -758,7 +758,7 @@ class CloseModal(discord.ui.Modal):
             required=True
         )
         self.runscount = discord.ui.TextInput(
-            label=f"If Yes enter number of runs to increase by",
+            label=f"If Yes enter number of runs",
             placeholder="I mean it defaults to 1...",
             default="1",
             style=discord.TextStyle.short,
@@ -829,7 +829,7 @@ class RunCountModal(discord.ui.Modal):
     def initialize(self):
         # Add all the items here based on what is above
         self.num = discord.ui.TextInput(
-            label=f"Number of runs to increase for {self.channel.name}",
+            label=f"Number of runs for {self.channel.name}",
             default = "1",
             placeholder="Just click cancel if you want to cancel.",
             style=discord.TextStyle.short,
