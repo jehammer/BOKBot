@@ -1,4 +1,5 @@
 import datetime
+import random
 import re
 import discord
 from discord.ext import commands
@@ -458,8 +459,12 @@ class RosterSelect(discord.ui.Select):
         for i in rosters:
             channel = interaction.guild.get_channel(i)
             if channel is not None:
-                options.append(discord.SelectOption(label=channel.name))
-                self.channels[channel.name] = i
+                name = channel.name
+                if name in self.channels.keys():
+                    rand = random.randint(1000,9999)
+                    name += f"-{str(rand)}"
+                options.append(discord.SelectOption(label=name))
+                self.channels[name] = i
             else:
                 options.append(discord.SelectOption(label=i))
                 self.channels[str(i)] = i

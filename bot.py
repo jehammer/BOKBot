@@ -69,7 +69,8 @@ async def on_tree_error(interaction: discord.Interaction, error: app_commands.Ap
     elif isinstance(error, app_commands.MissingRole):
         return await interaction.response.send_message(f"{str(error)}")
     else:
-        await interaction.response.send_message("test")
+        await interaction.response.send_message(f"Some weird error is being thrown. Not sure what it is")
+        logging.error(f"{str(error)}")
 
 bot.tree.on_error = on_tree_error
 
