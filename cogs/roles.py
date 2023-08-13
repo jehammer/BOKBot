@@ -90,7 +90,7 @@ class Roles(commands.Cog, name="Roles"):
                 return
 
             if str(payload.message_id) not in roles_info.keys():
-                print("Could not find message id")
+                logging.error("Could not find message id for reaction add")
                 return
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]

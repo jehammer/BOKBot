@@ -8,7 +8,6 @@ import logging
 from pytz import timezone
 from enum import Enum
 from pymongo import MongoClient
-import asyncio
 import decor.perms as permissions
 from errors.boterrors import *
 
@@ -70,6 +69,7 @@ def get_raid(channel_id):
         raise IODBError(f"Unable to load Raid from DB")
 
 
+# TODO: Make this cleaner with a new data factory
 def update_runs(raid, num=1):
     """Updates the number of runs for people in the raid roster"""
     for i in raid.dps:
@@ -1603,6 +1603,8 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send(f"I was unable to print the limits")
             logging.error(f"Print Limits Error: {str(e)}")
 
+    #TODO: Improve increase and decrease with template factories for building data.
+    #   Really only need one up above for use in the two functions.
     @commands.command(name="increase")
     @permissions.has_raid_lead()
     async def increase_raid_count(self, ctx: commands.Context, member: discord.Member = None):
