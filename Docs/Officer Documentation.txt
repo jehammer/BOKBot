@@ -1,44 +1,26 @@
 **Only people with the tag Raid Leads are able to use the commands below**
 
-To set up the trial:
-`!trial [leader],[trial],[date info]`
-or
-`!trial [Leader], [Trial Name], [Date], [DPS Nums], [Healer Nums], [Tank Nums]`
-
 You will get the Date Info to create a timestamp from this website:
 https://hammertime.cyou/
 
-A Video guide is available below
+A Video guide is available below to showcase the general usage of BOKBot for these features.
 
+As Raid Leads, your primary form of interacting with BOKBot is through Application Commands. The commands are as follows:
+`/trial` - used to open a modal to create a new Trial Roster, I advise you to have the timestamp already selected from hammertime above, but you can also type in `ASAP` for a popup roster.
 
-ex:
-`!trial Arma, nHOF, <t:1653624240:f>`
-`!trial me, nHOF, <t:1653624240:f>`
+The rest of the commands rely on you selecting the roster from a dropdown menu.
+`/modify` this is used to Modify any of the values you create in `/trial`
+`/call` is used to send out a message to everyone in a roster.
+`/fill` is used to fill a roster from backup, in the event you need to.
+`/runcount` is used to increase the number of runs by more than 1, and you can also change the date. It is useful if you want to keep the roster for another run later on.
+`/remove` is used to remove people who were not at the Trial from a roster, in the event they did not show up and should not get credit for the run.
+`/close` is used to close out a roster. This will also delete the channel.
 
-Note: When setting up a prog, you will generally not close the roster. You can use `!runcount` to increase the number of runs for people on a roster.
-Or, if you did multiple runs in a farm, you can call the command several times. I will later update it to have you enter the number of runs to increase the count by. 
+You can also use !add to manually add someone to a roster, the format for this is `!add role @theperson` such as `!add dps @Drakador`
 
-Note that using commas are required and extra will separate the inputs and cause issues. So please enter it as above. Use the template if needed.
+You can pin something within a roster channel using `!pin`, to do this either reply to a message with `!pin` or type `!pin my message here` and that message you send will be pinned in the channel.
 
-To add someone to the roster use `!add [role] [@ the person]`. This must be done in the roster channel itself, not the playground.
-
-You can also pin something in a channel using BOKBot, do note that this is meant for Raid Leads who do not have manage messages permissions. You can either reply to a message and use `!pin`
-or you can call !pin [msg] and it will pin the message.
-
-The following are menu based, and will take additional input after you call the command.
-Change leader use `!leader`
-Change date use `!datetime`, follow the menu and use the timestamp from above 
-Change trial use `!change`
-Change the number of each role in a roster use `!rolenum` and follow the menus, format is in dps, tanks, healers and defaults to 8, 2, 2
-Remove someone from a roster use `!remove`
-To send a message to everyone on a roster use `!call`
-To make/delete a memo for a roster use `!memo`
-To fill a roster from backups call `!fill`
-
-To close a trial use: `!close` 
-The bot will print out a menu with numbers, just type the number and the bot will verify if it is the right one by printing both the trial name and the channel name. type `y` or `Y` to confirm. 
-ANY invalid option at any point in the bot will cause it to safe-exit the command to prevent problems. 
-If you have deleted the channel but not the roster, have no fear, the bot will account for that and you can use the function as normal, but it will print the ID instead of the channel name. 
+If you have deleted the channel but not the roster, have no fear, the bot will account for that and you can use the function as normal, but it will print the ID instead of the channel name.
 I advise doing this in the bokbot-playground chat so we have a log.
 
 
@@ -47,9 +29,12 @@ I advise doing this in the bokbot-playground chat so we have a log.
 If Arma is not around and he should be, call `!getarma`
 This will ping him 8 times. 4 DMs, 4 messages in the chat
 
+If you need to manually increase someones run count by one, do `!increase @theperson`
+To decrease it is similar, do `!decrease @theperson`
 
+If a user is struggling to set their default, an officer can set it using `!setdef [@user] [role]`
 
-The report system is only available to officers. 
+***The report system is only available to officers.***
 
 To get the next oldest report that has not been closed, call `!next` to get it.
 To list all of the reports call `!reports`
@@ -58,8 +43,3 @@ The following will ask for verification from you before completing the function:
 
 You can reply to a report by using `!reply [id] [msg]` which will then send a DM through BOKBot to the report creator.
 You can close a report by calling `!handle [id] [msg]`
-
-
-If a user is struggling to set their default, an officer can set it using `!setdef [@user] [role]`
-
-Officers can also increase or decrease someones run count by 1 individually, by calling `!increase [@ the individual]` or `!decrease [@ the individual]`

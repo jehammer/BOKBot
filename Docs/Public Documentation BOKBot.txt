@@ -10,38 +10,41 @@ Hello and welcome to Breath of Kynareth!
 BOKBot is a custom build Discord bot written exclusively for our lovely guild here!
 It is designed to be an ~~overlord~~ assistant to the guild and as such has many useful functionalities for everyone!
 
-Lets start with the basics, perhaps you want to get a discord so you can be pinged. Well, BOKBot can provide!
+Lets start with the basics, perhaps you want to get a discord role so you can be pinged. Well, BOKBot can provide!
 
-To get a role from the list below, use `!role [role]` and the bot will grant you the role, and send you a DM saying the role has been granted, or removed if you already had it.
-For example, if you are a dps type: `!role dps` 
-If something has gone wrong, it will notify you and please just inform me of what you were trying to do and I will take a look.
+To get a role on Discord, just react in #role-selection and the bot will grant you the role, and send you a DM saying the role has been granted, or removed (if you unselect it, the role will be removed).
 
-You can use `!roles` to see a list of currently available roles to select or deselect with the bot.
+If something is not working just let me know!
 
-The roles above only apply for Discord roles. BOKBot also has its own roles for you to select when signing up to a roster. `!default [role]` is what you call.
+The roles above only apply for Discord roles to be tagged and stuff. However the Kyne's Follower role is needed for rosters sometimes to be able to sign up. As you may have read in #ranks this role means you have a toon that is CP 160 or higher.
+
+BOKBot also has its own roles for you to select when signing up to a roster. `!default [role]` is what you call, dont include the [ ] they are just for show.
 Default roles you can select are: dps, healer, tank
 So if you want to default to a healer you can type `!default healer` and the bot will store your default as a healer.
 You can check what your default role is using `!default` alone.
+#bot-spam is the channel for bot commands like this.
 
 
 Speaking of which...
 
 ***TRIALS***
 Please note trials are channel specific, so if you want to sign up for say, the CR run you will need to be in the correct channel under the Trials Category.
-It is very helpful here to have a default set, if you do not then you will have to specify what your role is when signing up. 
+It is very helpful here to have a default set, if you do not then you will have to specify what your role is when signing up.
 
-To sign up for a trial: `!su [optional role] [optional message]`
+Rember, set your default!
+
+To sign up for a trial: `!su [role (optional if default is set)] [optional message]`
 
 So you can use `!su dps` or `!su dps MagSorc`
 
 Or if you have set up a default from earlier in this document call `!su [optional message]`
 
-So you can use `!su` or `!su MagSorc` and either will work. 
+So you can use `!su` or `!su MagSorc` and either will work.
 
 Want to modify the message? `!msg [msg]` or `!msg MagBlade instead lol`
 
 
-We also have a backup roster. Please note that if you backup on a roster you must be available to come. But you want to give others the option to run first. 
+We also have a backup roster. Please note that if you backup on a roster you must be available to come. But you want to give others the option to run first.
 You call this with  `!bu [optional message]` or `!bu dps` or `!bu dps MagSorc`
 
 If the roster is full when you do !su, you will automatically be added as a backup.
@@ -61,13 +64,11 @@ Sometimes it can be difficult to send that initial DM to someone directly when y
 Please note that to have this working, you must be in a Direct Message with BOKBot. It is advised to have DMs for non-friends turned on for Breath of Kynareth.
 
 The report system is easy, to create a report you simply just do `!report [msg]` as a DM to BOKBot, and it will return an ID number for you. Keep this ID around,
-you will need it to update the report if you have to at all. 
+you will need it to update the report if you have to at all.
 
-Please note that images cannot be sent, so if you have to share a screenshot then use an alternative service such as imgur and send us the image link in the report. 
+Please note that images cannot be sent, so if you have to share a screenshot then use an alternative service such as imgur and send us the image link in the report.
 
-If you have to update your report, you will call (again in DMs) `!update [id] [msg]` and the officers will be notified of the update to your report. 
+If you have to update your report, you will call (again in DMs) `!update [id] [msg]` and the officers will be notified of the update to your report.
 
-The report system features 2-way communication, if you wish to keep communication through BOKBot instead of having an officer reach out to you, feel free to specify that or 
+The report system features 2-way communication, if you wish to keep communication through BOKBot instead of having an officer reach out to you, feel free to specify that or
 alternatively specify your wish for an officer to reach out to you directly instead of going through the bot. Whatever makes you most comfortable.
-
-Well, that was a lot. And there are many more fun features about BOKBot to explore! From fun voice commands to gif images, feel free to call `!help` to get a look at everything BOKBot has to offer!
