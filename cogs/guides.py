@@ -134,7 +134,7 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send information.")
             logging.error(f"Twins error: {str(e)}")
 
-    @commands.command(name="3runners", aliases=["backyard3", "yard3", "3runner, runner3, runners3"])
+    @commands.command(name="3runners", aliases=["backyard3", "yard3", "3runner", "runner3", "runners3"])
     async def send_three_runners_img(self, ctx: commands.Context):
         """Img for 3 backyard runners pathing"""
         try:
