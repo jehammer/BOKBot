@@ -23,13 +23,14 @@ logging.basicConfig(
 # TODO: Have the bot tell you when you overflow into Backup
 # TODO: Have bot remove anyone not meeting the new limit requirement when changing limit
 # TODO: Have bot move people to backup when rolenums changes if number signed up is too high
+# TODO: Figure out new date format method using DATE_TEMPLATE defined below
 
 # Global variables for the MongoDB channels, set by set_channels function
 global raids
 global count
 global defaults
 
-
+DATE_TEMPLATE = "<t:{date}:f>" # DATE_TEMPLATE.format(date=raid.date)
 class Role(Enum):
     DPS = "dps"
     HEALER = "healer"
@@ -598,6 +599,8 @@ class TrialModal(discord.ui.Modal):
         tank_limit = int(tank_limit.strip())
         formatted_date = format_date(self.date.value)
 
+        category = interaction.guild.get_channel(self.config["raids"]["category"])
+
         if self.new_roster is False:
             # Update all values then update the DB
             self.raid.raid = raid
@@ -614,7 +617,7 @@ class TrialModal(discord.ui.Modal):
             modify_channel = interaction.guild.get_channel(int(self.channel))
             await modify_channel.edit(name=new_name)
             await interaction.response.send_message(f"Roster {new_name} and Channel updated.")
-            return
+
 
         elif self.new_roster is True:
             def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
@@ -632,7 +635,6 @@ class TrialModal(discord.ui.Modal):
                 created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
 
                 logging.info(f"Creating new channel.")
-                category = interaction.guild.get_channel(self.config["raids"]["category"])
                 new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
                 channel = await category.create_text_channel(new_name)
                 limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
@@ -677,10 +679,33 @@ class TrialModal(discord.ui.Modal):
                 logging.error(f"Raid Creation MongoDB Error: {str(e)}")
                 return
             await interaction.response.send_message(f"Created Roster and Channel {channel.name}")
-            return
         else:
             await interaction.response.send_message(f"Hey uh, you reached an unreachable part of the code lol.")
-            return
+        def get_sort_key(current_channels):
+            current_raid = get_raid(current_channels.id)
+            new_position = 0
+            if current_raid is None:
+                new_position = channel.position  # Keep the channel's position unchanged
+            elif current_raid.date == "ASAP":
+                new_position = 100
+            else:
+                # Calculate new positioning
+                new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
+                tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
+                    tz=timezone(self.config["raids"]["timezone"]))
+                day = tz.day
+                if day < 10:
+                    day = int(f"0{str(day)}")
+                weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
+                current_channels.position = weight
+                new_position = weight
+            return new_position
+        # Sort channels
+        sorted(category.text_channels, key=get_sort_key)
+
+        for i in category.text_channels:
+            if i.position >= 100: # Fix the rate_limit so only adjust channels we want to adjust
+                await i.edit(position=i.position)
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
         logging.error(f"Trial Creation Error: {str(error)}")

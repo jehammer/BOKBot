@@ -134,6 +134,15 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send information.")
             logging.error(f"Twins error: {str(e)}")
 
+    @commands.command(name="3runners", aliases=["backyard3", "yard3", "3runner, runner3, runners3"])
+    async def send_three_runners_img(self, ctx: commands.Context):
+        """Img for 3 backyard runners pathing"""
+        try:
+            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1141509208639021066/mol3runner.png")
+        except Exception as e:
+            await ctx.send("Unable to send information.")
+            logging.error(f"3runners error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Guides(bot))
