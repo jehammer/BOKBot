@@ -8,6 +8,8 @@ import datetime
 import shutil
 import re
 import yaml
+from pymongo import MongoClient
+import os
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -131,7 +133,7 @@ class Admin(commands.Cog, name="Admin"):
             logging.error(f"Cog Reload Error: {str(e)}")
             await ctx.send(f"There was an issue reloading the cogs, check the logs for more info.")
 
-    @commands.command(name="configreload", aliases=["config", "reset", "configreset", "resetconfig", "reloadconfig"])
+    @commands.command(name="config", aliases=["configreload", "reset", "configreset", "resetconfig", "reloadconfig"])
     @permissions.creator_only()
     async def reload_config(self, ctx: commands.Context):
         """Owner Only: Reloads the config following an update"""
@@ -145,6 +147,89 @@ class Admin(commands.Cog, name="Admin"):
         except Exception as e:
             logging.error(f"Config Reload Error: {str(e)}")
             await ctx.send(f"There was an issue reloading the config, check the logs for more info.")
+
+    @commands.command(name="data")
+    async def dm_users_date(self, ctx: commands.Context):
+        """Get a DM of all Information BOKBot has on you"""
+        try:
+            await ctx.author.send(f"Hello! Just a moment as I gather up all your information. Please note this only includes "
+                                  f"saved information that is permanent, so any rosters you are on right now or reports "
+                                  f"you have opened will not be included in the data sent to you.")
+
+            client = MongoClient(self.bot.config['mongo'])
+            database = client['bot']
+            ranks = database.ranks
+            defaults = database.defaults
+            counts = database.count
+
+            user_id = ctx.message.author.id
+
+            rec = defaults.find_one({'userID': user_id})
+            if rec is None:
+                default = "No Default Set"
+            else:
+                default = f"Default is set to: {rec['default']}"
+
+            rec = ranks.find_one({'userID': user_id})
+            if rec is None:
+                rank = "No Rankings Done"
+            else:
+                rec = rec['data']
+                rank = f"Total Times Ranked: {rec['count']}\n" \
+                       f"Last Ranked: {rec['last_called']}\n" \
+                       f"Lowest Rank: {rec['lowest']}\n" \
+                       f"Highest Rank: {rec['highest']}\n" \
+                       f"Doubles: {rec['doubles']}\n" \
+                       f"Singles: {rec['singles']}\n" \
+                       f"69 Count: {rec['six_nine']}\n" \
+                       f"420 Count: {rec['four_twenty']}\n" \
+                       f"Boob Count: {rec['boob']}"
+
+            rec = counts.find_one({'userID': user_id})
+            if rec is None:
+                count = "No Raid Counts Recorded"
+            else:
+                count = f"Total Runs: {rec['raidCount']}\n" \
+                        f"Last Ran: {rec['lastRaid']}\n" \
+                        f"Last Date: {rec['lastDate']}\n" \
+                        f"DPS Runs: {rec['dpsRuns']}\n" \
+                        f"Tank Runs: {rec['tankRuns']}\n" \
+                        f"Healer Runs: {rec['healerRuns']}"
+
+            today = datetime.datetime.today()
+            name = ctx.message.author.display_name
+
+            text_lines = f"Data Request for {name} as of {today}\n\n" \
+                         f"Discord User ID: {user_id}\n\n" \
+                         f"##ROSTER DEFAULT INFORMATION##\n" \
+                         f"{default}\n\n" \
+                         f"##RANKING INFORMATION##\n" \
+                         f"{rank}\n\n" \
+                         f"##RUN COUNT INFORMATION##\n" \
+                         f"{count}\n\n"
+
+            # write to file
+            with open(f"{name}.txt", "w") as file:
+                file.write(text_lines)
+
+            # send file to Discord in message
+            with open(f"{name}.txt", "rb") as file:
+                await ctx.message.author.send("Your data has arrived:", file=discord.File(file, f"{name}.txt"))
+
+            if os.path.exists(f"{name}.txt"):
+                os.remove(f"{name}.txt")
+            else:
+                logging.error(f"Unable to find created file for the user")
+
+            return
+
+        except discord.Forbidden:
+            await ctx.reply(f"For privacy reasons (not that I store anything not publicly available, but just to keep anyone's concern down) "
+                            "this function requires you to have DMs available to me, please enable DMs on this server from non-friends so "
+                            "I can send you this data.")
+        except Exception as e:
+            logging.error(f"GET ALL USER DATA COMMAND ERROR: {str(e)}")
+            raise Exception(e)
 
     # AUTOMATED TASKS
     @tasks.loop(
