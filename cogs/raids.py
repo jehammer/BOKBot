@@ -1726,9 +1726,9 @@ class Raids(commands.Cog, name="Trials"):
                 embed.add_field(name="Last Ran:", value=counts["lastRaid"], inline=True)
                 embed.add_field(name="Last Date:", value=counts["lastDate"], inline=True)
                 embed.add_field(name="Stats", value="Role Runs", inline=False)
-                embed.add_field(name="Last Date:", value=counts["dpsRuns"], inline=True)
-                embed.add_field(name="Last Date:", value=counts["tankRuns"], inline=True)
-                embed.add_field(name="Last Date:", value=counts["healerRuns"], inline=True)
+                embed.add_field(name="DPS Runs:", value=counts["dpsRuns"], inline=True)
+                embed.add_field(name="Tanks Runs:", value=counts["tankRuns"], inline=True)
+                embed.add_field(name="Healer Runs:", value=counts["healerRuns"], inline=True)
                 await ctx.send(embed=embed)
             else:
                 new_data = {
