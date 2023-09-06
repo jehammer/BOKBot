@@ -212,9 +212,11 @@ class Admin(commands.Cog, name="Admin"):
             with open(f"{name}.txt", "w") as file:
                 file.write(text_lines)
 
+            logging.info(f"Sending data request file to: {name}")
+
             # send file to Discord in message
             with open(f"{name}.txt", "rb") as file:
-                await ctx.message.author.send("Your data has arrived:", file=discord.File(file, f"{name}.txt"))
+                await ctx.author.send("Your data has arrived:", file=discord.File(file, f"{name}.txt"))
 
             if os.path.exists(f"{name}.txt"):
                 os.remove(f"{name}.txt")
