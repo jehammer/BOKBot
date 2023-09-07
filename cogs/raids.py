@@ -592,11 +592,37 @@ class TrialModal(discord.ui.Modal):
             await interaction.response.send_message(f"Invalid input, the role_limits must be between 0 and 4")
             return
         mapped_limit = self.map_dict[role_limit]
-        leader, raid = self.leader_trial.value.split(",")
-        dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
-        dps_limit = int(dps_limit.strip())
-        healer_limit = int(healer_limit.strip())
-        tank_limit = int(tank_limit.strip())
+        try:
+            leader, raid = self.leader_trial.value.split(",")
+        except (NameError, ValueError):
+            await interaction.response.send_message(f"Invalid input: Leader and Trial should look like this: `Leader, Trial`\n"
+                                                    f"You entered: `{self.leader_trial.value}`")
+            return
+        try:
+            dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
+        except (NameError, ValueError):
+            await interaction.response.send_message(f"Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank "
+                                                    f"and look like: `8,2,2` for example.\n"
+                                                    f"You entered: `{self.role_nums.value}`")
+            return
+        try:
+            dps_limit = int(dps_limit.strip())
+        except ValueError:
+            await interaction.response.send_message(f"Invalid input: DPS limit should be a number, ex: `8`\n"
+                                                    f"You entered: `{dps_limit}`")
+            return
+        try:
+            healer_limit = int(healer_limit.strip())
+        except ValueError:
+            await interaction.response.send_message(f"Invalid input: Healer limit should be a number, ex: `2`\n"
+                                                    f"You entered: `{dps_limit}`")
+            return
+        try:
+            tank_limit = int(tank_limit.strip())
+        except ValueError:
+            await interaction.response.send_message(f"Invalid input: Tank limit should be a number, ex: `2`\n"
+                                                    f"You entered: `{dps_limit}`")
+            return
         formatted_date = format_date(self.date.value)
 
         category = interaction.guild.get_channel(self.config["raids"]["category"])
