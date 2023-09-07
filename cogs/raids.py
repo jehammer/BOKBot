@@ -825,13 +825,21 @@ class CloseModal(discord.ui.Modal):
         self.add_item(self.runscount)
 
     async def on_submit(self, interaction: discord.Interaction):
-        if self.confirm.value.strip().lower() != "y":
+        confirm_value = self.confirm.value.strip().lower()
+        runs_inc = self.runs.value.strip().lower()
+        if confirm_value != "n" and confirm_value != "y" and runs_inc != "n" and runs_inc != "y":
+            await interaction.response.send_message(f"You must enter a `y` or an `n` in the Confirmation fields")
+        if confirm_value != "y":
             await interaction.response.send_message(f"Wait why did you do that instead of just clicking cancel?")
             return
         runs_increased = "Runs not increased"
-        if self.runs.value.strip().lower() == "y":
-            update_runs(self.raid, int(self.runscount.value))
-            runs_increased = "Runs increased"
+        if runs_inc == "y":
+            try:
+                inc_val = int(self.runscount.value)
+                update_runs(self.raid, inc_val)
+                runs_increased = "Runs increased"
+            except ValueError:
+                await interaction.response.send_message(f"Runs Count Increase must be a number only.")
         to_delete = {"channelID": self.channel_id}
         raids.delete_one(to_delete)
         if self.channel is not None:
