@@ -513,6 +513,7 @@ class RosterSelectView(discord.ui.View):
         self.clear_items()
         self.stop()
 
+
 class TrialModal(discord.ui.Modal):
     def __init__(self, raid: Raid, interaction: discord.Interaction, config, channel=None ):
         self.config = config
@@ -734,7 +735,7 @@ class TrialModal(discord.ui.Modal):
                 await i.edit(position=i.position)
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
-        logging.error(f"Trial Creation Error: {str(error)}")
+        logging.error(f"Trial Creation/Modify Error: {str(error)}")
         return
 
 class CallModal(discord.ui.Modal):
@@ -829,6 +830,7 @@ class CloseModal(discord.ui.Modal):
         runs_inc = self.runs.value.strip().lower()
         if confirm_value != "n" and confirm_value != "y" and runs_inc != "n" and runs_inc != "y":
             await interaction.response.send_message(f"You must enter a `y` or an `n` in the Confirmation fields")
+            return
         if confirm_value != "y":
             await interaction.response.send_message(f"Wait why did you do that instead of just clicking cancel?")
             return
@@ -840,6 +842,7 @@ class CloseModal(discord.ui.Modal):
                 runs_increased = "Runs increased"
             except ValueError:
                 await interaction.response.send_message(f"Runs Count Increase must be a number only.")
+                return
         to_delete = {"channelID": self.channel_id}
         raids.delete_one(to_delete)
         if self.channel is not None:
@@ -870,7 +873,11 @@ class FillModal(discord.ui.Modal):
         self.add_item(self.confirm)
 
     async def on_submit(self, interaction: discord.Interaction):
-        if self.confirm.value.strip().lower() != "y":
+        val = self.confirm.value.strip().lower()
+        if val != 'y' and val != 'n':
+            await interaction.response.send_message(f"Only `y` or `n` input is allowed for this.")
+            return
+        if val != "y":
             await interaction.response.send_message(f"Wait why did you do that instead of just clicking cancel?")
             return
         self.raid.fill_spots(self.channel_id)
@@ -879,7 +886,7 @@ class FillModal(discord.ui.Modal):
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
-        logging.error(f"Roster Close Error: {str(error)}")
+        logging.error(f"Roster Fill Error: {str(error)}")
         return
 
 class RunCountModal(discord.ui.Modal):
@@ -909,22 +916,31 @@ class RunCountModal(discord.ui.Modal):
         self.add_item(self.date)
 
     async def on_submit(self, interaction: discord.Interaction):
-        update_runs(self.raid, int(self.num.value))
-        if self.date.value.strip().lower() != "n":
-            formatted_date = format_date(self.date.value)
-            self.raid.date = formatted_date
-            update_db(self.channel_id, self.raid)
-            new_name = generate_channel_name(self.raid.date, self.raid.raid,
-                                             self.config["raids"]["timezone"])
-            await self.channel.edit(name=new_name)
-            await interaction.response.send_message(f"{self.channel.name} Runs and Date updated")
+        try:
+            val = int(self.num.value)
+        except ValueError:
+            await interaction.response.send_message(f"Run Count Increase must be an integer value.")
             return
+        update_runs(self.raid, val)
+        if self.date.value.strip().lower() != "n":
+                try:
+                    formatted_date = format_date(self.date.value)
+                    self.raid.date = formatted_date
+                    update_db(self.channel_id, self.raid)
+                    new_name = generate_channel_name(self.raid.date, self.raid.raid,
+                                                     self.config["raids"]["timezone"])
+                    await self.channel.edit(name=new_name)
+                    await interaction.response.send_message(f"{self.channel.name} Runs and Date updated")
+                    return
+                except ValueError:
+                    await interaction.response.send_message(f"Invalid input, you gave me letters when I expected numbers.")
+                    return
         await interaction.response.send_message(f"{self.channel.name} Runs updated")
         return
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
-        logging.error(f"Roster Call Error: {str(error)}")
+        logging.error(f"Run Count Error: {str(error)}")
         return
 
 class RemoveModal(discord.ui.Modal):
@@ -980,30 +996,35 @@ class RemoveModal(discord.ui.Modal):
         self.add_item(self.options)
 
     async def on_submit(self, interaction: discord.Interaction):
-        to_remove = [int(i)-1 for i in self.options.value.split(',')]
-        to_remove_keys = []
-        names = ""
-        for i in range(len(self.roster)):
-            if i in to_remove:
-                to_remove_keys.append(self.roster[i])
-        for i in to_remove_keys:
-            if i in self.raid.dps.keys() or i in self.raid.backup_dps.keys():
-                self.raid.remove_dps(i)
-                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-            elif i in self.raid.healers.keys() or \
-                    i in self.raid.backup_healers.keys():
-                self.raid.remove_healer(i)
-                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-            elif i in self.raid.tanks.keys() or \
-                    i in self.raid.backup_tanks.keys():
-                self.raid.remove_tank(i)
-                names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-        update_db(self.channel_id, self.raid)
-        await interaction.response.send_message(f"User(s) have been removed from roster {self.channel.name}.\n{names}")
+        try:
+            to_remove = [int(i)-1 for i in self.options.value.split(',')]
+            to_remove_keys = []
+            names = ""
+            for i in range(len(self.roster)):
+                if i in to_remove:
+                    to_remove_keys.append(self.roster[i])
+            for i in to_remove_keys:
+                if i in self.raid.dps.keys() or i in self.raid.backup_dps.keys():
+                    self.raid.remove_dps(i)
+                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                elif i in self.raid.healers.keys() or \
+                        i in self.raid.backup_healers.keys():
+                    self.raid.remove_healer(i)
+                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                elif i in self.raid.tanks.keys() or \
+                        i in self.raid.backup_tanks.keys():
+                    self.raid.remove_tank(i)
+                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+            update_db(self.channel_id, self.raid)
+            await interaction.response.send_message(f"User(s) have been removed from roster {self.channel.name}.\n{names}")
+        except ValueError:
+            await interaction.response.send_message(f"Use the numbers only, no other values are allowed.\n"
+                                                    f"ex: `1,2,3,4`")
+            return
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
-        logging.error(f"Roster Close Error: {str(error)}")
+        logging.error(f"Remove From Roster Error: {str(error)}")
         return
 
 class Raids(commands.Cog, name="Trials"):
