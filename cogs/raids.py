@@ -588,11 +588,16 @@ class TrialModal(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         # Split the values:
-        role_limit = int(self.limit.value)
-        if role_limit < 0 or role_limit > 4:
-            await interaction.response.send_message(f"Invalid input, the role_limits must be between 0 and 4")
+        try:
+            role_limit = int(self.limit.value)
+            if role_limit < 0 or role_limit > 4:
+                await interaction.response.send_message(f"Invalid input, the Role Limit must be between 0 and 4")
+                return
+            mapped_limit = self.map_dict[role_limit]
+        except (NameError, ValueError):
+            await interaction.response.send_message(f"Invalid input: Role Limit should be a number. Check with `!limits`\n"
+                                                    f"You entered: `{self.limit.value}`")
             return
-        mapped_limit = self.map_dict[role_limit]
         try:
             leader, raid = self.leader_trial.value.split(",")
         except (NameError, ValueError):
@@ -639,11 +644,15 @@ class TrialModal(discord.ui.Modal):
             self.raid.memo = self.memo.value
             self.raid.role_limit = mapped_limit
 
-            update_db(self.channel, self.raid)
-            new_name = generate_channel_name(formatted_date, raid, self.config["raids"]["timezone"])
-            modify_channel = interaction.guild.get_channel(int(self.channel))
-            await modify_channel.edit(name=new_name)
-            await interaction.response.send_message(f"Roster {new_name} and Channel updated.")
+            try:
+                new_name = generate_channel_name(formatted_date, raid, self.config["raids"]["timezone"])
+                update_db(self.channel, self.raid)
+                modify_channel = interaction.guild.get_channel(int(self.channel))
+                await modify_channel.edit(name=new_name)
+                await interaction.response.send_message(f"Roster {new_name} and Channel updated.")
+            except ValueError:
+                await interaction.response.send_message(f"Invalid input, was the Date not formatted right?")
+                return
 
 
         elif self.new_roster is True:
@@ -662,7 +671,11 @@ class TrialModal(discord.ui.Modal):
                 created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
 
                 logging.info(f"Creating new channel.")
-                new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
+                try:
+                    new_name = generate_channel_name(created.date, created.raid, self.config["raids"]["timezone"])
+                except ValueError:
+                    await interaction.response.send_message(f"Invalid input, was the Date formatted correctly?")
+                    return
                 channel = await category.create_text_channel(new_name)
                 limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
                 embed = discord.Embed(
