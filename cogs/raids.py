@@ -18,19 +18,12 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-# TODO: Add a command to update channel names manually for RLs
-# TODO: Command to print template for things, store in txt maybe?
-# TODO: Have the bot tell you when you overflow into Backup
-# TODO: Have bot remove anyone not meeting the new limit requirement when changing limit
-# TODO: Have bot move people to backup when rolenums changes if number signed up is too high
-# TODO: Figure out new date format method using DATE_TEMPLATE defined below
-
 # Global variables for the MongoDB channels, set by set_channels function
 global raids
 global count
 global defaults
 
-DATE_TEMPLATE = "<t:{date}:f>" # DATE_TEMPLATE.format(date=raid.date)
+#DATE_TEMPLATE = "<t:{date}:f>" # DATE_TEMPLATE.format(date=raid.date)
 class Role(Enum):
     DPS = "dps"
     HEALER = "healer"
@@ -70,7 +63,6 @@ def get_raid(channel_id):
         raise IODBError(f"Unable to load Raid from DB")
 
 
-# TODO: Make this cleaner with a new data factory
 def update_runs(raid, num=1):
     """Updates the number of runs for people in the raid roster"""
     for i in raid.dps:
