@@ -10,13 +10,12 @@
 
 # Overview
 
-A Discord bot written using Discord.py with MongoDB, requires at least Python 3.10 to work.
+A Discord bot written using Discord.py and MongoDB, requires at least Python 3.10 to work.
 
 BOKBot is a self-hosted bot designed for single-server use. 
 
 You are welcome to copy and modify the code to suit your needs, **please just link back to BOKBot as the 
 original source, or use the Fork tool.** 
 
-A template yaml config file has
-been included in the repo. Rename to config.yaml before starting the bot.
-
+Feel free to check out the Wiki section to see how to get started with using BOKBot
+for your own purposes.
