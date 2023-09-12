@@ -18,13 +18,39 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
+scheduled_time = datetime.time(13, 0, 0, 0) # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
+
+def load_reminder_timer(config):
+    """Load days remaining on reminder timer"""
+    client = MongoClient(config['mongo'])
+    database = client['bot']
+    misc = database.misc
+    rec = misc.find_one({'reminder': 'timer'})
+    reminder_timer = rec['days']
+    return reminder_timer
+
+
+def save_reminder_time(config, remaining):
+    """Save days remaining on reminder timer"""
+    client = MongoClient(config['mongo'])
+    database = client['bot']
+    misc = database.misc
+    rec = {
+        'reminder': 'timer',
+        'days': remaining
+    }
+
+    misc.update_one({'reminder': 'timer'},  {'$set': rec})
+
 
 class Admin(commands.Cog, name="Admin"):
     """Receives Administration commands"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        load_reminder_timer(self.bot.config)
         self.scheduled_good_morning.start()
+        self.scheduled_invitation_checker.start()
 
     @commands.command(name="servers", hidden=True)
     @permissions.creator_only()
@@ -50,6 +76,7 @@ class Admin(commands.Cog, name="Admin"):
             time = datetime.datetime.now().strftime("%I:%M:%S %p")
             logging.info(f"Shutdown command received - {time} on {date}")
             logging.shutdown()
+            self.scheduled_invitation_checker.stop()
             self.scheduled_good_morning.stop()
             if os.path.exists(log_name):
                 file_name = f"log-{date}.log"
@@ -105,6 +132,7 @@ class Admin(commands.Cog, name="Admin"):
         try:
             logging.info(f"Stopping tasks")
             self.scheduled_good_morning.cancel()
+            self.scheduled_invitation_checker.cancel()
             logging.info(f"Stopped tasks")
             logging.info("Preparing to reload cogs")
             for filename in os.listdir("cogs"):
@@ -234,8 +262,7 @@ class Admin(commands.Cog, name="Admin"):
             raise Exception(e)
 
     # AUTOMATED TASKS
-    @tasks.loop(
-        time=datetime.time(13, 0, 0, 0))  # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
+    @tasks.loop(time=scheduled_time)
     async def scheduled_good_morning(self):
         try:
             guild = self.bot.get_guild(self.bot.config['guild'])
@@ -258,6 +285,25 @@ class Admin(commands.Cog, name="Admin"):
                 logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
         except Exception as e:
             logging.error(f"Good Morning Task Error: {str(e)}")
+    @tasks.loop(time=scheduled_time)
+    async def scheduled_invitation_checker(self):
+        try:
+            remaining = load_reminder_timer(self.bot.config)
+            if remaining != 1:
+                remaining-=1
+                save_reminder_time(self.bot.config, remaining)
+                logging.info(f"Remaining Days on Invite: {str(remaining)}")
+                return
+
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            officer_channel = guild.get_channel(self.bot.config['officer_channel'])
+            intro_channel = guild.get_channel(self.bot.config['intro_channel'])
+            invitation = await intro_channel.create_invite(reason="Monthly Invitation", max_age=2592000)
+            await officer_channel.send(f"TIME FOR A NEW INVITE IN THE IN-GAME GUILD MOTD: `discord.gg/{invitation.code}`")
+            logging.info(f"Created new Invite: {invitation.code}")
+            save_reminder_time(self.bot.config, 28)
+        except Exception as e:
+            logging.error(f"28 Day Invite Make Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
