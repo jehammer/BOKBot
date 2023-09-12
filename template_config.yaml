@@ -10,6 +10,8 @@ guild: put guild id here # Guild ID
 presence_message: Make this what you want to say
 morning: Good morning! # Message that the bot says in the morning channel at the designated time.
 morning_channel: Put discord channel id here
+officer_channel: Put discord channel id here
+intro_channel: Put discord channel id here
 # The welcome message can be as long as you want, and is very customizable.
 welcome: |
   This is a very long message meant to welcome you to our very special discord channel where we all do things!
