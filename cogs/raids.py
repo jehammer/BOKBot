@@ -717,7 +717,7 @@ class TrialModal(discord.ui.Modal):
             current_raid = get_raid(current_channels.id)
             new_position = 0
             if current_raid is None:
-                new_position = channel.position  # Keep the channel's position unchanged
+                return  # Keep the channel's position unchanged
             elif current_raid.date == "ASAP":
                 new_position = 100
             else:
