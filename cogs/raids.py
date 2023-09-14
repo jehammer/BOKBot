@@ -717,7 +717,7 @@ class TrialModal(discord.ui.Modal):
             current_raid = get_raid(current_channels.id)
             new_position = 0
             if current_raid is None:
-                return  # Keep the channel's position unchanged
+                return current_channels.position  # Keep the channel's position unchanged
             elif current_raid.date == "ASAP":
                 new_position = 100
             else:
@@ -733,7 +733,8 @@ class TrialModal(discord.ui.Modal):
                 new_position = weight
             return new_position
         # Sort channels
-        sorted(category.text_channels, key=get_sort_key)
+        for i in category.text_channels:
+            i.position = get_sort_key(i)
 
         for i in category.text_channels:
             if i.position >= 100: # Fix the rate_limit so only adjust channels we want to adjust
