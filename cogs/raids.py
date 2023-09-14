@@ -1,4 +1,5 @@
 import datetime
+import time
 import random
 import re
 import discord
@@ -719,7 +720,7 @@ class TrialModal(discord.ui.Modal):
             if current_raid is None:
                 return current_channels.position  # Keep the channel's position unchanged
             elif current_raid.date == "ASAP":
-                new_position = 100
+                return 100
             else:
                 # Calculate new positioning
                 new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
@@ -729,9 +730,8 @@ class TrialModal(discord.ui.Modal):
                 if day < 10:
                     day = int(f"0{str(day)}")
                 weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
-                current_channels.position = weight
-                new_position = weight
-            return new_position
+            return weight
+
         # Sort channels
         for i in category.text_channels:
             i.position = get_sort_key(i)
@@ -739,6 +739,7 @@ class TrialModal(discord.ui.Modal):
         for i in category.text_channels:
             if i.position >= 100: # Fix the rate_limit so only adjust channels we want to adjust
                 await i.edit(position=i.position)
+                time.sleep(1)
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
         logging.error(f"Trial Creation/Modify Error: {str(error)}")
