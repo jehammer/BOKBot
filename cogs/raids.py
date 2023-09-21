@@ -626,6 +626,24 @@ class TrialModal(discord.ui.Modal):
 
         category = interaction.guild.get_channel(self.config["raids"]["category"])
 
+        def get_sort_key(current_channels):
+            current_raid = get_raid(current_channels.id)
+            new_position = 0
+            if current_raid is None:
+                return current_channels.position  # Keep the channel's position unchanged
+            elif current_raid.date == "ASAP":
+                return 100
+            else:
+                # Calculate new positioning
+                new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
+                tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
+                    tz=timezone(self.config["raids"]["timezone"]))
+                day = tz.day
+                if day < 10:
+                    day = int(f"0{str(day)}")
+                weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
+            return weight
+
         if self.new_roster is False:
             # Update all values then update the DB
             self.raid.raid = raid
@@ -714,23 +732,9 @@ class TrialModal(discord.ui.Modal):
             await interaction.response.send_message(f"Created Roster and Channel {channel.name}")
         else:
             await interaction.response.send_message(f"Hey uh, you reached an unreachable part of the code lol.")
-        def get_sort_key(current_channels):
-            current_raid = get_raid(current_channels.id)
-            new_position = 0
-            if current_raid is None:
-                return current_channels.position  # Keep the channel's position unchanged
-            elif current_raid.date == "ASAP":
-                return 100
-            else:
-                # Calculate new positioning
-                new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
-                tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                    tz=timezone(self.config["raids"]["timezone"]))
-                day = tz.day
-                if day < 10:
-                    day = int(f"0{str(day)}")
-                weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
-            return weight
+
+        # Refresh category
+        category = interaction.guild.get_channel(self.config["raids"]["category"])
 
         # Sort channels
         for i in category.text_channels:
