@@ -143,6 +143,14 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send information.")
             logging.error(f"3runners error: {str(e)}")
 
+    @commands.command(name="lokkhm", aliases=["lokk", "lokhm", "hmlok", "hmlokk"])
+    async def send_lokk_hm_img(self, ctx: commands.Context):
+        """vSS Lokk HM Guide Image"""
+        try:
+            await ctx.send(f"https://cdn.discordapp.com/attachments/911730032286785536/1154973061133631629/lokkhm.png")
+        except Exception as e:
+            await ctx.send("Unable to send information.")
+            logging.error(f"Lokkhm error: {str(e)}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Guides(bot))
