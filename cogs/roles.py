@@ -94,7 +94,19 @@ class Roles(commands.Cog, name="Roles"):
                 return
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
+            main_role = None
+            match role_type:
+                case "tank":
+                    main_role = "Tank"
+                case "healer":
+                    main_role = "Healer"
+                case "mag":
+                    main_role = "DPS"
+                case "stam":
+                    main_role = "DPS"
             await member.add_roles(discord.utils.get(guild.roles, name=role))
+            if main_role is not None:
+                await member.add_roles(discord.utils.get(guild.roles, name=main_role))
             await member.send(f"Added role: {role}")
         except discord.Forbidden as e:
             logging.error(
@@ -129,6 +141,23 @@ class Roles(commands.Cog, name="Roles"):
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
             await member.remove_roles(discord.utils.get(guild.roles, name=role))
             await member.send(f"Removed role: {role}")
+            if role_type == "misc":
+                return
+            all_roles = set((self.bot.config["vanity"][role_type]).values())
+            all_user_roles = set([i.name for i in member.roles])
+            keep_main_role = bool(all_roles.intersection(all_user_roles))
+            if not keep_main_role:
+                match role_type:
+                    case "tank":
+                        main_role = "Tank"
+                    case "healer":
+                        main_role = "Healer"
+                    case "mag":
+                        main_role = "DPS"
+                    case "stam":
+                        main_role = "DPS"
+                await member.remove_roles(discord.utils.get(guild.roles, name=main_role))
+                await member.send(f"You have removed all {main_role} vanities and have been removed from the {main_role} tag")
         except discord.Forbidden as e:
             logging.error(
                 f"Remove Role Error: Forbidden to DM {member.display_name} after removing role, Message: {str(e)}")

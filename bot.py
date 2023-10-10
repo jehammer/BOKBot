@@ -17,6 +17,11 @@ bot = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 bot.remove_command("help")  # the help.py cog will replace the default command
 log_name = "log.log"
 
+role = None
+ranks = None
+poons = None
+other = None
+
 
 # Events
 @bot.event
@@ -25,10 +30,6 @@ async def on_member_join(member):
         guild = member.guild
         base = bot.config["roles"]['default']
         if base != "none":
-            role = discord.utils.get(guild.roles, name=bot.config["roles"]['default'])
-            ranks = discord.utils.get(guild.roles, name=bot.config["roles"]["ranks"])
-            poons = discord.utils.get(guild.roles, name=bot.config["roles"]["poons"])
-            other = discord.utils.get(guild.roles, name=bot.config["roles"]["other"])
             await member.add_roles(role, ranks, poons, other)
             logging.info(
                 f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
@@ -128,9 +129,23 @@ async def startup_logging():
         logging.error(f"I was unable to set up the new logging information: {str(e)}")
 
 
+async def gather_roles(guild, config):
+    """Loads the starting roles for people when joining """
+    global role
+    global ranks
+    global poons
+    global other
+    role = discord.utils.get(guild.roles, name=config["roles"]["default"])
+    ranks = discord.utils.get(guild.roles, name=config["roles"]["ranks"])
+    poons = discord.utils.get(guild.roles, name=config["roles"]["poons"])
+    other = discord.utils.get(guild.roles, name=config["roles"]["other"])
+    logging.info(f"Global Roles Set")
+
+
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as: {bot.user.name}")
+    await gather_roles(bot.get_guild(bot.config["guild"]), bot.config)
     await change_playing()
     synced = await bot.tree.sync()
     logging.info(f"Synced {len(synced)} command(s)")
