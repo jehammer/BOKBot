@@ -1056,7 +1056,7 @@ class ProgModal(discord.ui.Modal):
                 default_vals += f"{str(i)}\n"
         self.roles = discord.ui.TextInput(
             label=f"Keep all roles on new lines",
-            placeholder="There are currently none.",
+            placeholder="If there are none, say None",
             default = default_vals,
             style=discord.TextStyle.long,
             required=True
@@ -1733,12 +1733,19 @@ class Raids(commands.Cog, name="Trials"):
     async def print_limits(self, ctx: commands.Context):
         """Prints a list of the role limits and their values for making a roster."""
         try:
+            roles = self.bot.config["raids"]["roles"]
             limits = f"Roles and Values:\n" \
-                     f"0: Kyne's Founded\n" \
-                     f"1: Kyne's Follower\n" \
-                     f"2: Kyne's Hunters\n" \
-                     f"3: Storm Chasers\n" \
-                     f"4: Storm Riders"
+                     f"0: {roles['base']}\n" \
+                     f"1: {roles['first']['dps']} | {roles['first']['tank']} | {roles['first']['healer']}\n" \
+                     f"2: {roles['second']['dps']} | {roles['second']['tank']} | {roles['second']['healer']}\n" \
+                     f"3: {roles['third']['dps']} | {roles['third']['tank']} | {roles['third']['healer']}"
+            prog_roles = misc.find_one({'prog': 'roles'})
+            if prog_roles is not None and prog_roles["roles"][0] != "None":
+                num = 4
+                ext = prog_roles["roles"]
+                for i in ext:
+                    limits += f"\n{str(num)}: {i}"
+                    num += 1
             await ctx.send(f"{limits}")
         except Exception as e:
             await ctx.send(f"I was unable to print the limits")
