@@ -20,9 +20,10 @@ logging.basicConfig(
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 # Global variables for the MongoDB channels, set by set_channels function
-global raids
-global count
-global defaults
+raids = None
+count = None
+defaults = None
+misc = None
 
 #DATE_TEMPLATE = "<t:{date}:f>" # DATE_TEMPLATE.format(date=raid.date)
 class Role(Enum):
@@ -156,11 +157,13 @@ def set_channels(config):
     global raids
     global count
     global defaults
+    global misc
     client = MongoClient(config['mongo'])
     database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
     raids = database.raids
     count = database.count
     defaults = database.defaults
+    misc = database.misc
 
 
 def suffix(d):
@@ -1038,6 +1041,49 @@ class RemoveModal(discord.ui.Modal):
         logging.error(f"Remove From Roster Error: {str(error)}")
         return
 
+class ProgModal(discord.ui.Modal):
+    def __init__(self, interaction: discord.Interaction, config):
+        self.config = config
+        self.prog_roles = None
+        super().__init__(title='Prog Roles')
+        self.initialize()
+    def initialize(self):
+        self.prog_roles = misc.find_one({'prog': 'roles'})
+        default_vals = ""
+        if self.prog_roles is not None:
+            roles  = self.prog_roles['roles']
+            for i in roles:
+                default_vals += f"{str(i)}\n"
+        self.roles = discord.ui.TextInput(
+            label=f"Keep all roles on new lines",
+            placeholder="There are currently none.",
+            default = default_vals,
+            style=discord.TextStyle.long,
+            required=True
+        )
+        self.add_item(self.roles)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        role_list = self.roles.value.splitlines()
+        if self.prog_roles is not None:
+            new_data = {
+                "roles": role_list
+            }
+            new_rec = {'$set': new_data}
+            misc.update_one({'prog': "roles"}, new_rec)
+        else:
+            new_data = {
+                "prog": "roles",
+                "roles": role_list
+            }
+            misc.insert_one(new_data)
+        await interaction.response.send_message(f"Prog Roles Updated")
+        return
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
+        logging.error(f"Roster Call Error: {str(error)}")
+        return
+
 class Raids(commands.Cog, name="Trials"):
     """Commands related to Raids/Trials"""
 
@@ -1189,6 +1235,10 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Remove error: {str(e)}")
             await ctx.send("An error has occurred in the command.")
 
+    @app_commands.command(name="prog", description="For Raid Leads: Sets Prog role information")
+    @permissions.application_has_raid_lead()
+    async def set_prog_roles(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_modal(ProgModal(interaction, self.bot.config))
 
 
     @commands.command(name="su")
