@@ -11,12 +11,18 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-global roles_info
+roles_info = None
+agree_role = None
+recruits_role = None
 
 
 def set_roles_info(config):
     """Function to set the role information on cog load"""
     global roles_info
+    global agree_role
+    global recruits_role
+    recruits_role = discord.utils.get(guild.roles, name=config["roles"]["default"])
+    agree_role = discord.utils.get(guild.roles, name=config["roles"]["unlock"])
     client = MongoClient(config['mongo'])
     database = client.bot
     misc = database.misc
@@ -44,7 +50,6 @@ def save_roles_info(config):
         }
         misc.insert_one(rec)
 
-
 class Roles(commands.Cog, name="Roles"):
     """Commands related to Discord roles"""
 
@@ -56,9 +61,9 @@ class Roles(commands.Cog, name="Roles"):
     async def agree(self, ctx: commands.Context):
         """For agreeing with the rules of the discord | `!agree`"""
         try:
-            role = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["roles"]["base"])
             if role != "@everyone":
-                await ctx.message.author.add_roles(role)
+                await ctx.author.remove_roles(recruits_role)
+                await ctx.message.author.add_roles(agree_role)
             await ctx.author.send(self.bot.config['agree'])
         except discord.Forbidden:
             await ctx.reply(f"I need permission to DM you for this. Please enable DMs on this server.\n"
