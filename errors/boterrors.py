@@ -19,3 +19,6 @@ class DefaultIOError(Exception):
 
 class UnknownError(commands.CommandError):
     pass
+
+class NoRoleError(commands.CommandError):
+    pass

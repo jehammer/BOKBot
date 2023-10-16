@@ -60,6 +60,8 @@ async def on_command_error(ctx, error):
         await creator.send(f"{str(error)}")
     elif isinstance(error, NoDefaultError):
         await ctx.reply(f"{str(error)}")
+    elif isinstance(error, NoRoleError):
+        await ctx.reply(f"{str(error)}")
     else:
         await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")
