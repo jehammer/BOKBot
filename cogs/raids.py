@@ -173,7 +173,7 @@ def suffix(d):
         logging.error(f"Suffix Failure: {str(e)}")
         raise ValueError("Unable to set suffix value")
 
-def setup_roster_join_information(og_cmd, user: discord.User, raid):
+def setup_roster_join_information(og_cmd, user: discord.User, raid, limits_list, config):
     """Function to handle people joining a roster"""
 
     use_msg = False
@@ -217,6 +217,28 @@ def setup_roster_join_information(og_cmd, user: discord.User, raid):
         role = Role.HEALER
     else:
         raise NoDefaultError(default_error_msg)
+
+    # Check if user has permissions to sign up as that role (only applies to Tiers 1-3)
+    if len(limits_list) > 1:
+        throw_error = False
+        role_name = ""
+        if role == Role.DPS:
+            if user not in limits_list[0].members:
+                throw_error = True
+                role_name = limits_list[0].name
+        elif role == Role.TANK:
+            if user not in limits_list[1].members:
+                throw_error = True
+                role_name = limits_list[1].name
+        elif role == Role.HEALER:
+            if user not in limits_list[2].members:
+                throw_error = True
+                role_name = limits_list[2].name
+        if throw_error:
+            no_role_error_msg = f"You do not have the right role to sign up as {role.name} for this roster. " \
+                                f"Head on over to <#{config['ranks_channel']}> to explore ranks and what you need to do to " \
+                                f"achieve them. You are looking for details on: {role_name}"
+            raise NoRoleError(no_role_error_msg)
 
     user_id = str(user_id)
 
@@ -308,6 +330,25 @@ def format_date(date):
     formatted_date = f"<t:{re.sub('[^0-9]', '', date)}:f>"
     return formatted_date
 
+def get_limits(roles):
+    """Create list of roles with nested lists for 1-3 indexes"""
+    list_roles = [
+        roles['base'],
+        [
+            roles['first']['dps'],roles['first']['tank'],roles['first']['healer']
+        ],
+        [
+            roles['second']['dps'], roles['second']['tank'], roles['second']['healer']
+        ],
+        [
+            roles['third']['dps'], roles['third']['tank'], roles['third']['healer']
+        ]
+    ]
+    prog_roles = misc.find_one({'prog': 'roles'})
+    if prog_roles is not None and prog_roles["roles"] != "None":
+        for i in prog_roles["roles"]:
+            list_roles.append(i)
+    return list_roles
 
 class Raid:
     """Class for handling roster and related information"""
@@ -519,26 +560,13 @@ class TrialModal(discord.ui.Modal):
         self.role_nums_val = "8,2,2"
         self.memo_val = "None"
         self.new_roster = True
-        self.map_dict = {
-            self.config["raids"]["roles"]["base"]: 0,
-            self.config["raids"]["roles"]["first"]: 1,
-            self.config["raids"]["roles"]["second"]: 2,
-            self.config["raids"]["roles"]["third"]: 3,
-            self.config["raids"]["roles"]["fourth"]: 4,
-            0: self.config["raids"]["roles"]["base"],
-            1: self.config["raids"]["roles"]["first"],
-            2: self.config["raids"]["roles"]["second"],
-            3: self.config["raids"]["roles"]["third"],
-            4: self.config["raids"]["roles"]["fourth"]
-        }
         if raid is not None:
-            mapped_limit = self.map_dict[raid.role_limit]
             self.channel= channel
             self.new_roster = False
             self.raid = raid
             self.leader_trial_val = f"{raid.leader},{raid.raid}"
             self.date_val = f"{raid.date}"
-            self.limit_val = f"{mapped_limit}"
+            self.limit_val = f"{raid.role_limit}"
             self.role_nums_val = f"{raid.dps_limit},{raid.healer_limit},{raid.tank_limit}"
             self.memo_val = f"{raid.memo}"
         super().__init__(title='Trial Manager')
@@ -585,12 +613,14 @@ class TrialModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         # Split the values:
         try:
+
+            roles = get_limits(self.config["raids"]["roles"])
             role_limit = int(self.limit.value)
-            if role_limit < 0 or role_limit > 4:
-                await interaction.response.send_message(f"Invalid input, the Role Limit must be between 0 and 4")
+            if role_limit < 0 or role_limit > len(roles):
+                await interaction.response.send_message(f"Invalid input, the Role Limit must be between 0 and {len(roles)}")
                 return
-            mapped_limit = self.map_dict[role_limit]
-        except (NameError, ValueError):
+        except (NameError, ValueError) as e:
+            print(str(e))
             await interaction.response.send_message(f"Invalid input: Role Limit should be a number. Check with `!limits`\n"
                                                     f"You entered: `{self.limit.value}`")
             return
@@ -656,7 +686,7 @@ class TrialModal(discord.ui.Modal):
             self.raid.tank_limit = tank_limit
             self.raid.date = formatted_date
             self.raid.memo = self.memo.value
-            self.raid.role_limit = mapped_limit
+            self.raid.role_limit = role_limit
 
             try:
                 new_name = generate_channel_name(formatted_date, raid, self.config["raids"]["timezone"])
@@ -676,7 +706,6 @@ class TrialModal(discord.ui.Modal):
                     fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
                     fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
                     fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
-                fact_role_limit = self.map_dict[fact_role_limit]
                 dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
                 return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
                             backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
@@ -691,10 +720,22 @@ class TrialModal(discord.ui.Modal):
                     await interaction.response.send_message(f"Invalid input, was the Date formatted correctly?")
                     return
                 channel = await category.create_text_channel(new_name)
-                limiter = discord.utils.get(interaction.user.guild.roles, name=created.role_limit)
+                roles_req = ""
+                if isinstance(roles[role_limit], list):
+                    # Need to work with 3 roles to check, dps | tank | healer order
+                    # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                    limiter_dps = discord.utils.get(interaction.guild.roles, name=roles[role_limit][0])
+                    limiter_tank = discord.utils.get(interaction.guild.roles, name=roles[role_limit][1])
+                    limiter_healer = discord.utils.get(interaction.guild.roles, name=roles[role_limit][2])
+
+                    roles_req += f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
+
+                else:
+                    limiter = discord.utils.get(interaction.guild.roles, name=roles[role_limit])
+                    roles_req += f"{limiter.mention}"
                 embed = discord.Embed(
                     title=f"{created.raid} {created.date}",
-                    description=f"Role Required: {limiter.mention}\n\nI hope people sign up for this.",
+                    description=f"Role Required: {roles_req}\n\nI hope people sign up for this.",
                     color=discord.Color.blue()
                 )
                 embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
@@ -1256,21 +1297,45 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"SU Load Raid Error: {str(e)}")
                 return
 
-            limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
-            if ctx.message.author not in limiter.members:
-                if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
-                    await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
-                elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
-                    await ctx.reply(
-                        f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
-                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
-                else:
-                    await ctx.reply(
-                        f"You do not have the role to join this roster, please check <#933821777149329468> "
-                        f"to see what you need to do to get the {raid.role_limit} role")
-                return
+            roles = get_limits(self.bot.config["raids"]["roles"])
 
-            result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
+            # Raids will now store the raw value 0-whatever number and work with the index
+            index = int(raid.role_limit)
+            allowed = True
+            prog_role = False
+            limits_list = []
+            if isinstance(roles[index], list):
+                # Need to work with 3 roles to check, dps | tank | healer order
+                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                limiter_dps = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][0])
+                limiter_tank = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][1])
+                limiter_healer = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][2])
+                limits_list = [limiter_dps, limiter_tank, limiter_healer]
+                if ctx.author not in limiter_dps.members and ctx.author not in limiter_tank.members and \
+                        ctx.author not in limiter_healer.members:
+                    allowed = False
+            else:
+                limiter = discord.utils.get(ctx.message.author.guild.roles, name=roles[index])
+                limits_list = [limiter]
+                if ctx.author not in limiter.members:
+                    allowed = False
+                    if index >= 4:
+                        prog_role = True
+
+            if allowed is False:
+                if prog_role is False:
+                    await ctx.reply(f"You do not have the required rank to join this roster. Head on over to <#{self.bot.config['ranks_channel']}> "
+                                    f"to explore ranks and what you need to do to achieve them. You are "
+                                    f"looking for Tier {str(index)} ranks.")
+                    return
+                elif prog_role is True:
+                    await ctx.reply(f"This is a Prog roster, in order to join reach out to the Raid Lead for this Prog.")
+                    return
+                else:
+                    await ctx.reply(f"Hmmm, this part should have been unreachable...")
+                    return
+
+            result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid, limits_list, self.bot.config)
 
             try:
                 update_db(channel_id, raid)
@@ -1279,7 +1344,7 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"SU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except (UnknownError, NoDefaultError) as e:
+        except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
@@ -1301,21 +1366,45 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"BU Load Raid Error: {str(e)}")
                 return
 
-            limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
-            if ctx.message.author not in limiter.members:
-                if raid.role_limit == self.bot.config["raids"]["roles"]["base"]:
-                    await ctx.reply(f"Hey wait, you should have {raid.role_limit} in order to see this channel!")
-                elif raid.role_limit == self.bot.config["raids"]["roles"]["first"]:
-                    await ctx.reply(
-                        f"You need to be CP 160 to join this roster, if you are CP 160 then go to <#1102081398136909854> "
-                        f"and select the **Kyne's Follower** role from the Misc Roles section.")
-                else:
-                    await ctx.reply(
-                        f"You do not have the role to join this roster, please check <#933821777149329468> "
-                        f"to see what you need to do to get the {raid.role_limit} role")
-                return
+            roles = get_limits(self.bot.config["raids"]["roles"])
 
-            result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid)
+            # Raids will now store the raw value 0-whatever number and work with the index
+            index = int(raid.role_limit)
+            allowed = True
+            prog_role = False
+            limits_list = []
+            if isinstance(roles[index], list):
+                # Need to work with 3 roles to check, dps | tank | healer order
+                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                limiter_dps = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][0])
+                limiter_tank = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][1])
+                limiter_healer = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][2])
+                limits_list = [limiter_dps, limiter_tank, limiter_healer]
+                if ctx.author not in limiter_dps.members and ctx.author not in limiter_tank.members and \
+                        ctx.author not in limiter_healer.members:
+                    allowed = False
+            else:
+                limiter = discord.utils.get(ctx.message.author.guild.roles, name=roles[index])
+                limits_list = [limiter]
+                if ctx.author not in limiter.members:
+                    allowed = False
+                    if index >= 4:
+                        prog_role = True
+
+            if allowed is False:
+                if prog_role is False:
+                    await ctx.reply(f"You do not have the required rank to join this roster. Head on over to <#{self.bot.config['ranks_channel']}> "
+                                    f"to explore ranks and what you need to do to achieve them. You are "
+                                    f"looking for Tier {str(index)} ranks.")
+                    return
+                elif prog_role is True:
+                    await ctx.reply(f"This is a Prog roster, in order to join reach out to the Raid Lead for this Prog.")
+                    return
+                else:
+                    await ctx.reply(f"Hmmm, this part should have been unreachable...")
+                    return
+
+            result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid, limits_list, self.bot.config)
 
             try:
                 update_db(channel_id, raid)
@@ -1324,7 +1413,7 @@ class Raids(commands.Cog, name="Trials"):
                 logging.error(f"BU Error saving new roster: {str(e)}")
                 return
             await ctx.reply(f"{result}")
-        except (UnknownError, NoDefaultError) as e:
+        except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
             await ctx.send(f"I was was unable to sign you up due to processing errors.")
@@ -1399,10 +1488,25 @@ class Raids(commands.Cog, name="Trials"):
             tank_count = 0
             guild = self.bot.get_guild(self.bot.config['guild'])
             modified = False
-            limiter = discord.utils.get(ctx.message.author.guild.roles, name=raid.role_limit)
+
+            roles = get_limits(self.bot.config["raids"]["roles"])
+            roles_req = ""
+            if isinstance(roles[raid.role_limit], list):
+                # Need to work with 3 roles to check, dps | tank | healer order
+                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                limiter_dps = discord.utils.get(ctx.message.author.guild.roles, name=roles[raid.role_limit][0])
+                limiter_tank = discord.utils.get(ctx.message.author.guild.roles, name=roles[raid.role_limit][1])
+                limiter_healer = discord.utils.get(ctx.message.author.guild.roles, name=roles[raid.role_limit][2])
+
+                roles_req += f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
+
+            else:
+                limiter = discord.utils.get(ctx.message.author.guild.roles, name=roles[raid.role_limit])
+                roles_req += f"{limiter.mention}"
+
             embed = discord.Embed(
                 title=f"{raid.raid} {raid.date}",
-                description=f"Role Required: {limiter.mention}",
+                description=f"Role Required: {roles_req}",
                 color=discord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
