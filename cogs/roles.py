@@ -16,14 +16,15 @@ agree_role = None
 recruits_role = None
 
 
-def set_roles_info(config):
+def set_roles_info(bot):
     """Function to set the role information on cog load"""
     global roles_info
     global agree_role
     global recruits_role
-    recruits_role = discord.utils.get(guild.roles, name=config["roles"]["default"])
-    agree_role = discord.utils.get(guild.roles, name=config["roles"]["unlock"])
-    client = MongoClient(config['mongo'])
+    guild = bot.get_guild(bot.config['guild'])
+    recruits_role = discord.utils.get(guild.roles, name=bot.config["roles"]["default"])
+    agree_role = discord.utils.get(guild.roles, name=bot.config["roles"]["unlock"])
+    client = MongoClient(bot.config['mongo'])
     database = client.bot
     misc = database.misc
     roles_info = misc.find_one({'roles': "ids"})
@@ -55,7 +56,7 @@ class Roles(commands.Cog, name="Roles"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        set_roles_info(self.bot.config)
+        set_roles_info(self.bot)
 
     @commands.command(name="agree")
     async def agree(self, ctx: commands.Context):
