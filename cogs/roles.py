@@ -56,15 +56,20 @@ class Roles(commands.Cog, name="Roles"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         set_roles_info(self.bot)
+        logging.info(f"Roles Cog Roles Set")
+
 
     @commands.command(name="agree")
     async def agree(self, ctx: commands.Context):
         """For agreeing with the rules of the discord | `!agree`"""
         try:
-            if role != "@everyone":
+            if agree_role != "@everyone":
                 await ctx.author.remove_roles(recruits_role)
-                await ctx.message.author.add_roles(agree_role)
+                await ctx.author.add_roles(agree_role)
             await ctx.author.send(self.bot.config['agree'])
         except discord.Forbidden:
             await ctx.reply(f"I need permission to DM you for this. Please enable DMs on this server.\n"
