@@ -1282,7 +1282,7 @@ class Raids(commands.Cog, name="Trials"):
         await interaction.response.send_modal(ProgModal(interaction, self.bot.config))
 
 
-    @commands.command(name="su")
+    @commands.command(name="su", aliases=["signup"])
     async def su(self, ctx: commands.Context):
         """Signs you up to a roster | `!su [optional role] [optional message]`"""
         try:
@@ -1304,36 +1304,38 @@ class Raids(commands.Cog, name="Trials"):
             allowed = True
             prog_role = False
             limits_list = []
-            if isinstance(roles[index], list):
-                # Need to work with 3 roles to check, dps | tank | healer order
-                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
-                limiter_dps = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][0])
-                limiter_tank = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][1])
-                limiter_healer = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][2])
-                limits_list = [limiter_dps, limiter_tank, limiter_healer]
-                if ctx.author not in limiter_dps.members and ctx.author not in limiter_tank.members and \
-                        ctx.author not in limiter_healer.members:
-                    allowed = False
-            else:
-                limiter = discord.utils.get(ctx.message.author.guild.roles, name=roles[index])
-                limits_list = [limiter]
-                if ctx.author not in limiter.members:
-                    allowed = False
-                    if index >= 4:
-                        prog_role = True
-
-            if allowed is False:
-                if prog_role is False:
-                    await ctx.reply(f"You do not have the required rank to join this roster. Head on over to <#{self.bot.config['ranks_channel']}> "
-                                    f"to explore ranks and what you need to do to achieve them. You are "
-                                    f"looking for Tier {str(index)} ranks.")
-                    return
-                elif prog_role is True:
-                    await ctx.reply(f"This is a Prog roster, in order to join reach out to the Raid Lead for this Prog.")
-                    return
+            raid_leads = discord.utils.get(ctx.author.guild.roles, name=self.bot.config['raids']['lead'])
+            if ctx.author not in raid_leads.members:
+                if isinstance(roles[index], list):
+                    # Need to work with 3 roles to check, dps | tank | healer order
+                    # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                    limiter_dps = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][0])
+                    limiter_tank = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][1])
+                    limiter_healer = discord.utils.get(ctx.message.author.guild.roles, name=roles[index][2])
+                    limits_list = [limiter_dps, limiter_tank, limiter_healer]
+                    if ctx.author not in limiter_dps.members and ctx.author not in limiter_tank.members and \
+                            ctx.author not in limiter_healer.members:
+                        allowed = False
                 else:
-                    await ctx.reply(f"Hmmm, this part should have been unreachable...")
-                    return
+                    limiter = discord.utils.get(ctx.message.author.guild.roles, name=roles[index])
+                    limits_list = [limiter]
+                    if ctx.author not in limiter.members:
+                        allowed = False
+                        if index >= 4:
+                            prog_role = True
+
+                if allowed is False:
+                    if prog_role is False:
+                        await ctx.reply(f"You do not have the required rank to join this roster. Head on over to <#{self.bot.config['ranks_channel']}> "
+                                        f"to explore ranks and what you need to do to achieve them. You are "
+                                        f"looking for Tier {str(index)} ranks.")
+                        return
+                    elif prog_role is True:
+                        await ctx.reply(f"This is a Prog roster, in order to join reach out to the Raid Lead for this Prog.")
+                        return
+                    else:
+                        await ctx.reply(f"Hmmm, this part should have been unreachable...")
+                        return
 
             result, raid = setup_roster_join_information(ctx.message.content, ctx.author, raid, limits_list, self.bot.config)
 
@@ -1351,7 +1353,7 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"SU Error: {str(e)}")
             return
 
-    @commands.command(name="bu")
+    @commands.command(name="bu", aliases=["backup"])
     async def bu(self, ctx: commands.Context):
         """Signs you up as a backup | `!bu [optional role] [optional message]`"""
         try:
