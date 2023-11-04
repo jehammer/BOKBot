@@ -123,13 +123,13 @@ class Roles(commands.Cog, name="Roles"):
             logging.error(
                 f"Add Role Error: Forbidden to DM {member.display_name} after adding role, Message: {str(e)}")
         except KeyError as e:
-            channel = member.guild.get_channel(self.bot.config["private"])
+            channel = member.guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(
                 f"User: {member.display_name} attempted to add a role. but I could not find that "
                 f"role in the config.")
             logging.error(f"Add Role Error: {str(e)}")
         except Exception as e:
-            channel = member.guild.get_channel(self.bot.config["private"])
+            channel = member.guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(f"User: {member.display_name} attempted to add a role but there was an error.")
             logging.error(f"Add Role Error: {str(e)}")
 
@@ -155,6 +155,10 @@ class Roles(commands.Cog, name="Roles"):
             if role_type == "misc":
                 return
             all_roles = set((self.bot.config["vanity"][role_type]).values())
+            if role_type == "mag":
+                all_roles.update(set((self.bot.config["vanity"]["stam"]).values()))
+            elif role_type == "stam":
+                all_roles.update(set((self.bot.config["vanity"]["mag"]).values()))
             all_user_roles = set([i.name for i in member.roles])
             keep_main_role = bool(all_roles.intersection(all_user_roles))
             if not keep_main_role:
@@ -173,12 +177,12 @@ class Roles(commands.Cog, name="Roles"):
             logging.error(
                 f"Remove Role Error: Forbidden to DM {member.display_name} after removing role, Message: {str(e)}")
         except KeyError as e:
-            channel = guild.get_channel(self.bot.config["private"])
+            channel = guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(f"User: {member.display_name} attempted to remove role but I could not find that role "
                                f"in the config.")
             logging.error(f"Remove Role Error: {str(e)}")
         except Exception as e:
-            channel = guild.get_channel(self.bot.config["private"])
+            channel = guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(f"User: {member.display_name} attempted to remove role but there was an error.")
             logging.error(f"Remove Role Error: {str(e)}")
 
