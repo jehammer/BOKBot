@@ -152,6 +152,8 @@ async def on_ready():
     synced = await bot.tree.sync()
     logging.info(f"Synced {len(synced)} command(s)")
     logging.info("Bot is ready for use")
+    logging.info("Sending out load_on_ready Event")
+    bot.dispatch("load_on_ready", bot)
 
 
 async def main():
