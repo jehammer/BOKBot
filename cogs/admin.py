@@ -42,6 +42,15 @@ def save_reminder_time(config, remaining):
 
     misc.update_one({'reminder': 'timer'},  {'$set': rec})
 
+def save_members_list(config, member_dict):
+    client = MongoClient(config['mongo'])
+    database = client['bot']
+    misc = database.misc
+    rec = {
+        'members': 'list',
+        'data': member_dict
+    }
+    misc.update_one({'members': 'list'},  {'$set': rec})
 
 class Admin(commands.Cog, name="Admin"):
     """Receives Administration commands"""
@@ -51,6 +60,7 @@ class Admin(commands.Cog, name="Admin"):
         load_reminder_timer(self.bot.config)
         self.scheduled_good_morning.start()
         self.scheduled_invitation_checker.start()
+        self.update_name_mapping.start()
 
     @commands.command(name="servers", hidden=True)
     @permissions.creator_only()
@@ -133,6 +143,7 @@ class Admin(commands.Cog, name="Admin"):
             logging.info(f"Stopping tasks")
             self.scheduled_good_morning.cancel()
             self.scheduled_invitation_checker.cancel()
+            self.update_name_mapping.cancel()
             logging.info(f"Stopped tasks")
             logging.info("Preparing to reload cogs")
             for filename in os.listdir("cogs"):
@@ -306,6 +317,17 @@ class Admin(commands.Cog, name="Admin"):
         except Exception as e:
             logging.error(f"28 Day Invite Make Error: {str(e)}")
 
+    @tasks.loop(time=scheduled_time)
+    async def update_name_mapping(self):
+        try:
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            members_dict = {}
+            for member in guild.members:
+                members_dict[str(member.id)] = member.display_name
+            save_members_list(self.bot.config, members_dict)
+
+        except Exception as e:
+            logging.error(f"Members Dict Update Task Error: {str(e)}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
