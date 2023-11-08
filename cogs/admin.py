@@ -278,6 +278,8 @@ class Admin(commands.Cog, name="Admin"):
     @tasks.loop(time=scheduled_time)
     async def scheduled_good_morning(self):
         try:
+            if time.localtime().tm_isdst == 0:
+                await asyncio.sleep(3600)
             guild = self.bot.get_guild(self.bot.config['guild'])
             channel = guild.get_channel(self.bot.config['morning_channel'])
             await channel.send(self.bot.config['morning'])
