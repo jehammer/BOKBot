@@ -10,6 +10,7 @@ import re
 import yaml
 from pymongo import MongoClient
 import os
+import time
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
