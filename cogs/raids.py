@@ -588,7 +588,7 @@ class TrialModal(discord.ui.Modal):
         )
         self.limit = discord.ui.TextInput(
             label="Role Limit",
-            placeholder="Put Role Limit here",
+            placeholder="Put Rank Limit here",
             default=self.limit_val,
             required=True,
         )
