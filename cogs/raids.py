@@ -38,7 +38,7 @@ def update_db(channel_id, raid):
     try:
         logging.info(f"Updating Roster channelID: {channel_id}")
         new_rec = {'$set': {'data': raid.get_data()}}
-        raids.update_one({'channelID': channel_id}, new_rec)
+        raids.update_one({'channelID': str(channel_id)}, new_rec)
         logging.info(f"Roster channelID: {channel_id} - {raid.raid} updated")
     except Exception as e:
         logging.error(f"Save to DB Error: {str(e)}")
@@ -48,7 +48,7 @@ def update_db(channel_id, raid):
 def get_raid(channel_id):
     """Loads raid information from a database or returns None if there is none"""
     try:
-        rec = raids.find_one({'channelID': channel_id})
+        rec = raids.find_one({'channelID': str(channel_id)})
         if rec is None:
             return None
         raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
@@ -495,7 +495,7 @@ class RosterSelect(discord.ui.Select):
         rosters = raids.distinct("channelID")
         options = []
         for i in rosters:
-            channel = interaction.guild.get_channel(i)
+            channel = interaction.guild.get_channel(int(i))
             if channel is not None:
                 name = channel.name
                 if name in self.channels.keys():
@@ -764,7 +764,7 @@ class TrialModal(discord.ui.Modal):
             try:
                 logging.info(f"Saving Roster channelID: {str(channel.id)}")
                 rec = {
-                    'channelID': channel.id,
+                    'channelID': str(channel.id),
                     'data': created.get_data()
                 }
                 raids.insert_one(rec)
@@ -898,7 +898,7 @@ class CloseModal(discord.ui.Modal):
             except ValueError:
                 await interaction.response.send_message(f"Runs Count Increase must be a number only.")
                 return
-        to_delete = {"channelID": self.channel_id}
+        to_delete = {"channelID": str(self.channel_id)}
         raids.delete_one(to_delete)
         if self.channel is not None:
             await self.channel.delete()
@@ -1142,38 +1142,39 @@ class Raids(commands.Cog, name="Trials"):
             private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
             await private_channel.send(f"{member.name} - {member.display_name} has left the server")
             for i in rosters:
-                raid = get_raid(i)
-                channel = member.guild.get_channel(i)
+                typed_i = int(i)
+                raid = get_raid(typed_i)
+                channel = member.guild.get_channel(typed_i)
                 if user_id in raid.dps.keys():
                     raid.remove_dps(user_id)
                     await private_channel.send(f"Traitor was removed as a DPS from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
                 elif user_id in raid.backup_dps.keys():
                     raid.remove_dps(user_id)
                     await private_channel.send(f"Traitor was removed as a backup DPS from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
                 elif user_id in raid.healers.keys():
                     raid.remove_healer(user_id)
                     await private_channel.send(f"Traitor was removed as a Healer from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
                 elif user_id in raid.backup_healers.keys():
                     raid.remove_healer(user_id)
                     await private_channel.send(f"Traitor was removed as a backup Healer from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
                 elif user_id in raid.tanks.keys():
                     raid.remove_tank(user_id)
                     await private_channel.send(f"Traitor was removed as a Tank from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
                 elif user_id in raid.backup_tanks.keys():
                     raid.remove_tank(user_id)
                     await private_channel.send(f"Traitor was removed as a backup Tank from {channel.name}")
                     was_on = True
-                    update_db(i, raid)
+                    update_db(typed_i, raid)
             if was_on:
                 await private_channel.send(f"The Traitor has been removed from all active rosters.")
             else:
