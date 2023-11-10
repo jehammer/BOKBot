@@ -735,7 +735,7 @@ class TrialModal(discord.ui.Modal):
                     roles_req += f"{limiter.mention}"
                 embed = discord.Embed(
                     title=f"{created.raid} {created.date}",
-                    description=f"Rank Required: {roles_req}\n\nI hope people sign up for this.",
+                    description=f"Rank(s) Required: {roles_req}\n\nI hope people sign up for this.",
                     color=discord.Color.blue()
                 )
                 embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
@@ -1509,7 +1509,7 @@ class Raids(commands.Cog, name="Trials"):
 
             embed = discord.Embed(
                 title=f"{raid.raid} {raid.date}",
-                description=f"Rank Required: {roles_req}",
+                description=f"Rank(s) Required: {roles_req}",
                 color=discord.Color.green()
             )
             embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
