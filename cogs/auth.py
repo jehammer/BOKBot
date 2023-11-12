@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 import logging
 import time
 import secrets
@@ -37,19 +38,18 @@ class Auth(commands.Cog, name="Auth"):
         self.bot = bot
         set_channels(bot.config)
 
-    @commands.command(name='auth', aliases=['authenticate', 'authentication', 'authorize', 'authorization'])
-    async def send_site_authorization(self, ctx: commands.Context):
+    @app_commands.command(name="auth", description="Creates your access Token to the BOK Website")
+    async def send_site_authorization(self, interaction: discord.Interaction) -> None:
         """Get yourself a token to log into the website!"""
         try:
-
-            if isinstance(ctx.channel, discord.channel.DMChannel):
-                await ctx.reply(f"This command must be called from within the server so I can get your permissions.")
-                logging.info(f"User: {ctx.author.display_name} attempted to generate Token from DMs")
+            if isinstance(interaction.channel, discord.channel.DMChannel):
+                await interaction.response.send_message(f"This command must be called from within the server so I can get your permissions.")
+                logging.info(f"User: {interaction.user.display_name} attempted to generate Token from DMs")
                 return
 
-            user = ctx.author
+            user = interaction.user
             await user.send('Generating Token')
-            logging.info(f"Generating Site Token for: {ctx.author.display_name}")
+            logging.info(f"Generating Site Token for: {interaction.user.display_name}")
             permissions = []
             user_id = str(user.id)
             generated_token = generate_access_token()
@@ -78,12 +78,14 @@ class Auth(commands.Cog, name="Auth"):
             }
             auth.insert_one(rec)
             await user.send(f"Your token has been generated:\n{str(generated_token)}")
-            logging.info(f"Generated Site Token for: {ctx.author.display_name}")
+            logging.info(f"Generated Site Token for: {interaction.user.display_name}")
 
-        except discord.Forbidden as e:
-            await ctx.reply(f"Please enable DMs on this server, I need permission to DM you for this command.")
+            await interaction.response.send_message(f"Check your DMs.", ephemeral=True)
+
+        except discord.Forbidden:
+            await interaction.response.send_message(f"Please enable DMs on this server, I need permission to DM you for this command.")
         except Exception as e:
-            await ctx.reply("Unable to setup authorization for you.")
+            await interaction.response.send_message("Unable to setup authorization for you.")
             logging.error(f"Auth Command Error: {str(e)}")
 
 async def setup(bot: commands.Bot):
