@@ -11,6 +11,8 @@ from enum import Enum
 from pymongo import MongoClient
 import decor.perms as permissions
 from errors.boterrors import *
+import aio_pika
+import asyncio
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -24,6 +26,7 @@ raids = None
 count = None
 defaults = None
 misc = None
+site = None
 
 #DATE_TEMPLATE = "<t:{date}:f>" # DATE_TEMPLATE.format(date=raid.date)
 class Role(Enum):
@@ -50,7 +53,9 @@ def get_raid(channel_id):
     try:
         rec = raids.find_one({'channelID': str(channel_id)})
         if rec is None:
-            return None
+            rec = site.find_one({'tempId': str(channel_id)})
+            if rec is None:
+                return None
         raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
                     rec['data']['dps'],
                     rec['data']['healers'], rec['data']['tanks'],
@@ -158,12 +163,14 @@ def set_channels(config):
     global count
     global defaults
     global misc
+    global site
     client = MongoClient(config['mongo'])
     database = client['bot']  # Or do it with client.PyTest, accessing collections works the same way.
     raids = database.raids
     count = database.count
     defaults = database.defaults
     misc = database.misc
+    site = database.site
 
 
 def suffix(d):
@@ -349,6 +356,38 @@ def get_limits(roles):
         for i in prog_roles["roles"]:
             list_roles.append(i)
     return list_roles
+
+
+def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
+            fact_role_limit, fact_memo, config):
+    if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
+        fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
+        fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
+        fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
+    dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
+    return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
+                backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
+                fact_memo)
+
+def get_sort_key(current_channels, config):
+    # TODO: Review the way I calculate these
+    current_raid = get_raid(current_channels.id)
+    new_position = 0
+    if current_raid is None:
+        return current_channels.position  # Keep the channel's position unchanged
+    elif current_raid.date == "ASAP":
+        return 100
+    else:
+        # Calculate new positioning
+        new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
+        tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
+            tz=timezone(config["raids"]["timezone"]))
+        day = tz.day
+        if day < 10:
+            day = int(f"0{str(day)}")
+        weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
+    return weight
+
 
 class Raid:
     """Class for handling roster and related information"""
@@ -659,24 +698,6 @@ class TrialModal(discord.ui.Modal):
 
         category = interaction.guild.get_channel(self.config["raids"]["category"])
 
-        def get_sort_key(current_channels):
-            current_raid = get_raid(current_channels.id)
-            new_position = 0
-            if current_raid is None:
-                return current_channels.position  # Keep the channel's position unchanged
-            elif current_raid.date == "ASAP":
-                return 100
-            else:
-                # Calculate new positioning
-                new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
-                tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                    tz=timezone(self.config["raids"]["timezone"]))
-                day = tz.day
-                if day < 10:
-                    day = int(f"0{str(day)}")
-                weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
-            return weight
-
         if self.new_roster is False:
             # Update all values then update the DB
             self.raid.raid = raid
@@ -700,16 +721,6 @@ class TrialModal(discord.ui.Modal):
 
 
         elif self.new_roster is True:
-            def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-                        fact_role_limit, fact_memo, config):
-                if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
-                    fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
-                    fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
-                    fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
-                dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
-                return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                            backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
-                            fact_memo)
             try:
                 created = factory(leader, raid, formatted_date, dps_limit, healer_limit, tank_limit, role_limit, self.memo.value, self.config)
 
@@ -782,7 +793,7 @@ class TrialModal(discord.ui.Modal):
 
         # Sort channels
         for i in category.text_channels:
-            i.position = get_sort_key(i)
+            i.position = get_sort_key(i, self.config)
 
         for i in category.text_channels:
             if i.position >= 100: # Fix the rate_limit so only adjust channels we want to adjust
@@ -1131,6 +1142,122 @@ class Raids(commands.Cog, name="Trials"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         set_channels(self.bot.config)
+
+    @commands.Cog.listener()
+    async def on_new_roster_message(self, token):
+        try:
+            logging.info(f"Received New Roster Token from RabbitMQ: {token}")
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            private_channel = guild.get_channel(self.bot.config['administration']['private'])
+            category = guild.get_channel(self.bot.config["raids"]["category"])
+
+            raid = get_raid(token)
+            raid.date = format_date(raid.date)
+
+            roles = get_limits(self.bot.config["raids"]["roles"])
+            role_limit = int(raid.role_limit)
+
+            logging.info(f"Creating new channel.")
+            new_name = generate_channel_name(raid.date, raid.raid, self.bot.config["raids"]["timezone"])
+            channel = await category.create_text_channel(new_name)
+            roles_req = ""
+            if isinstance(roles[role_limit], list):
+                # Need to work with 3 roles to check, dps | tank | healer order
+                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                limiter_dps = discord.utils.get(guild.roles, name=roles[role_limit][0])
+                limiter_tank = discord.utils.get(guild.roles, name=roles[role_limit][1])
+                limiter_healer = discord.utils.get(guild.roles, name=roles[role_limit][2])
+
+                roles_req += f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
+
+            else:
+                limiter = discord.utils.get(guild.roles, name=roles[role_limit])
+                roles_req += f"{limiter.mention}"
+            embed = discord.Embed(
+                title=f"{raid.raid} {raid.date}",
+                description=f"Rank(s) Required: {roles_req}\n\nI hope people sign up for this.",
+                color=discord.Color.blue()
+            )
+            embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
+            embed.set_author(name="Raid Lead: " + raid.leader)
+            embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+            embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+            embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
+
+            if raid.memo != "None":
+                embed_memo = discord.Embed(
+                    title=" ",
+                    color=discord.Color.dark_gray()
+                )
+                embed_memo.add_field(name=" ", value=raid.memo, inline=True)
+                embed_memo.set_footer(text="This is very important!")
+                await channel.send(embed=embed_memo)
+            await channel.send(embed=embed)
+            logging.info(f"Created Channel: channelID: {str(channel.id)}")
+            # Save raid info to MongoDB
+            try:
+                logging.info(f"Saving Roster channelID: {str(channel.id)}")
+                rec = {
+                    'channelID': str(channel.id),
+                    'data': raid.get_data()
+                }
+                raids.insert_one(rec)
+                logging.info(f"Saved Roster channelID: {str(channel.id)}")
+            except Exception as e:
+                await private_channel.send("Error in saving information to MongoDB, roster was not saved.")
+                logging.error(f"Raid Creation MongoDB Error: {str(e)}")
+                return
+
+            # Refresh category
+            category = guild.get_channel(self.bot.config["raids"]["category"])
+
+            # Sort channels
+            for i in category.text_channels:
+                i.position = get_sort_key(i, self.bot.config)
+
+            for i in category.text_channels:
+                if i.position >= 100:
+                    await i.edit(position=i.position)
+                    time.sleep(1)
+            await private_channel.send(f"New Roster Created from Website: {channel.mention}")
+        except Exception as e:
+            logging.error(f"RabbitMQ New Roster Error: {str(e)}")
+            await private_channel.send(f"Error creating new roster and channel from Website.")
+            return
+
+
+    @commands.Cog.listener()
+    async def on_modified_roster_message(self, channel_id):
+        try:
+            logging.info(f"Received Modified Roster Channel ID from RabbitMQ: {channel_id}")
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            private_channel = guild.get_channel(self.bot.config['administration']['private'])
+
+            raid = get_raid(channel_id)
+            raid.date = format_date(raid.date)
+
+            new_name = generate_channel_name(raid.date, raid.raid, self.bot.config["raids"]["timezone"])
+            update_db(channel_id, raid)
+            modify_channel = guild.get_channel(int(channel_id))
+            await modify_channel.edit(name=new_name)
+            category = guild.get_channel(self.bot.config["raids"]["category"])
+
+            # Sort channels
+            for i in category.text_channels:
+                i.position = get_sort_key(i, self.bot.config)
+
+            for i in category.text_channels:
+                if i.position >= 100:
+                    await i.edit(position=i.position)
+                    time.sleep(1)
+
+            await private_channel.send(f"Roster {new_name} and Channel updated.")
+        except Exception as e:
+            logging.error(f"RabbitMQ Modified Roster Error: {str(e)}")
+            await private_channel.send(f"Error modifying roster and channel from Website.")
+            return
+
+
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
