@@ -351,9 +351,9 @@ def get_limits(roles):
             roles['third']['dps'], roles['third']['tank'], roles['third']['healer']
         ]
     ]
-    prog_roles = misc.find_one({'prog': 'roles'})
-    if prog_roles is not None and prog_roles["roles"] != "None":
-        for i in prog_roles["roles"]:
+    prog_roles = misc.find_one({'key': 'progRoles'})
+    if prog_roles is not None and prog_roles["data"] != "None":
+        for i in prog_roles["data"]:
             list_roles.append(i)
     return list_roles
 
@@ -1100,10 +1100,10 @@ class ProgModal(discord.ui.Modal):
         super().__init__(title='Prog Roles')
         self.initialize()
     def initialize(self):
-        self.prog_roles = misc.find_one({'prog': 'roles'})
+        self.prog_roles = misc.find_one({'key': 'progRoles'})
         default_vals = ""
         if self.prog_roles is not None:
-            roles  = self.prog_roles['roles']
+            roles  = self.prog_roles['data']
             for i in roles:
                 default_vals += f"{str(i)}\n"
         self.roles = discord.ui.TextInput(
@@ -1119,14 +1119,14 @@ class ProgModal(discord.ui.Modal):
         role_list = self.roles.value.splitlines()
         if self.prog_roles is not None:
             new_data = {
-                "roles": role_list
+                "data": role_list
             }
             new_rec = {'$set': new_data}
-            misc.update_one({'prog': "roles"}, new_rec)
+            misc.update_one({'key': "progRoles"}, new_rec)
         else:
             new_data = {
-                "prog": "roles",
-                "roles": role_list
+                "key": "progRoles",
+                "data": role_list
             }
             misc.insert_one(new_data)
         await interaction.response.send_message(f"Prog Roles Updated")
@@ -1973,10 +1973,10 @@ class Raids(commands.Cog, name="Trials"):
                      f"1: {roles['first']['dps']} | {roles['first']['tank']} | {roles['first']['healer']}\n" \
                      f"2: {roles['second']['dps']} | {roles['second']['tank']} | {roles['second']['healer']}\n" \
                      f"3: {roles['third']['dps']} | {roles['third']['tank']} | {roles['third']['healer']}"
-            prog_roles = misc.find_one({'prog': 'roles'})
-            if prog_roles is not None and prog_roles["roles"][0] != "None":
+            prog_roles = misc.find_one({'key': 'progRoles'})
+            if prog_roles is not None and prog_roles["data"][0] != "None":
                 num = 4
-                ext = prog_roles["roles"]
+                ext = prog_roles["data"]
                 for i in ext:
                     limits += f"\n{str(num)}: {i}"
                     num += 1
