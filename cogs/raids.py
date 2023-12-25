@@ -1203,6 +1203,8 @@ class Raids(commands.Cog, name="Trials"):
                 }
                 raids.insert_one(rec)
                 logging.info(f"Saved Roster channelID: {str(channel.id)}")
+                to_delete = {{'tempId': str(token)}}
+                site.delete_one(to_delete)
             except Exception as e:
                 await private_channel.send("Error in saving information to MongoDB, roster was not saved.")
                 logging.error(f"Raid Creation MongoDB Error: {str(e)}")
