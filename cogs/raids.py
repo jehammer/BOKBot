@@ -52,10 +52,6 @@ def get_raid(channel_id):
     """Loads raid information from a database or returns None if there is none"""
     try:
         rec = raids.find_one({'channelID': str(channel_id)})
-        if rec is None:
-            rec = site.find_one({'tempId': str(channel_id)})
-            if rec is None:
-                return None
         raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
                     rec['data']['dps'],
                     rec['data']['healers'], rec['data']['tanks'],
@@ -68,6 +64,20 @@ def get_raid(channel_id):
     except Exception as e:
         logging.error(f"Load Raid Error: {str(e)}")
         raise IODBError(f"Unable to load Raid from DB")
+
+def get_fresh_roster(temp_id, config):
+    try:
+        rec = site.find_one({'tempId': str(temp_id)})
+        if rec is None:
+            return None
+        site_raid = factory(rec['data']['leader'], rec['data']['raid'], rec['data']['date'], rec['data']['dps_limit'],
+                            rec['data']['healer_limit'], rec['data']['tank_limit'],
+                            rec['data']['role_limit'], rec['data']['memo'], config)
+        return site_raid
+    except Exception as e:
+        logging.error(f"Load Fresh Roster Raid Error: {str(e)}")
+        raise IODBError(f"Unable to load Raid from DB")
+
 
 
 def update_runs(raid, num=1):
@@ -1151,7 +1161,7 @@ class Raids(commands.Cog, name="Trials"):
             private_channel = guild.get_channel(self.bot.config['administration']['private'])
             category = guild.get_channel(self.bot.config["raids"]["category"])
 
-            raid = get_raid(token)
+            raid = get_fresh_roster(token, self.bot.config)
             raid.date = format_date(raid.date)
 
             roles = get_limits(self.bot.config["raids"]["roles"])
