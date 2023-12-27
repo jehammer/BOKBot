@@ -52,6 +52,8 @@ def get_raid(channel_id):
     """Loads raid information from a database or returns None if there is none"""
     try:
         rec = raids.find_one({'channelID': str(channel_id)})
+        if rec is None:
+            return None
         raid = Raid(rec['data']['raid'], rec['data']['date'], rec['data']['leader'],
                     rec['data']['dps'],
                     rec['data']['healers'], rec['data']['tanks'],
@@ -67,7 +69,7 @@ def get_raid(channel_id):
 
 def get_fresh_roster(temp_id, config):
     try:
-        rec = site.find_one({'tempId': str(temp_id)})
+        rec = site.find_one({"tempId": str(temp_id)})
         if rec is None:
             return None
         site_raid = factory(rec['data']['leader'], rec['data']['raid'], rec['data']['date'], rec['data']['dps_limit'],
@@ -76,7 +78,7 @@ def get_fresh_roster(temp_id, config):
         return site_raid
     except Exception as e:
         logging.error(f"Load Fresh Roster Raid Error: {str(e)}")
-        raise IODBError(f"Unable to load Raid from DB")
+        raise IODBError(f"Unable to load Site New Roster from DB")
 
 
 
@@ -380,23 +382,27 @@ def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit
                 fact_memo)
 
 def get_sort_key(current_channels, config):
-    # TODO: Review the way I calculate these
-    current_raid = get_raid(current_channels.id)
-    new_position = 0
-    if current_raid is None:
-        return current_channels.position  # Keep the channel's position unchanged
-    elif current_raid.date == "ASAP":
-        return 100
-    else:
-        # Calculate new positioning
-        new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
-        tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-            tz=timezone(config["raids"]["timezone"]))
-        day = tz.day
-        if day < 10:
-            day = int(f"0{str(day)}")
-        weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
-    return weight
+    try:
+        # TODO: Review the way I calculate these
+        current_raid = get_raid(current_channels.id)
+        new_position = 0
+        if current_raid is None:
+            return current_channels.position  # Keep the channel's position unchanged
+        elif current_raid.date == "ASAP":
+            return 100
+        else:
+            # Calculate new positioning
+            new_time = datetime.datetime.utcfromtimestamp(int(re.sub('[^0-9]', '', current_raid.date)))
+            tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
+                tz=timezone(config["raids"]["timezone"]))
+            day = tz.day
+            if day < 10:
+                day = int(f"0{str(day)}")
+            weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
+        return weight
+    except Exception as e:
+        logging.error(f"Sort Key Error: {str(e)}")
+        raise Exception(e)
 
 
 class Raid:
@@ -1219,25 +1225,31 @@ class Raids(commands.Cog, name="Trials"):
                 return
 
             try:
-                to_delete = {{"tempId": str(token)}}
+                to_delete = {"tempId": str(token)}
                 site.delete_one(to_delete)
             except Exception as e:
                 await private_channel.send("Error in deleting leftover MongoDB data")
                 logging.error(f"Site Data Roster Deletion MongoDB Error: {str(e)}")
                 return
 
-            # Refresh category
-            category = guild.get_channel(self.bot.config["raids"]["category"])
-
-            # Sort channels
-            for i in category.text_channels:
-                i.position = get_sort_key(i, self.bot.config)
-
-            for i in category.text_channels:
-                if i.position >= 100:
-                    await i.edit(position=i.position)
-                    time.sleep(1)
             await private_channel.send(f"New Roster Created from Website: {channel.mention}")
+
+            try:
+                time.sleep(2)
+                # Refresh category
+                category = guild.get_channel(self.bot.config["raids"]["category"])
+
+                # Sort channels
+                for i in category.text_channels:
+                    i.position = get_sort_key(i, self.bot.config)
+
+                for i in category.text_channels:
+                    if i.position >= 100:
+                        await i.edit(position=i.position)
+                        time.sleep(1)
+            except Exception as e:
+                logging.error(f"New Roster Channel Sort Error: { str(e)}")
+                await private_channel.send(f"Unable to sort rosters, encountered an error.")
         except Exception as e:
             logging.error(f"RabbitMQ New Roster Error: {str(e)}")
             await private_channel.send(f"Error creating new roster and channel from Website.")
