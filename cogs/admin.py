@@ -64,7 +64,6 @@ class Admin(commands.Cog, name="Admin"):
             time = datetime.datetime.now().strftime("%I:%M:%S %p")
             logging.info(f"Shutdown command received - {time} on {date}")
             logging.shutdown()
-            self.scheduled_invitation_checker.stop()
             self.scheduled_good_morning.stop()
             if os.path.exists(log_name):
                 file_name = f"log-{date}.log"
