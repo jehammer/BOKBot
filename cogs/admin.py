@@ -120,7 +120,6 @@ class Admin(commands.Cog, name="Admin"):
         try:
             logging.info(f"Stopping tasks")
             self.scheduled_good_morning.cancel()
-            self.scheduled_invitation_checker.cancel()
             self.update_name_mapping.cancel()
             logging.info(f"Stopped tasks")
             logging.info("Preparing to reload cogs")
