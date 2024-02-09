@@ -21,27 +21,6 @@ logging.basicConfig(
 
 scheduled_time = datetime.time(13, 0, 0, 0) # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
 
-def load_reminder_timer(config):
-    """Load days remaining on reminder timer"""
-    client = MongoClient(config['mongo'])
-    database = client['bot']
-    misc = database.misc
-    rec = misc.find_one({'reminder': 'timer'})
-    reminder_timer = rec['days']
-    return reminder_timer
-
-
-def save_reminder_time(config, remaining):
-    """Save days remaining on reminder timer"""
-    client = MongoClient(config['mongo'])
-    database = client['bot']
-    misc = database.misc
-    rec = {
-        'reminder': 'timer',
-        'days': remaining
-    }
-
-    misc.update_one({'reminder': 'timer'},  {'$set': rec})
 
 def save_members_list(config, member_dict):
     client = MongoClient(config['mongo'])
@@ -300,25 +279,6 @@ class Admin(commands.Cog, name="Admin"):
                 logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
         except Exception as e:
             logging.error(f"Good Morning Task Error: {str(e)}")
-    @tasks.loop(time=scheduled_time)
-    async def scheduled_invitation_checker(self):
-        try:
-            remaining = load_reminder_timer(self.bot.config)
-            if remaining != 1:
-                remaining-=1
-                save_reminder_time(self.bot.config, remaining)
-                logging.info(f"Remaining Days on Invite: {str(remaining)}")
-                return
-
-            guild = self.bot.get_guild(self.bot.config['guild'])
-            officer_channel = guild.get_channel(self.bot.config['officer_channel'])
-            intro_channel = guild.get_channel(self.bot.config['intro_channel'])
-            invitation = await intro_channel.create_invite(reason="Monthly Invitation", max_age=2592000)
-            await officer_channel.send(f"TIME FOR A NEW INVITE IN THE IN-GAME GUILD MOTD: `discord.gg/{invitation.code}`")
-            logging.info(f"Created new Invite: {invitation.code}")
-            save_reminder_time(self.bot.config, 28)
-        except Exception as e:
-            logging.error(f"28 Day Invite Make Error: {str(e)}")
 
     @tasks.loop(time=scheduled_time)
     async def update_name_mapping(self):
