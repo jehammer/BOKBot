@@ -37,9 +37,7 @@ class Admin(commands.Cog, name="Admin"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        load_reminder_timer(self.bot.config)
         self.scheduled_good_morning.start()
-        self.scheduled_invitation_checker.start()
         self.update_name_mapping.start()
 
     @commands.command(name="servers", hidden=True)
