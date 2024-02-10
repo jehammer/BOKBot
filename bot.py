@@ -175,8 +175,6 @@ async def on_ready():
     logging.info(f"Logged in as: {bot.user.name}")
     await gather_roles(bot.get_guild(bot.config["guild"]), bot.config)
     await change_playing()
-    synced = await bot.tree.sync()
-    logging.info(f"Synced {len(synced)} command(s)")
     logging.info("Bot is ready for use")
     logging.info("Sending out load_on_ready Event")
     bot.dispatch("load_on_ready", bot)
