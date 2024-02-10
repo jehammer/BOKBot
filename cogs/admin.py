@@ -164,6 +164,18 @@ class Admin(commands.Cog, name="Admin"):
             logging.error(f"Config Reload Error: {str(e)}")
             await ctx.send(f"There was an issue reloading the config, check the logs for more info.")
 
+    @commands.command(name="sync", aliases=["resync", "synchronize", "rescynchronize"])
+    @permissions.creator_only()
+    async def sync_application_commands(self, ctx: commands.Context):
+        """Owner Only: Force Syncs Application Commands"""
+        try:
+            synced = await self.bot.tree.sync()
+            logging.info(f"Synced {len(synced)} command(s)")
+            await ctx.send(f"Sync Complete. Synced {len(synced)} Application Commands.")
+        except Exception as e:
+            logging.error(f"Sync Error: {str(e)}")
+            await ctx.send(f"There was an issue syncing, check the logs for more info.")
+
     @commands.command(name="data")
     async def dm_users_date(self, ctx: commands.Context):
         """Get a DM of all Information BOKBot has on you"""
