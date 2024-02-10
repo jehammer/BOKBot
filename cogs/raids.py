@@ -1967,6 +1967,42 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send("Something has gone wrong.")
             logging.error(f"Add To Roster Error: {str(e)}")
 
+    @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
+    @permissions.application_has_prog_lead()
+    async def grant_discord_role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
+        try:
+            if member.bot is True:
+                await interaction.response.send_message(f"You can only use this command on people, not bots.")
+                return
+            prog_roles = misc.find_one({'key': 'progRoles'})
+            if role.name not in prog_roles["data"]:
+                await interaction.response.send_message(f"You can only grant Prog Roles with this command.")
+                return
+            logging.info(f"Grant Role called by {interaction.user.display_name} to grant {role.name} to {member.display_name}")
+            await member.add_roles(role)
+            await interaction.response.send_message(f"Added {role.name} to {member.display_name}")
+        except Exception as e:
+            logging.error(f"Grant Role Error: {str(e)}")
+            raise e
+
+    @app_commands.command(name="remove-role", description="For Leads: Removes mentioned user a prog role.")
+    @permissions.application_has_prog_lead()
+    async def remove_discord_role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
+        try:
+            if member.bot is True:
+                await interaction.response.send_message(f"You can only use this command on people, not bots.")
+                return
+            prog_roles = misc.find_one({'key': 'progRoles'})
+            if role.name not in prog_roles["data"]:
+                await interaction.response.send_message(f"You can only remove Prog Roles with this command.")
+                return
+            logging.info(f"Remove Role called by {interaction.user.display_name} to remove {role.name} from {member.display_name}")
+            await member.remove_roles(role)
+            await interaction.response.send_message(f"Removed {role.name} from {member.display_name}")
+        except Exception as e:
+            logging.error(f"Remove Role Error: {str(e)}")
+            raise e
+
     @commands.command(name="pin", aliases=["unpin"])
     @permissions.has_raid_lead()
     async def pin_message(self, ctx: commands.Context):
