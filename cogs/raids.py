@@ -1916,17 +1916,19 @@ class Raids(commands.Cog, name="Trials"):
             await ctx.send(f"Unable to check count")
             logging.error(f"Count check error: {str(e)}")
 
-    @commands.command(name="add")
-    @permissions.has_raid_lead()
-    async def add_to_roster(self, ctx: commands.Context, p_type, member: discord.Member):
-        """For Raid Leads: Manually add to roster | `!add [role] [@ the user]`"""
+    @app_commands.command(name="add", description="For Raid Leads: Manually add to roster")
+    @permissions.application_has_raid_lead()
+    async def add_to_roster(self, interaction: discord.Interaction, role: str, member: discord.Member):
         try:
-            channel_id = ctx.message.channel.id  # Get channel id, use it to grab trial, and add user into the trial
+            channel_id = interaction.channel_id  # Get channel id, use it to grab trial, and add user into the trial
             raid = get_raid(channel_id)
             if raid is None:
-                await ctx.send(f"Sorry! This command only works in a roster channel!")
+                await interaction.response.send_message(f"Sorry! This command only works in a roster channel!")
                 return
-
+            if member.bot is True:
+                await interaction.response.send_message(f"You can only use this command on people, not bots.")
+                return
+            logging.info(f"Add called by {interaction.user.display_name} to add {member.display_name} as {role}")
             def remove_for_add(member_id):
                 if member_id in raid.dps.keys() or \
                         member_id in raid.backup_dps.keys():
@@ -1943,29 +1945,33 @@ class Raids(commands.Cog, name="Trials"):
             added_member_id = str(member.id)
 
             worked = False
-            if p_type.lower() == "dps":
+            if role.lower() == "dps":
                 remove_for_add(added_member_id)
                 result = raid.add_dps(added_member_id, "")
                 worked = True
-            elif p_type.lower() == "healer":
+            elif role.lower() == "healer":
                 remove_for_add(added_member_id)
                 result = raid.add_healer(added_member_id, "")
                 worked = True
-            elif p_type.lower() == "tank":
+            elif role.lower() == "tank":
                 remove_for_add(added_member_id)
                 result = raid.add_tank(added_member_id, "")
                 worked = True
             else:
-                await ctx.send(f"Please specify a valid role. dps, healer, or tank.")
+                await interaction.response.send_message(f"Please specify a valid role. dps, healer, or tank.")
             if worked:  # If True
                 update_db(channel_id, raid)
-                await ctx.reply(f"{result}")
+                await interaction.response.send_message(f"{member.display_name}: {result}")
         except OSError as e:
-            await ctx.send(f"Unable to get process information.")
+            await interaction.response.send_message(f"Unable to get process information.")
             logging.error(f"Add To Roster Raid Get Error: {str(e)}")
         except Exception as e:
-            await ctx.send("Something has gone wrong.")
+            await interaction.response.send_message("Something has gone wrong.")
             logging.error(f"Add To Roster Error: {str(e)}")
+
+    @commands.command(name="add", hidden=True)
+    async def old_add_response(self, ctx: commands.Context):
+        await ctx.reply(f"This has become an Application Command, use /add instead!")
 
     @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
     @permissions.application_has_prog_lead()
