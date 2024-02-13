@@ -181,8 +181,8 @@ class Admin(commands.Cog, name="Admin"):
         """Get a DM of all Information BOKBot has on you"""
         try:
             await ctx.author.send(f"Hello! Just a moment as I gather up all your information. Please note this only includes "
-                                  f"saved information that is permanent, so any rosters you are on right now or reports "
-                                  f"you have opened will not be included in the data sent to you.")
+                                  f"saved information that is permanent, so any rosters you are on right now "
+                                  f"will not be included in the data sent to you.")
 
             client = MongoClient(self.bot.config['mongo'])
             database = client['bot']
