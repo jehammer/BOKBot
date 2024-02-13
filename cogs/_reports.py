@@ -6,6 +6,14 @@ from pymongo import MongoClient
 import asyncio
 import logging
 
+
+###
+###
+### DEPRECATED!!!! THIS COG IS NO LONGER MAINTAINED!!!
+###
+###
+
+
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
     handlers=[
@@ -30,6 +38,7 @@ class Reports(commands.Cog, name="Reports"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         set_channels(self.bot.config)
+        logging.warning(f"WARNING: REPORTS MODULE HAS BEEN DEPRECATED AND IS NO LONGER MAINTAINED!")
 
     @commands.command(name="report")
     async def create_report(self, ctx: commands.Context):
