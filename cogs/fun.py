@@ -337,26 +337,21 @@ Goodnight BOK
             await ctx.send("Unable to send the gif")
             logging.error(f"No Questions Asked GIF error: {str(e)}")
 
-    @app_commands.command(name="rank", description="This is an app command, use /rank @someone!")
+    @app_commands.command(name="rank", description="See how much BOKBot approves of you today.")
+    @app_commands.describe(member="Discord user to rank if not yourself.")
     async def rank_app_command(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
         """Ranks someone out of 10000 you ping"""
         try:
             if member is None:
-                await interaction.response.send_message(f"Hey! You need to @ someone!")
-                return
-            timestamp = int(
-                time.mktime(datetime.datetime.now().timetuple()))  # All this just for a utc timestamp integer
+                member = interaction.user
+            timestamp = int(time.mktime(datetime.datetime.now().timetuple()))  # All this just for a utc timestamp int
             ran = random.randint(1, 10000)
-
             user_id = member.id
-
             info = load_rank(user_id)
-
             info.last_called = f"<t:{timestamp}:f>"
             info.count += 1
 
             # Lowest and Highest check
-
             if info.lowest > ran:
                 info.lowest = ran
             if info.highest < ran:
@@ -384,7 +379,7 @@ Goodnight BOK
 
             update_db(user_id, info)
 
-            await interaction.response.send_message(f"{member.mention} ranks {ordinalSuffix(ran)}!")
+            await interaction.response.send_message(f"{member.display_name} ranks {ordinalSuffix(ran)}!")
 
         except IOError as e:
             await interaction.response.send_message(f"Sorry, I was unable to load or save your new information.")
@@ -393,22 +388,21 @@ Goodnight BOK
             await interaction.response.send_message("Sorry, I was unable to complete the command")
             logging.error(f"Rank Command Error: {str(e)}")
 
-    @commands.command(name="kowtow")
-    async def send_rank_information(self, ctx: commands.Context, m: discord.Member = None):
+    @app_commands.command(name="kowtow", description="Check someones Ranking records")
+    @app_commands.describe(member="Discord user to check if not yourself.")
+    async def send_rank_info_app_command(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
         """Prints a leaderboard for your /rank uses"""
         try:
-            if m is None:
-                user = ctx.author
-            else:
-                user = m
-            user_id = user.id
+            if member is None:
+                member = interaction.user
+            user_id = member.id
             rec = ranks.find_one({'userID': user_id})
             if rec is None:
-                await ctx.send(f"{user.display_name} has not been ranked before, there is no information.")
+                await interaction.response.send_message(f"{member.display_name} has not been ranked before, there is no information.")
                 return
             info = load_rank(user_id)
             embed = discord.Embed(
-                title=user.display_name,
+                title=member.display_name,
                 color=discord.Color.red()
             )
             embed.set_footer(text="Be sure to get ranked again!")
@@ -422,14 +416,20 @@ Goodnight BOK
             embed.add_field(name=f"69 Count: {info.six_nine}", value=" ", inline=False)
             embed.add_field(name=f"420 Count: {info.four_twenty}", value=" ", inline=False)
             embed.add_field(name=f"Boob Count: {info.boob}", value=" ", inline=False)
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
         except IOError as e:
-            await ctx.send(f"I was unable to load your rank information.")
+            await interaction.response.send_message(f"I was unable to load your rank information.")
             logging.error(f"Kowtow Error: {str(e)}")
         except Exception as e:
-            await ctx.send(f"Sorry, I was unable to complete the command.")
+            await interaction.response.send_message(f"Sorry, I was unable to complete the command.")
             logging.error(f"Kowtow Error: {str(e)}")
+
+
+    @commands.command(name="kowtow", hidden=True)
+    async def send_kowtow_notice(self, ctx: commands.Context):
+        await ctx.reply(f"This has moved to the /kowtow application command.\n"
+                        f"Keep an eye out for future re-use of this ! command.")
 
 
 async def setup(bot: commands.Bot):
