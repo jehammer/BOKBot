@@ -1917,6 +1917,8 @@ class Raids(commands.Cog, name="Trials"):
             logging.error(f"Count check error: {str(e)}")
 
     @app_commands.command(name="add", description="For Raid Leads: Manually add to roster")
+    @app_commands.describe(role="Tank, Healer, or DPS Role to add user into.")
+    @app_commands.describe(member="Discord user to add to roster.")
     @permissions.application_has_raid_lead()
     async def add_to_roster(self, interaction: discord.Interaction, role: str, member: discord.Member):
         try:
@@ -1974,6 +1976,8 @@ class Raids(commands.Cog, name="Trials"):
         await ctx.reply(f"This has become an Application Command, use /add instead!")
 
     @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
+    @app_commands.describe(member="Discord user to grant role to.")
+    @app_commands.describe(role="Discord role to grant to the user.")
     @permissions.application_has_prog_lead()
     async def grant_discord_role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
         try:
@@ -1992,6 +1996,8 @@ class Raids(commands.Cog, name="Trials"):
             raise e
 
     @app_commands.command(name="remove-role", description="For Leads: Removes mentioned user a prog role.")
+    @app_commands.describe(member="Discord user to remove role from.")
+    @app_commands.describe(role="Discord role to remove from user.")
     @permissions.application_has_prog_lead()
     async def remove_discord_role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
         try:
