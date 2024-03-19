@@ -289,6 +289,15 @@ Goodnight BOK
             await ctx.send("Unable to send the gif")
             logging.error(f"Logz error: {str(e)}")
 
+    @commands.command(name="pizza")
+    async def pizza_video(self, ctx: commands.Context):
+        """Leahs favorite early morning/late night meal."""
+        try:
+            await ctx.send('https://youtu.be/SMkG2FDCQ7w')
+        except Exception as e:
+            await ctx.send("Unable to send the link")
+            logging.error(f"Pizza Error: {str(e)}")
+
     @commands.command(name="ec")
     async def my_ec_gif(self, ctx: commands.Context):
         """You have it!"""
