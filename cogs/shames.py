@@ -42,7 +42,7 @@ class Shames(commands.Cog, name="Shames"):
                     await ctx.send(
                         'https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
                 case 2:
-                    await ctx.send('https://youtu.be/SQ9oCUNNbxc')
+                    await ctx.send('https://youtu.be/NdySJq7lG44')
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Arma error: " + str(e))
@@ -73,15 +73,6 @@ class Shames(commands.Cog, name="Shames"):
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"Auddy error: {str(e)}")
-
-    @commands.command(name="dracus", aliases=["drac"])
-    async def send_dracus_image(self, ctx: commands.Context):
-        """His joke was ruined"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1046640340641271838/Dracus.png')
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Dracus Image error: {str(e)}")
 
     @commands.command(name="rng")
     async def rng(self, ctx: commands.Context):

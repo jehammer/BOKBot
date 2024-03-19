@@ -186,12 +186,7 @@ class Fun(commands.Cog, name="Fun"):
     @commands.command(name="fishing")
     async def fishing(self, ctx: commands.Context):
         """Glub Glub"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/976527850524016650/Fishing.gif')
-
-    @commands.command(name="dance")
-    async def dance(self, ctx: commands.Context):
-        """A little jiggle"""
-        await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730135919628328/Dance.gif')
+        await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1219447029688959067/FishFishes.gif')
 
     @commands.command(name="jabs")
     async def jabs(self, ctx: commands.Context):
@@ -231,11 +226,6 @@ class Fun(commands.Cog, name="Fun"):
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"Chainz error: {str(e)}")
-
-    @commands.command(name="pizza")
-    async def pizza(self, ctx: commands.Context):
-        """Pizza Pizza"""
-        await ctx.send('https://youtu.be/0YgW-05_y3A')
 
     @commands.command()
     async def translate(self, ctx: commands.Context):
@@ -299,15 +289,6 @@ Goodnight BOK
             await ctx.send("Unable to send the gif")
             logging.error(f"Logz error: {str(e)}")
 
-    @commands.command(name="bocket")
-    async def send_bocket_image(self, ctx: commands.Context):
-        """Dracus! Chains!"""
-        try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1050804078202077274/bocket.png')
-        except Exception as e:
-            await ctx.send("Unable to send the image")
-            logging.error(f"Bocket Image error: {str(e)}")
-
     @commands.command(name="ec")
     async def my_ec_gif(self, ctx: commands.Context):
         """You have it!"""
@@ -336,6 +317,16 @@ Goodnight BOK
         except Exception as e:
             await ctx.send("Unable to send the gif")
             logging.error(f"No Questions Asked GIF error: {str(e)}")
+
+    @commands.command(name="cover")
+    async def my_bok_cover(self, ctx: commands.Context):
+        """Put this over your chat when you stream!"""
+        try:
+            await ctx.send(
+                'https://cdn.discordapp.com/attachments/911730032286785536/1219457387640000612/BOK_Stream_Cover.png')
+        except Exception as e:
+            await ctx.send("Unable to send the picture")
+            logging.error(f"Cover Picture error: {str(e)}")
 
     @app_commands.command(name="rank", description="See how much BOKBot approves of you today.")
     @app_commands.describe(member="Discord user to rank if not yourself.")
