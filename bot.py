@@ -178,7 +178,8 @@ async def on_ready():
     logging.info("Bot is ready for use")
     logging.info("Sending out load_on_ready Event")
     bot.dispatch("load_on_ready", bot)
-    asyncio.create_task(start_rabbit_consumer(bot.config))
+    #asyncio.create_task(start_rabbit_consumer(bot.config))
+    #   TODO: Replace with AWS SQS
 
 
 async def main():
