@@ -7,6 +7,15 @@ import logging
 from discord import FFmpegPCMAudio
 from discord.utils import get
 
+
+###
+###
+### DEPRECATED!!!! THIS COG IS NO LONGER MAINTAINED!!!
+###
+###
+
+
+
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
     handlers=[
