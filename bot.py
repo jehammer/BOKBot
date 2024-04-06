@@ -9,7 +9,7 @@ import yaml
 from datetime import datetime
 import shutil
 import re
-from errors.boterrors import *
+from errors import *
 import aio_pika
 
 
