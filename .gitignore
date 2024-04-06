@@ -28,8 +28,8 @@ venv/
 *.pyc
 config.yaml
 mongo.yaml
-cogs/transfer.py
 cogs/_transfer.py
+cogs/transfer.py
 _config.yaml
 cogs/_help_prac.py
 cogs/help_prac.py
