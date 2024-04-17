@@ -1,0 +1,22 @@
+RosterResponses:
+  Added: "Added as %s"
+  Removed: "Removed :("
+  Full: "%s spots full, slotted for Backup"
+  NoDefault: > 
+            "You have no default set, please specify a role (ex: `%s dps`) or set a default "\
+            "(ex: `!default dps`) then sign up again."
+  no_role_error_msg: > 
+    "You do not have the right role to sign up as %s for this roster. " \
+    "Head on over to %s to explore ranks and what you need to do to " \
+    "achieve them. You are looking for details on: %s"
+  # Need to update this with placeholders
+
+ModalCreateResponses:
+  TrialLeader: >
+    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n"\
+    f"You entered: %s"
+  BadLimit: "Invalid input, the Role Limit must be between 0 and %s"
+  InvalidLimit: > 
+    "Invalid input: Role Limit should be a number. Check with `!limits`\n"\
+    "You entered: %s"
+    
