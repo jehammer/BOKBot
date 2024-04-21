@@ -1,0 +1,16 @@
+TrialModify:
+  Title: "Trial Manager"
+  LeaderTrial:
+    Label: "Raid Lead and Trial"
+    Placeholder: "Format: Raid Lead, Trial"
+  Date:
+    Label: "Date"
+    Placeholder: "Put Timestamp here"
+  Limit:
+    Label: "Role Limit"
+    Placeholder: "Put Rank Limit here"
+  RoleNums:
+    Label: "DPS/Healer/Tank Role Nums"
+  Memo:
+    Label: "Memo"
+    Placeholder: "Type None if you do not want a memo."
