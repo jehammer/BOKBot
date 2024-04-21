@@ -10,7 +10,6 @@ from datetime import datetime
 import shutil
 import re
 from errors import *
-import aio_pika
 
 
 intents = discord.Intents.all()
@@ -83,6 +82,27 @@ def load_configurations():
     with open("config.yaml", 'r') as stream:
         data_loaded = yaml.safe_load(stream)
     return data_loaded
+
+def load_languages():
+    """Function to load all the Language options for BOKBot"""
+    languages = {}
+    for root, _, files in os.walk("languages"):
+        for file in files:
+            if file.endswith(".yaml"):
+                filepath = os.path.join(root, file)
+                language = os.path.basename(root)
+                section = os.path.splitext(file)[0]
+
+                if language not in languages:
+                    languages[language] = {}
+
+                with open(filepath, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                    languages[language][section] = data
+
+    return languages
+
+
 
 async def change_playing():
     await bot.change_presence(activity=discord.Game(name=bot.config['presence_message']))
@@ -186,6 +206,7 @@ async def main():
     async with bot:
         await startup_logging()
         bot.config = load_configurations()
+        bot.language = load_languages()
         await load_cogs()
         await bot.start(bot.config['bot']['token'])
 
