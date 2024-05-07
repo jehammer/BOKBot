@@ -172,27 +172,5 @@ class Helpers(commands.Cog):
             await ctx.send("I was unable to complete the help command")
             logging.error(f"Help command Error: {str(e)}")
 
-    @commands.command(name="starter", aliases=["start"])
-    async def send_starter_info(self, ctx: commands.Context):
-        """DM's you some BOKBot starter information"""
-        try:
-            info = 'Welcome to learning BOKBot!\n' \
-                   'There is a lot of things that I can do. In any channel you can make use of `!help` to get some command help.\n' \
-                   'You can get further information for each section of commands, also called "cogs" or "modules" by calling ' \
-                   'that specific cog/module or command `!help [command/cog/module]` (without the [] of course).\n' \
-                   'BOKBot features its own system for Trial rosters which is the majority of its function. Something that ' \
-                   'you would want to look into is the defaults system. You can set your default to be a healer, tank, or dps ' \
-                   'via `!default [role]` which can be used to bypass having to specify your role when doing `!su` or `!bu` ' \
-                   'in a roster. Otherwise when joining a roster you must specify your role then any optional comment you ' \
-                   'may wish to add.\n' \
-                   'I strongly advise checking out <#932438565009379358> for more information on what BOKBot can do.\n' \
-                   'If you have any questions, feel free to ask for help in the discord, or ping/dm Drakador as he made me and ' \
-                   'can easily help you out!'
-            await ctx.author.send(info)
-        except discord.Forbidden as e:
-            await ctx.send(f"I do not have permission to DM you, please turn on DM's from non friends for this server.")
-            logging.error(f"Starter Error: {str(e)}")
-
-
 async def setup(bot: commands.Bot):
     await bot.add_cog(Helpers(bot))
