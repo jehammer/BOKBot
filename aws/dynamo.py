@@ -61,3 +61,13 @@ class Dynamo:
             )
         else:
             return response["Attributes"]
+
+    def batch_get(self, query):
+        """Gets a batch of items from the db based upon the query"""
+        pass
+        # TODO: Implement a batch_get, useful for getting all counts to be increased in a roster.
+
+    def batch_put(self, data):
+        """Put a batch of items into the db"""
+        pass
+        #TODO: Implement a batch_put for mass data update, since we charge based upon total write requests
