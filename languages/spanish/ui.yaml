@@ -1,0 +1,16 @@
+TrialModify: # Will be updated just for testing
+  Title: "Gerente de Ensayo"
+  LeaderTrial:
+    Label: "Líder De Incursión and Prueba"
+    Placeholder: "Format: Líder De Incursión, Prueba"
+  Date:
+    Label: "Date"
+    Placeholder: "Put Timestamp here"
+  Limit:
+    Label: "Role Limit"
+    Placeholder: "Put Rank Limit here"
+  RoleNums:
+    Label: "Daño/Sanación/Tanque Role Nums"
+  Memo:
+    Label: "Nota"
+    Placeholder: "Escribe None si no quieres una nota"
