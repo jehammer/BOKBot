@@ -1,0 +1,8 @@
+TrialModify: # Will be updated just for testing
+  TrialLeader: >
+    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n"\
+    f"You entered: %s"
+  BadLimit: "Invalid input, the Role Limit must be between 0 and %s"
+  InvalidLimit: > 
+    "Invalid input: Role Limit should be a number. Check with `!limits`\n"\
+    "You entered: %s"
