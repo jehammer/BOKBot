@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 from functools import wraps
 
+# TODO: Change these to use Role Names rather than getting the Roles themselves
 
 def has_officer():
     """A decorator that validates if someone has the officer role"""
