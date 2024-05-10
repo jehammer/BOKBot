@@ -228,18 +228,6 @@ class Fun(commands.Cog, name="Fun"):
             logging.error(f"Chainz error: {str(e)}")
 
     @commands.command()
-    async def translate(self, ctx: commands.Context):
-        """For the Boomers to understand Drak"""
-
-        await ctx.send("Pog/Poggers: A triumphant cry of celebration. \nBased: The opposite of cringe. "
-                       "\nRedpilled: To have seen reality for what it is. \nBaller: Very nice"
-                       "\nNo Cap: An expression of authenticity."
-                       "\nSussy Baka: An insincere comment saying summon is a suspicious fool, said as a joke."
-                       "\nBussin: Same as Baller."
-                       "\nFr: For Real, see: No Cap."
-                       "\nOn God: Confirming or asking one is serious.")
-
-    @commands.command()
     async def goodnight(self, ctx: commands.context):
         """A way to say goodnight to bok"""
 
