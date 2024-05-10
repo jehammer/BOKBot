@@ -18,7 +18,10 @@ welcome: |
   And this is on a new line!
 agree: Put a message here to DM to people when/if they agree to your rules
 
-mongo: # Mongo url
+dynamo:
+  progDB:
+    tableName: none
+    endpoint: none
 
 administration:
   rules: #Rules Channel ID
