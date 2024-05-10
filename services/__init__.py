@@ -1,5 +1,5 @@
-from .naming import Naming
 from .schema import Schema
 from .utilities import Utilities
+from .roster_extended import RosterExtended
 
-__all__ = ["Naming", "Schema", "Utilities"]
+__all__ = ["Schema", "Utilities", "RosterExtended"]
