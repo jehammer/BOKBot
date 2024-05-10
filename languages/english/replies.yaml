@@ -5,7 +5,7 @@ Roster:
   NoDefault: > 
             "You have no default set, please specify a role (ex: `%s dps`) or set a default "\
             "(ex: `!default dps`) then sign up again."
-  no_role_error_msg: > 
+  NoRoleError: > 
     "You do not have the right role to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
     "achieve them. You are looking for details on: %s"
@@ -13,10 +13,28 @@ Roster:
 
 TrialModify:
   TrialLeader: >
-    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n"\
-    f"You entered: %s"
+    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
+    "You entered: %s"
   BadLimit: "Invalid input, the Role Limit must be between 0 and %s"
   InvalidLimit: > 
-    "Invalid input: Role Limit should be a number. Check with `!limits`\n"\
+    "Invalid input: Role Limit should be a number. Check with `!limits`\n" \
     "You entered: %s"
-    
+  BadLeaderTrial: >
+    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
+    "You entered: `%s`"
+  BadRoleNums: >
+    "Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank " \
+    "and look like: `8,2,2` for example.\n" \
+    "You entered: `%s`"
+  InvalidDPS: >
+    "Invalid input: DPS limit should be a number, ex: `8`\n" \
+    "You entered: `%s`
+  InvalidHealers: >
+    "Invalid input: Healer limit should be a number, ex: `2`\n" \
+    "You entered: `%s`
+  InvalidTanks: >
+    "Invalid input: Tank limit should be a number, ex: `2`\n" \
+    "You entered: `%s`
+  NewNameErr: "Invalid input, was the Date formatted correctly?"
+  ExistingUpdated: "Roster %s and Channel updated."
+  CantCreate: "I was unable to create the channel."
