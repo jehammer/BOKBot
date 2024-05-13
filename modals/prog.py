@@ -1,7 +1,6 @@
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color
 from services import Librarian, Utilities
-import discord
 import logging
 
 logging.basicConfig(
@@ -12,7 +11,7 @@ logging.basicConfig(
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 class ProgModal(Modal):
-    def __init__(self, interaction: discord.Interaction, config, language):
+    def __init__(self, interaction: Interaction, config, language):
         self.config = config
         self.language = language['replies']
         self.ui_language = language['ui']
@@ -29,18 +28,18 @@ class ProgModal(Modal):
             label= self.ui_language['Prog']['RolesInput']['Label'],
             placeholder= self.ui_language['Prog']['RolesInput']['Placeholder'],
             default = default_vals,
-            style=discord.TextStyle.long,
+            style=TextStyle.long,
             required=True
         )
         self.add_item(self.roles_input)
 
-    async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: Interaction):
         role_list = self.roles_input.value.splitlines()
         mapped_data = Utilities.list_to_dict(role_list)
         Librarian.put_progs( mapped_data, self.config['Dynamo']['ProgDB'], self.config['AWS'])
         await interaction.response.send_message(self.language['Prog']['Updated'])
         return
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(self.language['Prog']['Incomplete'])
         logging.error(f"Prog Roles Update Error: {str(error)}")
         return
