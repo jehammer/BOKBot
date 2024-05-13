@@ -38,3 +38,7 @@ TrialModify:
   NewNameErr: "Invalid input, was the Date formatted correctly?"
   ExistingUpdated: "Roster %s and Channel updated."
   CantCreate: "I was unable to create the channel."
+
+Prog:
+  Updated: "Prog Roles Updated"
+  Incomplete: "I was unable to complete the command. Logs have more detail."

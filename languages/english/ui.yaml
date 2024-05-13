@@ -14,3 +14,9 @@ TrialModify:
   Memo:
     Label: "Memo"
     Placeholder: "Type None if you do not want a memo."
+
+Prog:
+  Title: "Prog Roles"
+  RolesInput:
+    Label: "Keep all roles on new lines"
+    Placeholder: "If there are none, say None"
