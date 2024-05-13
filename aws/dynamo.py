@@ -2,27 +2,24 @@ import boto3
 import logging
 from botocore.exceptions import ClientError
 
-class Dynamo:
-    def __init__(self, table, endpoint):
-        self.table_name = table
-        self.resource = boto3.resource('dynamodb', endpoint=endpoint)
-        self.table = self.dynamodb.Table(table)
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-    def create(self, schema):
-        """Creates new table in DynamoDB given specified name and schema."""
-        # NOTE: This is for testing mainly, as AWS resources will be provisioned through CloudFormation
-        try:
-            logging.info(f"Received request to create table {schema['TableName']} with schema {schema}")
-            new_table = self.resource.create_table(**schema)
-            new_table.wait_until_exists()
-            return new_table
-        except Exception as e:
-            logging.error(f"Dynamo Create Table Error: {str(e)}")
+
+class Dynamo:
+    def __init__(self, table, endpoint, region, access, secret):
+        self.table_name = table
+        self.client = boto3.client('dynamodb', endpoint_url=endpoint,
+                                   region_name=region, aws_access_key_id=access, aws_secret_access_key=secret)
 
     def get(self, query):
         """Fetch an item based on the defined query."""
         try:
-            response = self.table.get_item(Key={query})
+            response = self.client.get_item(TableName=self.table_name, Key=query)
             return response
         except ClientError as e:
             logging.error(f"Dynamo Get Item Error Table: {self.table_name} error: {str(e)} ")
@@ -30,7 +27,7 @@ class Dynamo:
     def put(self, data):
         """Put new entry into the database using the defined data parameter."""
         try:
-            self.table.put_item(Item=data)
+            self.client.put_item(TableName=self.table_name, Item=data)
         except ClientError as e:
             logging.error(f"Dynamo Put Item Error Table: %s, error: %s: %s",
                 self.table.name,
@@ -47,7 +44,8 @@ class Dynamo:
                 update += f":{key} =:{key}, "
                 update_vals[f"{key}"] = value
             expression = update[:-2] # NOTE: Need to remove trailing space and comma included in for-loop
-            response = self.table.update_item(
+            response = self.client.update_item(
+                TableName=self.table_name,
                 Key=query,
                 UpdateExpression=expression,
                 ExpressionAttributeValues=update_vals,
