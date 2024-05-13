@@ -4,6 +4,15 @@ version: 1.0
 
 bot:
   token: Put Discord Token Here
+AWS:
+  Access: none
+  Secret: none
+
+dynamo:
+  progDB:
+    TableName: none
+    Endpoint: none
+    Region: None
 
 guild: put guild id here # Guild ID
 
@@ -17,11 +26,6 @@ welcome: |
   This is a very long message meant to welcome you to our very special discord channel where we all do things!
   And this is on a new line!
 agree: Put a message here to DM to people when/if they agree to your rules
-
-dynamo:
-  progDB:
-    tableName: none
-    endpoint: none
 
 administration:
   rules: #Rules Channel ID
