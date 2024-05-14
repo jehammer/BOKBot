@@ -2,6 +2,7 @@ from services import Utilities
 from re import sub
 from aws import Dynamo
 import logging
+from models import Roster
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -21,7 +22,7 @@ class RosterExtended:
             fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
             fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
         dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
-        return Raid(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
+        return Roster(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
                     backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
                     fact_memo)
 
