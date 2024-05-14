@@ -1,6 +1,15 @@
 from services import Utilities
 from re import sub
 from aws import Dynamo
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+
 class RosterExtended:
     """Class of static methods for trial operations."""
 
@@ -66,25 +75,27 @@ class RosterExtended:
         return formatted_date
 
     @staticmethod
-    def get_limits(roles, prog_db):
+    def get_limits(table_config, roles_config, creds_config):
         """Create list of roles with nested lists for 1-3 indexes"""
+
+        from services import Librarian
+
         list_roles = [
-            roles['base'],
+            roles_config['base'],
             [
-                roles['first']['dps'], roles['first']['tank'], roles['first']['healer']
+                roles_config['first']['dps'], roles_config['first']['tank'], roles_config['first']['healer']
             ],
             [
-                roles['second']['dps'], roles['second']['tank'], roles['second']['healer']
+                roles_config['second']['dps'], roles_config['second']['tank'], roles_config['second']['healer']
             ],
             [
-                roles['third']['dps'], roles['third']['tank'], roles['third']['healer']
+                roles_config['third']['dps'], roles_config['third']['tank'], roles_config['third']['healer']
             ]
         ]
 
-        db = Dynamo(prog_db["tableName"], prog_db["endpoint"])
+        prog_roles = Utilities.dict_to_list(Librarian.get_progs(table_config, creds_config))
 
-        prog_roles = Dyamo.get({'key': 'progRoles'})
-        if prog_roles is not None and prog_roles["data"] != "None":
-            for i in prog_roles["data"]:
+        if prog_roles is not None and prog_roles[0] != "None":
+            for i in prog_roles:
                 list_roles.append(i)
         return list_roles
