@@ -57,7 +57,41 @@ def setup_misc_table():
         logging.error(f"Misc Table setup error: {str(e)}")
 
 
+
+def setup_trial_table():
+    table_name = 'Trial'
+    key_schema = [
+        {
+            'AttributeName': 'channelID',
+            'KeyType': 'HASH'
+        }
+    ]
+    attribute_definitions = [
+        {
+            'AttributeName': 'channelID',
+            'AttributeType': 'S'
+        }
+    ]
+    provisioned_throughput = {
+        'ReadCapacityUnits': 2,
+        'WriteCapacityUnits': 2
+    }
+    try:
+        response = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
+            ProvisionedThroughput=provisioned_throughput
+        )
+        logging.info(f"Trial Table status: {response['TableDescription']['TableStatus']}")
+    except dynamodb.exceptions.ResourceInUseException:
+        logging.info(f"Trial Table already exists.")
+    except Exception as e:
+        logging.error(f"Trial Table setup error: {str(e)}")
+
 def main():
     setup_misc_table()
+    setup_trial_table()
+
 
 main()
