@@ -1,8 +1,8 @@
 from aws import Dynamo
 
 
-def create_instance(config, credentials):
-    return Dynamo(table=config['TableName'], endpoint=config['Endpoint'], region=config['Region'],
+def create_instance(table_config, credentials):
+    return Dynamo(table=table_config['TableName'], endpoint=table_config['Endpoint'], region=table_config['Region'],
                          access=credentials['Access'], secret=credentials['Secret'])
 
 class Librarian:
@@ -12,40 +12,40 @@ class Librarian:
     """
 
     @staticmethod
-    def get_roster(channel_id, config, credentials):
+    def get_roster(channel_id, table_config, credentials):
         pass
 
     @staticmethod
-    def put_roster(channel_id, data, config, credentials):
+    def put_roster(channel_id, data, table_config, credentials):
         pass
 
     @staticmethod
-    def get_rank(user_id, config, credentials):
+    def get_rank(user_id, table_config, credentials):
         pass
 
     @staticmethod
-    def put_rank(user_id, data, config, credentials):
+    def put_rank(user_id, data, table_config, credentials):
         pass
 
     @staticmethod
-    def get_default(user_id, config, credentials):
+    def get_default(user_id, table_config, credentials):
         pass
 
     @staticmethod
-    def put_default(user_id, default,config, credentials):
+    def put_default(user_id, default,table_config, credentials):
         pass
 
     @staticmethod
-    def get_count(user_id, config, credentials):
+    def get_count(user_id, table_config, credentials):
         pass
 
     @staticmethod
-    def put_count(user_id, data, config, credentials):
+    def put_count(user_id, data, table_config, credentials):
         pass
 
     @staticmethod
-    def get_progs(config, credentials):
-        db_instance = create_instance(config, credentials)
+    def get_progs(table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
         query = {'key': {'S': 'progs'}}
         data = db_instance.get(query)
         if data is not None and 'Item' in data:
@@ -54,8 +54,8 @@ class Librarian:
             return None
 
     @staticmethod
-    def put_progs(data, config, credentials):
-        db_instance = create_instance(config, credentials)
+    def put_progs(data, table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
         item = {
             'key': {'S': 'progs'},
             'data': {'M': data}
@@ -64,9 +64,9 @@ class Librarian:
 
 
     @staticmethod
-    def get_role_channel(config, credentials):
+    def get_role_channel(table_config, credentials):
         pass
 
     @staticmethod
-    def put_role_chanel(data, config, credentials):
+    def put_role_chanel(data, table_config, credentials):
         pass

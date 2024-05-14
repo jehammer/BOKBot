@@ -42,3 +42,5 @@ TrialModify:
 Prog:
   Updated: "Prog Roles Updated"
   Incomplete: "I was unable to complete the command. Logs have more detail."
+
+Limits: "Roles and Values:\n"
