@@ -59,7 +59,7 @@ def setup_misc_table():
 
 
 def setup_trial_table():
-    table_name = 'Trial'
+    table_name = 'Rosters'
     key_schema = [
         {
             'AttributeName': 'channelID',
@@ -83,11 +83,11 @@ def setup_trial_table():
             AttributeDefinitions=attribute_definitions,
             ProvisionedThroughput=provisioned_throughput
         )
-        logging.info(f"Trial Table status: {response['TableDescription']['TableStatus']}")
+        logging.info(f"Rosters Table status: {response['TableDescription']['TableStatus']}")
     except dynamodb.exceptions.ResourceInUseException:
-        logging.info(f"Trial Table already exists.")
+        logging.info(f"Rosters Table already exists.")
     except Exception as e:
-        logging.error(f"Trial Table setup error: {str(e)}")
+        logging.error(f"Rosters Table setup error: {str(e)}")
 
 def main():
     setup_misc_table()

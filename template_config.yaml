@@ -8,10 +8,14 @@ AWS:
   Access: none
   Secret: none
 
-dynamo:
-  progDB:
-    TableName: none
-    Endpoint: none
+Dynamo:
+  ProgDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+  RosterDB:
+    TableName: None
+    Endpoint: None
     Region: None
 
 guild: put guild id here # Guild ID
