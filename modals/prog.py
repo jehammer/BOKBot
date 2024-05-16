@@ -34,10 +34,12 @@ class ProgModal(Modal):
 
     async def on_submit(self, interaction: Interaction):
         role_list = self.roles_input.value.splitlines()
+        logging.info(f"Updating Prog Role Data")
         Librarian.put_progs(role_list, self.config['Dynamo']['ProgDB'], self.config['AWS'])
+        logging.info(f"Updated Prog Role Data")
         await interaction.response.send_message(self.language['Prog']['Updated'])
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        await interaction.response.send_message(self.language['Prog']['Incomplete'])
         logging.error(f"Prog Roles Update Error: {str(error)}")
+        await interaction.response.send_message(self.language['Prog']['Incomplete'])
         return
