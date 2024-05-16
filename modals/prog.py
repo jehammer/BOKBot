@@ -1,6 +1,6 @@
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color
-from services import Librarian, Utilities
+from services import Librarian
 import logging
 
 logging.basicConfig(
@@ -21,8 +21,7 @@ class ProgModal(Modal):
         roles = Librarian.get_progs(self.config['Dynamo']['ProgDB'], self.config['AWS'])
         default_vals = ""
         if roles is not None:
-            prog_roles  = Utilities.dict_to_list(roles)
-            for i in prog_roles:
+            for i in roles:
                 default_vals += f"{str(i)}\n"
         self.roles_input = TextInput(
             label= self.ui_language['Prog']['RolesInput']['Label'],
@@ -35,8 +34,7 @@ class ProgModal(Modal):
 
     async def on_submit(self, interaction: Interaction):
         role_list = self.roles_input.value.splitlines()
-        mapped_data = Utilities.list_to_dict(role_list)
-        Librarian.put_progs( mapped_data, self.config['Dynamo']['ProgDB'], self.config['AWS'])
+        Librarian.put_progs(role_list, self.config['Dynamo']['ProgDB'], self.config['AWS'])
         await interaction.response.send_message(self.language['Prog']['Updated'])
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:

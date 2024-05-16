@@ -94,7 +94,7 @@ class RosterExtended:
             ]
         ]
 
-        prog_roles = Utilities.dict_to_list(Librarian.get_progs(table_config, creds_config))
+        prog_roles = Librarian.get_progs(table_config, creds_config)
 
         if prog_roles is not None and prog_roles[0] != "None":
             for i in prog_roles:

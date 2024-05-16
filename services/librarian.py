@@ -1,9 +1,30 @@
 from aws import Dynamo
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 
 def create_instance(table_config, credentials):
     return Dynamo(table=table_config['TableName'], endpoint=table_config['Endpoint'], region=table_config['Region'],
                          access=credentials['Access'], secret=credentials['Secret'])
+
+def serialize(data):
+    serializer = TypeSerializer()
+    if isinstance(data, dict):
+        serialized = {k: serializer.serialize(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        serialized = [serializer.serialize(item) for item in data]
+    else:
+        serialized = serializer.serialize(data)
+    return serialized
+
+def deserialize(data):
+    deserializer = TypeDeserializer()
+    if isinstance(data, dict):
+        deserialized = {k: deserializer.deserialize(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        deserialized = [deserializer.deserialize(item) for item in data]
+    else:
+        deserialized = deserializer.deserialize(data)
+    return deserialized
 
 class Librarian:
     """
@@ -17,7 +38,14 @@ class Librarian:
 
     @staticmethod
     def put_roster(channel_id, data, table_config, credentials):
-        pass
+        db_instance = create_instance(table_config, credentials)
+        item = {
+            'channelID': {'S': str(channel_id)},
+            'data': {'M': data}
+        }
+        print(item)
+        db_instance.put(item)
+
 
     @staticmethod
     def get_rank(user_id, table_config, credentials):
@@ -47,9 +75,9 @@ class Librarian:
     def get_progs(table_config, credentials):
         db_instance = create_instance(table_config, credentials)
         query = {'key': {'S': 'progs'}}
-        data = db_instance.get(query)
-        if data is not None and 'Item' in data:
-            return data['Item']
+        db_data = db_instance.get(query)
+        if db_data is not None and 'Item' in db_data:
+            return deserialize(db_data['Item'])['data']
         else:
             return None
 
@@ -58,7 +86,7 @@ class Librarian:
         db_instance = create_instance(table_config, credentials)
         item = {
             'key': {'S': 'progs'},
-            'data': {'M': data}
+            'data': {'L': serialize(data)}
         }
         db_instance.put(item)
 

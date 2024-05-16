@@ -25,21 +25,3 @@ class Utilities:
         except Exception as e:
             logging.error(f"Suffix Failure: {str(e)}")
             raise ValueError("Unable to set suffix value")
-
-    @staticmethod
-    def list_to_dict(data):
-        """DynamoDB, converts a List to a Dict for DB Storage"""
-        count = 0
-        mapped = {}
-        for i in data:
-            mapped[f'r{str(count)}'] = {'S': i }
-            count+=1
-        return mapped
-
-    @staticmethod
-    def dict_to_list(obj):
-        mapped = []
-        data = obj['data']['M']
-        for key, value in data.items():
-            mapped.append(value['S'])
-        return mapped
