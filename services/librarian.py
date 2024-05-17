@@ -34,14 +34,20 @@ class Librarian:
 
     @staticmethod
     def get_roster(channel_id, table_config, credentials):
-        pass
+        db_instance = create_instance(table_config, credentials)
+        query = {'channelID': {'S': str(channel_id)}}
+        db_data = db_instance.get(query)
+        if db_data is not None and 'Item' in db_data:
+            return deserialize(db_data['Item'])['data']
+        else:
+            return None
 
     @staticmethod
     def put_roster(channel_id, data, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
         item = {
             'channelID': {'S': str(channel_id)},
-            'data': {'M': data}
+            'data': {'M': serialize(data)}
         }
         print(item)
         db_instance.put(item)
