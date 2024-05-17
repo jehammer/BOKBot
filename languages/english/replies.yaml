@@ -9,7 +9,7 @@ Roster:
     "You do not have the right role to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
     "achieve them. You are looking for details on: %s"
-  # Need to update this with placeholders
+
 
 TrialModify:
   TrialLeader: >
@@ -38,9 +38,23 @@ TrialModify:
   NewNameErr: "Invalid input, was the Date formatted correctly?"
   ExistingUpdated: "Roster %s and Channel updated."
   CantCreate: "I was unable to create the channel."
+  CantEmbed: "Error in creating category channel and sending embed."
+  Unreachable: "Hey uh, you reached an unreachable part of the code lol."
+  DBSaveError: "Error in saving information to Database, Roster was not saved."
+  NewRosterCreated: "Created Roster and Channel %s"
 
 Prog:
   Updated: "Prog Roles Updated"
   Incomplete: "I was unable to complete the command. Logs have more detail."
 
+
+SelectRoster:
+  Select: "Select the roster"
+
 Limits: "Roles and Values:"
+MovedAnswer: "This command has moved to an application command, look for \/%s instead!"
+Unknown: "An unknown error has occurred with the command"
+
+Pin:
+  Pinned: "Message pinned"
+  Unpinned: "Message unpinned"
