@@ -37,5 +37,13 @@ class Trials(commands.Cog, name="Trials"):
     async def create_roster(self, interaction: discord.Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(TrialModal(None, interaction, self.bot.config, self.bot.language[user_language]))
+
+
+    @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
+    @permissions.application_has_raid_lead()
+    async def set_prog_roles(self, interaction: discord.Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_modal(ProgModal(interaction, self.bot.config, self.bot.language[user_language]))
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Trials(bot))
