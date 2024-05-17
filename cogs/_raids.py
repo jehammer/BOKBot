@@ -1152,7 +1152,7 @@ class ProgModal(discord.ui.Modal):
         logging.error(f"Roster Call Error: {str(error)}")
         return
 
-class Raids(commands.Cog, name="Trials"):
+class Raids(commands.Cog, name="Raids"):
     """Commands related to Raids/Trials"""
 
     def __init__(self, bot: commands.Bot):
