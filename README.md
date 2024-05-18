@@ -1,16 +1,15 @@
 <div align="center">
 
 # BOKBot Discord Bot
-[![Stack](https://skillicons.dev/icons?i=python,discord,bots,mongodb)](https://skillicons.dev)
+[![Stack](https://skillicons.dev/icons?i=python,discord,bots,aws,dynamodb)](https://skillicons.dev)
 
 <img src="https://img.shields.io/badge/Discord-py-blue?style=flat&logo=discord" alt="discord.py">
 <img src="https://img.shields.io/badge/Python-3.10%2b-blue?style=flat&logo=Python&logoColor=green">
-<img src="https://img.shields.io/badge/MongoDB-4.4%2b-blue?style=flat&logo=Mongodb">
 </div>
 
 # Overview
 
-A Discord bot written using Discord.py and MongoDB, requires at least Python 3.10 to work.
+A Discord bot written using Discord.py, requires at least Python 3.10 to work.
 
 ### NOTICE: BOKBot is currently migrating to AWS, if you want to run locally with MongoDB please check one of the legacy branches.
 
