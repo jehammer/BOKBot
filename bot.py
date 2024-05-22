@@ -164,7 +164,7 @@ async def startup_logging():
             shutil.move(log_name, path)
         time = datetime.now().strftime("%I:%M:%S %p")
         with open(log_name, "w") as file:
-            file.write(f"Bot stated at: {time} on {date}\n\n")
+            file.write(f"Bot started at: {time} on {date}\n\n")
 
         logging.basicConfig(
             level=logging.INFO, format='%(asctime)s: %(message)s',
