@@ -121,32 +121,6 @@ async def load_cogs():
                 logging.info(f"Failed to load {filename}")
                 logging.error(f"cog load error: {str(e)}")
 
-async def modified_roster_handler(message):
-    async with message.process():
-        bot.dispatch("modified_roster_message", message.body.decode())
-
-async def new_roster_handler(message):
-    async with message.process():
-        bot.dispatch("new_roster_message", message.body.decode())
-
-async def consume(config):
-    connection = await aio_pika.connect_robust(config["rabbitmq"]["url"])
-    channel = await connection.channel()
-
-    queue_name_modified = config["rabbitmq"]["modified"]
-    queue_name_new = config["rabbitmq"]["new"]
-
-    # Declaring queues
-    queue_modified = await channel.declare_queue(queue_name_modified, durable=True)
-    queue_new = await channel.declare_queue(queue_name_new, durable=True)
-
-    # Binding handlers to queues
-    await queue_modified.consume(modified_roster_handler)
-    await queue_new.consume(new_roster_handler)
-
-async def start_rabbit_consumer(config):
-    await consume(config)
-
 async def startup_logging():
     """Checks if there is logs from a bad shutdown"""
     try:
@@ -198,9 +172,6 @@ async def on_ready():
     logging.info("Bot is ready for use")
     logging.info("Sending out load_on_ready Event")
     bot.dispatch("load_on_ready", bot)
-    #asyncio.create_task(start_rabbit_consumer(bot.config))
-    #   TODO: Replace with AWS SQS
-
 
 async def main():
     async with bot:
@@ -209,6 +180,5 @@ async def main():
         bot.language = load_languages()
         await load_cogs()
         await bot.start(bot.config['bot']['token'])
-
 
 asyncio.run(main())
