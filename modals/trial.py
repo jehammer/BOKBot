@@ -196,11 +196,11 @@ class TrialModal(Modal):
                     logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
                     return
             else:
-                await interaction.response.send_message(f"{self.language['TrialModify']['Unreachable']}")
+                await interaction.response.send_message(f"{self.language['Unreachable']}")
                 return
         except Exception as e:
             logging.error(f"Trial/Modify Error During Channel Create and Embed: {str(e)}")
-            await interaction.response.send_message(f"{self.language['TrialModify']['Unreachable']}")
+            await interaction.response.send_message(f"{self.language['Unreachable']}")
             return
         finally:
             # Save Roster info to DynamoDB
