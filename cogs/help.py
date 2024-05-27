@@ -1,6 +1,9 @@
 import logging
 import discord
+import yaml
 from discord.ext import commands
+from services import Utilities
+from difflib import ndiff
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -9,6 +12,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
+mapping = None
 
 async def send_embed(ctx, embed):
     try:
@@ -16,12 +20,73 @@ async def send_embed(ctx, embed):
     except Exception as e:
         logging.error(f"Help Embed Send Error: {str(e)}")
 
+def load_mapping():
+    with open("languages/mapping.yaml", 'r') as stream:
+        data_loaded = yaml.safe_load(stream)
+    logging.info(f"Translate Error Mapping Loaded")
+    return data_loaded
 
 class Helpers(commands.Cog):
     """Commands for Bot help and more"""
 
     def __init__(self, bot):
         self.bot = bot
+        global mapping
+        mapping = load_mapping()
+
+
+    @commands.command(name='translate')
+    async def translate_error(self, ctx: commands.Context):
+        """Translates BOKBot Error to your language"""
+        lang = Utilities.get_language(ctx.author)
+        try:
+            ref = ctx.message.reference
+            # Check if it is a reply or not
+            if ref is None:
+                await ctx.reply(Utilities.format_error(lang, self.bot.language[lang]['replies']['Help']['NotReply']))
+                return
+
+            message = await ctx.fetch_message(ref.message_id)
+            sent_message = message.content
+
+            # Strip out the codes and get the lang stuff
+            error_code = sent_message[:5]
+            lang_code = int(error_code[0])
+            error_code = error_code[-4:]
+            og_lang = Utilities.get_language_from_number(lang_code)
+
+            global mapping
+            unpacked = mapping[error_code].split(',')
+            if len(unpacked) == 1:
+                # Top-Level Error
+                main = unpacked[0]
+                error = self.bot.language[lang]['replies'][main]
+                og_lang_error  = self.bot.language[og_lang]['replies'][main]
+            else:
+                main = unpacked[0]
+                sub = unpacked[1]
+                error = self.bot.language[lang]['replies'][main][sub]
+                og_lang_error = self.bot.language[og_lang]['replies'][main][sub]
+
+            # Strip out the error number portion of each
+            sent_message = sent_message[6:]
+            og_lang_error = og_lang_error[5:]
+
+            # Compare the two and get the missing bits
+            diff = ndiff(sent_message.split(), og_lang_error.split())
+            diffs = [line for line in diff if line.startswith('- ') or line.startswith('+ ')]
+            missing = [line[2:] for line in diffs if line.startswith('- ')]
+
+            # Join the missing bits into strings
+            added = ''.join(missing).replace('`', '')
+
+            # Format the error and send it back
+            error = error % added
+            await ctx.reply(Utilities.format_error(lang, error))
+
+        except (ValueError, KeyError) as e:
+            logging.error(f"Translate Error: {str(e)}")
+            await ctx.reply(Utilities.format_error(lang, self.bot.language[lang]['replies']['Help']['NotReply']))
 
     @commands.command(name="help")
     async def help(self, ctx, *input):
