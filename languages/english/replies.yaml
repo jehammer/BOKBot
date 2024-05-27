@@ -1,51 +1,57 @@
+Unreachable: "0001: Hey uh, you reached an unreachable part of the code lol."
+
 Roster:
   Added: "Added as %s"
   Removed: "Removed :("
   Full: "%s spots full, slotted for Backup"
   NoDefault: > 
-            "You have no default set, please specify a role (ex: `%s dps`) or set a default "\
-            "(ex: `!default dps`) then sign up again."
+            0002: You have no default set, please specify a role (ex: `%s dps`) or set a default 
+            (ex: `!default dps`) then sign up again.
   NoRoleError: > 
-    "You do not have the right role to sign up as %s for this roster. " \
+    "0003: You do not have the right role to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
     "achieve them. You are looking for details on: %s"
 
-
-TrialModify:
-  TrialLeader: >
-    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
-    "You entered: %s"
-  BadLimit: "Invalid input, the Role Limit must be between 0 and %s"
-  InvalidLimit: > 
-    "Invalid input: Role Limit should be a number. Check with `!limits`\n" \
-    "You entered: %s"
-  BadLeaderTrial: >
-    "Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
-    "You entered: `%s`"
-  BadRoleNums: >
-    "Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank " \
-    "and look like: `8,2,2` for example.\n" \
-    "You entered: `%s`"
-  InvalidDPS: >
-    "Invalid input: DPS limit should be a number, ex: `8`\n" \
-    "You entered: `%s`
-  InvalidHealers: >
-    "Invalid input: Healer limit should be a number, ex: `2`\n" \
-    "You entered: `%s`
-  InvalidTanks: >
-    "Invalid input: Tank limit should be a number, ex: `2`\n" \
-    "You entered: `%s`
-  NewNameErr: "Invalid input, was the Date formatted correctly?"
-  ExistingUpdated: "Roster %s and Channel updated."
-  CantCreate: "I was unable to create the channel."
-  CantEmbed: "Error in creating category channel and sending embed."
-  Unreachable: "Hey uh, you reached an unreachable part of the code lol."
-  DBSaveError: "Error in saving information to Database, Roster was not saved."
-  NewRosterCreated: "Created Roster and Channel %s"
+Help:
+  NotReply: "0004: You need to reply to an error message to use this functionality."
+  NotError: "0005: That is not an Error Message."
 
 Prog:
   Updated: "Prog Roles Updated"
-  Incomplete: "I was unable to complete the command. Logs have more detail."
+  Incomplete: "0006: I was unable to complete the command. Logs have more detail."
+
+Unknown: "0007: An unknown error has occurred with the command"
+
+TrialModify:
+  TrialLeader: >
+    "0008: Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
+    "You entered: %s"
+  BadLimit: "0009: Invalid input, the Role Limit must be between 0 and %s"
+  InvalidLimit: > 
+    "0010: Invalid input: Role Limit should be a number. Check with `!limits`\n" \
+    "You entered: %s"
+  BadLeaderTrial: >
+    "0011: Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
+    "You entered: `%s`"
+  BadRoleNums: >
+    "0012: Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank " \
+    "and look like: `8,2,2` for example.\n" \
+    "You entered: `%s`"
+  InvalidDPS: >
+    "0013: Invalid input: DPS limit should be a number, ex: `8`\n" \
+    "You entered: `%s`
+  InvalidHealers: >
+    "0014: Invalid input: Healer limit should be a number, ex: `2`\n" \
+    "You entered: `%s`
+  InvalidTanks: >
+    "0015: Invalid input: Tank limit should be a number, ex: `2`\n" \
+    "You entered: `%s`
+  NewNameErr: "0016: Invalid input, was the Date formatted correctly?"
+  ExistingUpdated: "Roster %s and Channel updated."
+  CantCreate: "0017: I was unable to create the channel."
+  CantEmbed: "0018: Error in creating category channel and sending embed."
+  DBSaveError: "0019: Error in saving information to Roster Database, Roster was not saved."
+  NewRosterCreated: "Created Roster and Channel %s"
 
 
 SelectRoster:
@@ -53,8 +59,6 @@ SelectRoster:
 
 Limits: "Roles and Values:"
 MovedAnswer: "This command has moved to an application command, look for \/%s instead!"
-Unknown: "An unknown error has occurred with the command"
-
 Pin:
   Pinned: "Message pinned"
   Unpinned: "Message unpinned"
