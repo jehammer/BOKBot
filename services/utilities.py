@@ -5,7 +5,7 @@ import datetime
 import time
 from re import sub
 
-languages = ["Spanish", "French"]
+languages = ['English', 'Spanish', 'French']
 
 class Utilities:
     """Class to store one-off functions that don't otherwise have a home"""
@@ -25,3 +25,12 @@ class Utilities:
         except Exception as e:
             logging.error(f"Suffix Failure: {str(e)}")
             raise ValueError("Unable to set suffix value")
+
+    @staticmethod
+    def format_error(lang, error):
+        identifier = languages.index(lang.capitalize()) + 1
+        return f"{identifier}{error}"
+
+    @staticmethod
+    def get_language_from_number(num):
+        return languages[num-1].lower()
