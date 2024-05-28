@@ -52,6 +52,7 @@ TrialModify:
   CantEmbed: "0018: Error in creating category channel and sending embed."
   DBSaveError: "0019: Error in saving information to Roster Database, Roster was not saved."
   NewRosterCreated: "Created Roster and Channel %s"
+  CantPosition: "0020: Error in adjusting Channel Position. Everything is otherwise ready to go."
 
 
 SelectRoster:

@@ -17,3 +17,4 @@
 '0017': "TrialModify, CantCreate"
 '0018': "TrialModify, CantEmbed"
 '0019': "TrialModify, DBSaveError"
+'0020': "TrialModify, CantPosition"
