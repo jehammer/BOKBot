@@ -17,6 +17,10 @@ Dynamo:
     TableName: None
     Endpoint: None
     Region: None
+  MapDB:
+    TableName: None
+    Endpoint: None
+    Region: None
 
 guild: put guild id here # Guild ID
 
