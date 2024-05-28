@@ -1,6 +1,6 @@
 from aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-
+from models import Roster
 
 def create_instance(table_config, credentials):
     return Dynamo(table=table_config['TableName'], endpoint=table_config['Endpoint'], region=table_config['Region'],
@@ -38,7 +38,10 @@ class Librarian:
         query = {'channelID': {'S': str(channel_id)}}
         db_data = db_instance.get(query)
         if db_data is not None and 'Item' in db_data:
-            return deserialize(db_data['Item'])['data']
+            data = deserialize(db_data['Item'])['data']
+            return Roster(data['trial'], data['date'], data['leader'], data['dps'], data['healers'], data['tanks'],
+                          data['backup_dps'], data['backup_healers'], data['backup_tanks'], data['dps_limit'], data['healer_limit'],
+                          data['tank_limit'], data['role_limit'], data['memo'])
         else:
             return None
 
@@ -49,7 +52,6 @@ class Librarian:
             'channelID': {'S': str(channel_id)},
             'data': {'M': serialize(data)}
         }
-        print(item)
         db_instance.put(item)
 
 
