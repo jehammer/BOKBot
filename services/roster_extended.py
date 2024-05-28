@@ -2,6 +2,8 @@ from services import Utilities
 from re import sub
 from aws import Dynamo
 import logging
+import datetime
+from pytz import timezone
 from models import Roster
 
 logging.basicConfig(
@@ -27,23 +29,18 @@ class RosterExtended:
                     fact_memo)
 
     @staticmethod
-    def get_sort_key(current_channels, config):
+    def get_channel_position(roster, config):
         try:
-            current_raid = get_raid(current_channels.id)
-            new_position = 0
-            if current_raid is None:
-                return current_channels.position  # Keep the channel's position unchanged
-            elif current_raid.date == "ASAP":
-                return 100
+            if roster.date == "ASAP":
+                weight = 50
             else:
-                # Calculate new positioning
-                new_time = datetime.datetime.utcfromtimestamp(int(sub('[^0-9]', '', current_raid.date)))
+                new_time = datetime.datetime.utcfromtimestamp(int(sub('[^0-9]', '', roster.date)))
                 tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
                     tz=timezone(config["raids"]["timezone"]))
-                day = tz.day
-                if day < 10:
-                    day = int(f"0{str(day)}")
-                weight = int(f"{str(tz.month)}{str(day)}{str(tz.year)}")
+                day = tz.timetuple().tm_yday
+                if day < 30:
+                    day += 360
+                weight = day
             return weight
         except Exception as e:
             logging.error(f"Sort Key Error: {str(e)}")
