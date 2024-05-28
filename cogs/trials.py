@@ -10,9 +10,8 @@ import decor as permissions
 from errors import *
 from modals import *
 from models import roster, count
-from services import Utilities, RosterExtended
-
-
+from services import Utilities, RosterExtended, Librarian
+from ui import RosterSelector
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -21,9 +20,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-
-#TODO: Replace and remove this import for more specific ones
-import discord
+roster_map = {}
 
 class Trials(commands.Cog, name="Trials"):
     """Commands related to Trials And Rosters"""
@@ -32,16 +29,37 @@ class Trials(commands.Cog, name="Trials"):
         self.bot = bot
 
 
+    @commands.Cog.listener()
+    async def on_load_on_ready(self, bot):
+        global roster_map
+        fetched = Librarian.get_roster_map(table_config=bot.config['Dynamo']["MapDB"], credentials=bot.config["AWS"])
+        if fetched is not None:
+            roster_map = fetched
+        logging.info(f"Loaded Roster Map")
+
+    @commands.Cog.listener()
+    async def on_reload_roster_map(self, new_roster_map):
+        global roster_map
+        roster_map = new_roster_map
+        logging.info(f"Loaded New Roster Map")
+
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
     @permissions.application_has_raid_lead()
-    async def create_roster(self, interaction: discord.Interaction) -> None:
+    async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_modal(TrialModal(None, interaction, self.bot.config, self.bot.language[user_language]))
+        await interaction.response.send_modal(TrialModal(None, interaction, self.bot, user_language, roster_map))
 
+    @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
+    @permissions.application_has_raid_lead()
+    async def modify_roster(self, interaction: Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+                                                view=RosterSelector(interaction, self.bot, interaction.user,"modify",
+                                                                    user_language, roster_map))
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
-    async def set_prog_roles(self, interaction: discord.Interaction) -> None:
+    async def set_prog_roles(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(ProgModal(interaction, self.bot.config, self.bot.language[user_language]))
 
