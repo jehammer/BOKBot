@@ -19,7 +19,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-scheduled_time = datetime.time(13, 0, 0, 0) # UTC Time, remember to convert and use a 24 hour-clock CDT: 13, CST: 14.
+scheduled_time = datetime.time(13, 0, 0, 0)
 
 
 def save_members_list(config, member_dict):
