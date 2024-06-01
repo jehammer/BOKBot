@@ -1,0 +1,21 @@
+# The way that this works is broken down into a series of Cogs with permissions required to use those commands
+#   a check is made if a user has a matching permission/role in Discord and if so it adds those commands into the
+#   Help embed, if not they are not included. Commands are broken up into "Text" which use a ! to trigger
+#   And Application, which is for Discord Application commands and will have a / before it while Text has an !
+
+
+Trials:
+  Everyone:
+    Text:
+      su:
+        short: "Signup to a roster | !su [Optional Role] [Optional Msg]"
+        long: |
+          Signs you up to a roster, if you have a default set there is no need to specify your role after the !su.
+          Note that if you say a role it will override your default. Otherwise you can include a message after.
+          !su
+          !su tank
+          !su tank DK
+          !su EC Cro / Colo
+  RaidLeads:
+    text:
+      limits: "Prints the current limits you can use when making a Roster."
