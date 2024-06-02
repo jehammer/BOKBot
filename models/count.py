@@ -9,7 +9,7 @@ class Count:
         self.tankRuns = tank if tank is not None else 0,
         self.healerRuns = healer if healer is not None else 0
 
-    def getCountData(self):
+    def get_count_data(self):
         """Return Object of Count Data for DB"""
         all_data = {
             "count": self.count,
