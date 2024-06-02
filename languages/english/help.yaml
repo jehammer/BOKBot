@@ -16,6 +16,16 @@ Trials:
           !su tank
           !su tank DK
           !su EC Cro / Colo
+    Interaction: None
   RaidLeads:
-    text:
-      limits: "Prints the current limits you can use when making a Roster."
+    Text:
+      limits:
+        short: "Prints the current Roster limit options."
+        long: "Prints the current Roster limit options that you can use in the Roster Creation Modal"
+    Interactions:
+      trial:
+        short: "Opens the Roster Creation Modal"
+        long: None
+      modify:
+        short: "Modify a Roster from a drop-down selection."
+        long: None
