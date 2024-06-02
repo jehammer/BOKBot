@@ -57,9 +57,12 @@ TrialModify:
 
 SelectRoster:
   Select: "Select the roster"
+  NoMapError: "0021: No Roster Map ID:Channels can be found."
+  NotCaller: "You need to be the caller of the command to interact with it!"
 
 Limits: "Roles and Values:"
 MovedAnswer: "This command has moved to an application command, look for \/%s instead!"
+
 Pin:
   Pinned: "Message pinned"
   Unpinned: "Message unpinned"

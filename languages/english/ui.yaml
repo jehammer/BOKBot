@@ -20,3 +20,7 @@ Prog:
   RolesInput:
     Label: "Keep all roles on new lines"
     Placeholder: "If there are none, say None"
+
+SelectRoster:
+  Placeholder: "Select the roster you wish to use"
+
