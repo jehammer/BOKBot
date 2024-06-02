@@ -18,3 +18,4 @@
 '0018': "TrialModify,CantEmbed"
 '0019': "TrialModify,DBSaveError"
 '0020': "TrialModify,CantPosition"
+'0021': "SelectRoster,NoMapError"
