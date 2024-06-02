@@ -2,14 +2,14 @@ from discord import ui, SelectOption, Interaction
 from services import Utilities, Librarian
 from modals import *
 
-# TODO: Implement Language Options here
 class RosterSelect(ui.Select):
     def __init__(self, interaction: Interaction, cmd_called, bot, user_language, roster_map):
         self.channels = {}
         self.config = bot.config
         self.cmd_called = cmd_called
         self.roster_map = roster_map
-        self.language = bot.language[user_language]
+        self.language = bot.language[user_language]['replies']
+        self.ui_language = bot.language[user_language]['ui']
         self.user_language = user_language
         self.bot = bot
         self.channel_mapper = {}
@@ -37,7 +37,7 @@ class RosterSelect(ui.Select):
                 used.append(label)
 
         #discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
-        super().__init__(placeholder="Select the roster you wish to use",max_values=1,min_values=1,options=options)
+        super().__init__(placeholder=self.ui_language['SelectRoster']['Placeholder'],max_values=1,min_values=1,options=options)
 
     def update_options_timeout(self):
         # Remove all options and set the placeholder to "Timed out"
@@ -48,7 +48,7 @@ class RosterSelect(ui.Select):
         selected = self.values[0]
 
         if self.roster_map is None:
-            #TODO: Implement language based return for no roster here
+            interaction.response.send_message(f"{self.language['SelectRoster']['NoMapError']}")
             return
 
         # Fetch Key from value for channel ID
@@ -85,7 +85,7 @@ class RosterSelector(ui.View):
 
     async def interaction_check(self, interaction: Interaction):
         if interaction.user.id != self.caller.id:
-            await interaction.response.send_message(f"You need to be the caller of the command to interact with it.", ephemeral=True)
+            await interaction.response.send_message(f"{self.language['SelectRoster']['NotCaller']}", ephemeral=True)
             return False
         return True
 
