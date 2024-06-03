@@ -1,6 +1,6 @@
 from aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from models import Roster
+from models import Roster, Count
 
 def create_instance(table_config, credentials):
     return Dynamo(table=table_config['TableName'], endpoint=table_config['Endpoint'], region=table_config['Region'],
@@ -99,11 +99,26 @@ class Librarian:
 
     @staticmethod
     def get_count(user_id, table_config, credentials):
-        pass
+        db_instance = create_instance(table_config, credentials)
+        query = {'key': {'S': str(user_id)}}
+        db_data = db_instance.get(query)
+        if db_data is not None and 'Item' in db_data:
+            data = deserialize(db_data['Item'])['data']
+            return Count(runs = data['count'], trial= data['lastTrial'], date= data['lastDate'], dps= data['dpsRuns'],
+                         tank= data['tankRuns'], healer= data['healerRuns'])
+        else:
+            return None
 
     @staticmethod
-    def put_count(user_id, data, table_config, credentials):
-        pass
+    def put_count(user_id, count, table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
+        data = count.get_count_data()
+        item = {
+            'key': {'S': str(user_id)},
+            'data': {'M': serialize(data)}
+        }
+        db_instance.put(item)
+        return
 
     @staticmethod
     def get_progs(table_config, credentials):
