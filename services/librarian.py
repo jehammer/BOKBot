@@ -54,6 +54,11 @@ class Librarian:
         }
         db_instance.put(item)
 
+    @staticmethod
+    def delete_roster(channel_id, table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
+        query =  {'channelID': {'S': str(channel_id)}}
+        db_instance.delete(query)
 
     @staticmethod
     def get_roster_map(table_config, credentials):
@@ -74,6 +79,7 @@ class Librarian:
             'data': {'M': serialize(data)}
         }
         db_instance.put(item)
+        return
 
     @staticmethod
     def get_rank(user_id, table_config, credentials):
@@ -117,6 +123,7 @@ class Librarian:
             'data': {'L': serialize(data)}
         }
         db_instance.put(item)
+        return
 
 
     @staticmethod
