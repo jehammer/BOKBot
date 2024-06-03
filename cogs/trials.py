@@ -57,6 +57,14 @@ class Trials(commands.Cog, name="Trials"):
                                                 view=RosterSelector(interaction, self.bot, interaction.user,"modify",
                                                                     user_language, roster_map))
 
+    @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
+    @permissions.application_has_raid_lead()
+    async def close_roster(self, interaction: Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+                                                view=RosterSelector(interaction, self.bot, interaction.user,"close",
+                                                                    user_language, roster_map))
+
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
     async def set_prog_roles(self, interaction: Interaction) -> None:
