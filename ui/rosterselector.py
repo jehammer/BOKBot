@@ -63,7 +63,8 @@ class RosterSelect(ui.Select):
         elif self.cmd_called == "call":
             await interaction.response.send_modal(CallModal(roster, interaction, self.bot, self.user_language, channel_id))
         elif self.cmd_called == "close":
-            await interaction.response.send_modal(CloseModal(roster, interaction, self.bot, self.user_language, channel_id))
+            await interaction.response.send_modal(CloseModal(roster, interaction, self.bot, self.user_language,
+                                                             self.roster_map, channel_id))
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(RemoveModal(roster, interaction, self.bot, self.user_language, channel_id))
         elif self.cmd_called == "run_count":
