@@ -3,7 +3,7 @@
 '0003': "Roster,NoRoleError"
 '0004': "Help,NotReply"
 '0005': "Help,NotError"
-'0006': "Prog,Incomplete"
+'0006': "Incomplete"
 '0007': "Unknown"
 '0008': "TrialModify,TrialLeader"
 '0009': "TrialModify,BadLimit"

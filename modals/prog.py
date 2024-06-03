@@ -41,5 +41,5 @@ class ProgModal(Modal):
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         logging.error(f"Prog Roles Update Error: {str(error)}")
-        await interaction.response.send_message(self.language['Prog']['Incomplete'])
+        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
         return

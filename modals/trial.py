@@ -243,6 +243,6 @@ class TrialModal(Modal):
         self.bot.dispatch("reload_roster_map", self.roster_map)
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        await interaction.response.send_message(f'I was unable to complete the command. Logs have more detail.')
+        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
         logging.error(f"Trial Creation/Modify Error: {str(error)}")
         return

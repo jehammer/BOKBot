@@ -18,7 +18,8 @@ Help:
 
 Prog:
   Updated: "Prog Roles Updated"
-  Incomplete: "0006: I was unable to complete the command. Logs have more detail."
+
+Incomplete: "0006: I was unable to complete the command. Logs have more detail."
 
 Unknown: "0007: An unknown error has occurred with the command"
 
