@@ -38,41 +38,42 @@ class Roster:
         return all_data
 
     # Add people into the right spots
+    # True for Main, False of Backup
     def add_dps(self, n_dps, p_class=""):
         if len(self.dps) < self.dps_limit:
             self.dps[n_dps] = p_class
-            return "Added as DPS"
+            return True
         else:
             self.backup_dps[n_dps] = p_class
-            return "DPS spots full, slotted for Backup"
+            return False
 
     def add_healer(self, n_healer, p_class=""):
         if len(self.healers) < self.healer_limit:
             self.healers[n_healer] = p_class
-            return "Added as Healer"
+            return True
         else:
             self.backup_healers[n_healer] = p_class
-            return "Healer spots full, slotted for Backup"
+            return False
 
     def add_tank(self, n_tank, p_class=""):
         if len(self.tanks) < self.tank_limit:
             self.tanks[n_tank] = p_class
-            return "Added as Tank"
+            return True
         else:
             self.backup_tanks[n_tank] = p_class
-            return "Tank spots full, slotted for Backup"
+            return False
 
     def add_backup_dps(self, n_dps, p_class=""):
         self.backup_dps[n_dps] = p_class
-        return "Added for backup as DPS"
+        return
 
     def add_backup_healer(self, n_healer, p_class=""):
         self.backup_healers[n_healer] = p_class
-        return "Added for backup as Healer"
+        return
 
     def add_backup_tank(self, n_tank, p_class=""):
         self.backup_tanks[n_tank] = p_class
-        return "Added for backup as Tank"
+        return
 
     # remove people from right spots
     def remove_dps(self, n_dps):
