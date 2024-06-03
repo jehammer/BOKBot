@@ -8,7 +8,7 @@ AWS:
   Access: none
   Secret: none
 
-Dynamo:
+Dynamo: # All the None values should be Strings in quotes
   ProgDB:
     TableName: None
     Endpoint: None
@@ -18,6 +18,10 @@ Dynamo:
     Endpoint: None
     Region: None
   MapDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+  CountDB:
     TableName: None
     Endpoint: None
     Region: None
@@ -54,13 +58,6 @@ raids:
     tanks: 0
     dps: 0
     healers: 0
-  msg_defaults: # Replace the "" with whatever text you want to use, or use "" to keep it blank
-    dps: ""
-    healers: ""
-    tanks: ""
-    backup_dps: ""
-    backup_healers: ""
-    backup_tanks: ""
   dps_emoji: <:DPS:id> #Optional emoji use for rosters, make sure they are set in a server the bot is in. Example: <:Tank:933835838951948339>
   healer_emoji: <:Healer:id>
   tank_emoji: <:Tank:id>
