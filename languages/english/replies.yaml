@@ -55,7 +55,6 @@ TrialModify:
   NewRosterCreated: "Created Roster and Channel %s"
   CantPosition: "0020: Error in adjusting Channel Position. Everything is otherwise ready to go."
 
-
 SelectRoster:
   Select: "Select the roster"
   NoMapError: "0021: No Roster Map ID:Channels can be found."
@@ -67,3 +66,11 @@ MovedAnswer: "This command has moved to an application command, look for \/%s in
 Pin:
   Pinned: "Message pinned"
   Unpinned: "Message unpinned"
+
+Close:
+  BadConfirmError: "0022: You must enter a `y` or an `n` in the Confirmation fields."
+  CloseWithoutClose: "Wait why did you do that instead of just clicking cancel?"
+  NotNumberError: "0023: Runs Count Increase must be a number only."
+  NoIncrease: "Roster %s closed and Runs not increased."
+  Increase: "Roster %s closed and Runs increased."
+  IncompleteError: "0024: I was unable to handle closing the roster. I have logged the details."

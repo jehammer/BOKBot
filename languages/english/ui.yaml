@@ -24,3 +24,16 @@ Prog:
 SelectRoster:
   Placeholder: "Select the roster you wish to use"
 
+Close:
+  Title: "Close Roster"
+  Confirm:
+    Label: "Close %s"
+    Placeholder: "Y or N? Click cancel to close this"
+  Runs:
+    Label: "Increase Run Count?"
+    Placeholder: "Y or N? Click cancel to close this"
+
+  RunsCount:
+    Label: "If Yes enter number of runs"
+    Placeholder: "Defaults to 1"
+

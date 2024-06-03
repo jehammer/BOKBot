@@ -19,3 +19,6 @@
 '0019': "TrialModify,DBSaveError"
 '0020': "TrialModify,CantPosition"
 '0021': "SelectRoster,NoMapError"
+'0022': "Close,BadConfirmError"
+'0023': "Close,NotNumberError"
+'0024': "Close,IncompleteError"
