@@ -4,7 +4,7 @@ from aws import Dynamo
 import logging
 import datetime
 from pytz import timezone
-from models import Roster
+from models import Roster, Count
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -97,3 +97,38 @@ class RosterExtended:
             for i in prog_roles:
                 list_roles.append(i)
         return list_roles
+
+    @staticmethod
+    def increase_roster_count(roster: Roster, count, table_config, creds_config):
+        """Increase run count of all users in a roster."""
+        try:
+            from services import Librarian
+
+            for i in roster.dps:
+                db_count = Librarian.get_count(i, table_config, creds_config)
+                if db_count is None:
+                    db_count = Count(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                else:
+                    db_count.increase_data(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                Librarian.put_count(i, db_count, table_config, creds_config)
+
+            for i in roster.tanks:
+                db_count = Librarian.get_count(i, table_config, creds_config)
+                if db_count is None:
+                    db_count = Count(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                else:
+                    db_count.increase_data(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                Librarian.put_count(i, db_count, table_config, creds_config)
+
+            for i in roster.healers:
+                db_count = Librarian.get_count(i, table_config, creds_config)
+                if db_count is None:
+                    db_count = Count(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                else:
+                    db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                Librarian.put_count(i, db_count, table_config, creds_config)
+
+        except Exception as e:
+            logging.error(f"Increase Roster Run Count Error: {str(e)}")
+            raise e
+
