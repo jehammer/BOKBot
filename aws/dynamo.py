@@ -22,7 +22,12 @@ class Dynamo:
             response = self.client.get_item(TableName=self.table_name, Key=query)
             return response
         except ClientError as e:
-            logging.error(f"Dynamo Get Item Error Table: {self.table_name} error: {str(e)} ")
+            logging.error(f"Dynamo Get Item Error Table: %s, error: %s: %s",
+                self.table.name,
+                e.response['Error']['Code'],
+                e.response['Error']['Message'],
+            )
+            raise e
 
     def put(self, data):
         """Put new entry into the database using the defined data parameter."""
@@ -34,6 +39,7 @@ class Dynamo:
                 e.response["Error"]["Code"],
                 e.response["Error"]["Message"],
             )
+            raise e
 
     def update(self, query, data):
         """Update an item found from the passed in query and data to update."""
