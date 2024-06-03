@@ -36,8 +36,20 @@ class Dynamo:
         except ClientError as e:
             logging.error(f"Dynamo Put Item Error Table: %s, error: %s: %s",
                 self.table.name,
-                e.response["Error"]["Code"],
-                e.response["Error"]["Message"],
+                e.response['Error']['Code'],
+                e.response['Error']['Message'],
+            )
+            raise e
+
+    def delete(self, query):
+        """Delete an item from a table in the Database"""
+        try:
+            self.client.delete_item(TableName=self.table_name, Key=query)
+        except ClientError as e:
+            logging.error(f"Dynamo Put Item Error Table: %s, error: %s: %s",
+                self.table_name,
+                e.response['Error']['Code'],
+                e.response['Error']['Message'],
             )
             raise e
 
