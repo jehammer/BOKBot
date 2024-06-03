@@ -193,7 +193,7 @@ class TrialModal(Modal):
                         embed_memo.set_footer(text="This is very important!")
                         await self.channel.send(embed=embed_memo)
                     await self.channel.send(embed=embed)
-                    logging.info(f"self.roster Channel: channelID: {str(self.channel.id)}")
+                    logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                     self.channel_id = self.channel.id
                 except Exception as e:
                     await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantEmbed'])}")
