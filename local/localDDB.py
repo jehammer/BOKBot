@@ -89,9 +89,73 @@ def setup_trial_table():
     except Exception as e:
         logging.error(f"Rosters Table setup error: {str(e)}")
 
+def setup_count_table():
+    table_name = 'Count'
+    key_schema = [
+        {
+            'AttributeName': 'userID',
+            'KeyType': 'HASH'
+        }
+    ]
+    attribute_definitions = [
+        {
+            'AttributeName': 'userID',
+            'AttributeType': 'S'
+        }
+    ]
+    provisioned_throughput = {
+        'ReadCapacityUnits': 2,
+        'WriteCapacityUnits': 2
+    }
+    try:
+        response = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
+            ProvisionedThroughput=provisioned_throughput
+        )
+        logging.info(f"Count Table status: {response['TableDescription']['TableStatus']}")
+    except dynamodb.exceptions.ResourceInUseException:
+        logging.info(f"Count Table already exists.")
+    except Exception as e:
+        logging.error(f"Count Table setup error: {str(e)}")
+
+def setup_default_table():
+    table_name = 'Defaults'
+    key_schema = [
+        {
+            'AttributeName': 'userID',
+            'KeyType': 'HASH'
+        }
+    ]
+    attribute_definitions = [
+        {
+            'AttributeName': 'userID',
+            'AttributeType': 'S'
+        }
+    ]
+    provisioned_throughput = {
+        'ReadCapacityUnits': 2,
+        'WriteCapacityUnits': 2
+    }
+    try:
+        response = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
+            ProvisionedThroughput=provisioned_throughput
+        )
+        logging.info(f"Defaults Table status: {response['TableDescription']['TableStatus']}")
+    except dynamodb.exceptions.ResourceInUseException:
+        logging.info(f"Count Table already exists.")
+    except Exception as e:
+        logging.error(f"Defaults Table setup error: {str(e)}")
+
 def main():
     setup_misc_table()
     setup_trial_table()
+    setup_count_table()
+    setup_default_table()
 
 
 main()
