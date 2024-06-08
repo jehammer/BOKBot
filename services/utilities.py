@@ -1,9 +1,5 @@
 import discord.role
 from discord import member
-from pytz import timezone
-import datetime
-import time
-from re import sub
 import logging
 
 languages = ['English', 'Spanish', 'French']
