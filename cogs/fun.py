@@ -395,11 +395,5 @@ Goodnight BOK
             logging.error(f"Kowtow Error: {str(e)}")
 
 
-    @commands.command(name="kowtow", hidden=True)
-    async def send_kowtow_notice(self, ctx: commands.Context):
-        await ctx.reply(f"This has moved to the /kowtow application command.\n"
-                        f"Keep an eye out for future re-use of this ! command.")
-
-
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))
