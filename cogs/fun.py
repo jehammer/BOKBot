@@ -8,7 +8,7 @@ import calendar
 import random
 from pymongo import MongoClient
 
-# For using Aliases: (name="ex", aliases=["al1", "al2"])
+from services import Utilities, Librarian
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -19,22 +19,6 @@ logging.basicConfig(
 
 global ranks
 
-
-def ordinalSuffix(number):
-    # 11, 12, and 13 have the suffix th:
-    if number % 100 in (11, 12, 13):
-        return str(number) + 'th'
-    # Numbers that end with 1 have the suffix st:
-    if number % 10 == 1:
-        return str(number) + 'st'
-    # Numbers that end with 2 have the suffix nd:
-    if number % 10 == 2:
-        return str(number) + 'nd'
-    # Numbers that end with 3 have the suffix rd:
-    if number % 10 == 3:
-        return str(number) + 'rd'
-    # All other numbers end with th:
-    return str(number) + 'th'
 
 
 def set_channels(config):
@@ -167,18 +151,15 @@ class Fun(commands.Cog, name="Fun"):
     async def joined(self, ctx: commands.context, m: discord.Member = None):
         """Tells you when you joined the server in M-D-Y Format"""
         try:
-            def suffix(d):
-                return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
-
             if m is None:
                 user = ctx.message.author
                 await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
-                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}"
-                                f"{suffix(user.joined_at.day)} {user.joined_at.year}")
+                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}{Utilities.suffix(user.joined_at.day)}"
+                                f"{user.joined_at.year}")
             else:
                 await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
-                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}"
-                                f"{suffix(m.joined_at.day)} {m.joined_at.year}")
+                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}{Utilities.suffix(m.joined_at.day)}"
+                                f"{m.joined_at.year}")
         except Exception as e:
             logging.error("Joined command error: " + str(e))
             await ctx.send("Unable to fetch joined information.")
@@ -329,7 +310,7 @@ Goodnight BOK
     @app_commands.describe(member="Discord user to rank if not yourself.")
     async def rank_app_command(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
         """Ranks someone out of 10000 you ping"""
-        try:
+        try: # TODO: Change the vanity checks to be in a dictonary and do an in-check or something to make it less of an if-else
             if member is None:
                 member = interaction.user
             timestamp = int(time.mktime(datetime.datetime.now().timetuple()))  # All this just for a utc timestamp int
@@ -367,7 +348,7 @@ Goodnight BOK
 
             update_db(user_id, info)
 
-            await interaction.response.send_message(f"{member.display_name} ranks {ordinalSuffix(ran)}!")
+            await interaction.response.send_message(f"{member.display_name} ranks {Utilities.suffix(ran)}!")
 
         except IOError as e:
             await interaction.response.send_message(f"Sorry, I was unable to load or save your new information.")
