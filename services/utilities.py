@@ -4,8 +4,16 @@ from pytz import timezone
 import datetime
 import time
 from re import sub
+import logging
 
 languages = ['English', 'Spanish', 'French']
+
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 class Utilities:
     """Class to store one-off functions that don't otherwise have a home"""
