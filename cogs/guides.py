@@ -43,32 +43,6 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send the image")
             logging.error(f"Reef error: {str(e)}")
 
-    @commands.command(name="abbr")
-    async def dm_trial_abbreviations(self, ctx: commands.Context):
-        """DMs the User the Trial abbreviations"""
-        try:
-            message = f"n - Normal\n" \
-                      f"v - Veteran\n" \
-                      f"+[#] - How many Minis are up for the Arena type Trials\n" \
-                      f"hm - Hard Mode\n" \
-                      f"hrc - Hel Ra Citadel\n" \
-                      f"aa - Atherian Archive\n" \
-                      f"so - Sanctum Ophidia\n" \
-                      f"mol - Maw of Lorkhaj\n" \
-                      f"hof - Halls of Fabrication\n" \
-                      f"as - Asylum Sanctorium\n" \
-                      f"cr - Cloud Rest\n" \
-                      f"ss - Sunspire\n" \
-                      f"ka - Kyne's Aegis\n" \
-                      f"rg - Rockgrove\n" \
-                      f"dsr - Dreadsail Reef\n" \
-                      f"se - Sanity's Edge"
-            author = ctx.author
-            await author.send(message)
-        except discord.Forbidden as e:
-            await ctx.reply("I was unable to send you the abbreviations because you have DMs turned off.")
-            logging.error(f"ABBR Error: {str(e)}")
-
     @commands.command(name="ka", aliases=["vka", "nka"])
     async def vka(self, ctx: commands.Context):
         """Something you wanna see for KA"""
