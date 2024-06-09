@@ -145,7 +145,7 @@ def setup_default_table():
         )
         logging.info(f"Defaults Table status: {response['TableDescription']['TableStatus']}")
     except dynamodb.exceptions.ResourceInUseException:
-        logging.info(f"Count Table already exists.")
+        logging.info(f"Defaults Table already exists.")
     except Exception as e:
         logging.error(f"Defaults Table setup error: {str(e)}")
 
