@@ -149,11 +149,43 @@ def setup_default_table():
     except Exception as e:
         logging.error(f"Defaults Table setup error: {str(e)}")
 
+def setup_ranks_table():
+    table_name = 'Ranks'
+    key_schema = [
+        {
+            'AttributeName': 'userID',
+            'KeyType': 'HASH'
+        }
+    ]
+    attribute_definitions = [
+        {
+            'AttributeName': 'userID',
+            'AttributeType': 'S'
+        }
+    ]
+    provisioned_throughput = {
+        'ReadCapacityUnits': 2,
+        'WriteCapacityUnits': 2
+    }
+    try:
+        response = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
+            ProvisionedThroughput=provisioned_throughput
+        )
+        logging.info(f"Ranks Table status: {response['TableDescription']['TableStatus']}")
+    except dynamodb.exceptions.ResourceInUseException:
+        logging.info(f"Ranks Table already exists.")
+    except Exception as e:
+        logging.error(f"Ranks Table setup error: {str(e)}")
+
 def main():
     setup_misc_table()
     setup_roster_table()
     setup_count_table()
     setup_default_table()
+    setup_ranks_table()
 
 
 main()
