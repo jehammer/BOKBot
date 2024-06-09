@@ -58,7 +58,7 @@ class Guides(commands.Cog, name="Guides"):
             await ctx.send("Unable to send the gif")
             logging.error(f"Backyard Error: {str(e)}")
 
-    @commands.command(name="zhaj", aliases=["mol1"])
+    @commands.command(name="zhaj", aliases=['mol1', 'vrol', 'yandir'])
     async def send_zhaj_image(self, ctx: commands.Context):
         """MOL Zhaj positioning good for Yandir and Vrol too"""
         try:
