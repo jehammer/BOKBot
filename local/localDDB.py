@@ -56,9 +56,7 @@ def setup_misc_table():
     except Exception as e:
         logging.error(f"Misc Table setup error: {str(e)}")
 
-
-
-def setup_trial_table():
+def setup_roster_table():
     table_name = 'Rosters'
     key_schema = [
         {
@@ -153,7 +151,7 @@ def setup_default_table():
 
 def main():
     setup_misc_table()
-    setup_trial_table()
+    setup_roster_table()
     setup_count_table()
     setup_default_table()
 
