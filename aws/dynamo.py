@@ -23,7 +23,7 @@ class Dynamo:
             return response
         except ClientError as e:
             logging.error(f"Dynamo Get Item Error Table: %s, error: %s: %s",
-                self.table.name,
+                self.table_name,
                 e.response['Error']['Code'],
                 e.response['Error']['Message'],
             )
@@ -35,7 +35,7 @@ class Dynamo:
             self.client.put_item(TableName=self.table_name, Item=data)
         except ClientError as e:
             logging.error(f"Dynamo Put Item Error Table: %s, error: %s: %s",
-                self.table.name,
+                self.table_name,
                 e.response['Error']['Code'],
                 e.response['Error']['Message'],
             )
