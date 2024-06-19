@@ -1,0 +1,47 @@
+version: 1.0
+
+# NOTE: RENAME THIS FILE FROM template_config.yaml TO config.yaml BEFORE USING
+
+bot:
+  token: Put Discord Token Here
+AWS:
+  Access: none
+  Secret: none
+
+Dynamo: # All the None values should be Strings in quotes
+  ProgDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+  RosterDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+  MapDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+  CountDB:
+    TableName: None
+    Endpoint: None
+    Region: None
+
+guild: put guild id here # Guild ID
+
+presence_message: Make this what you want to say
+morning: Good morning! # Message that the bot says in the morning channel at the designated time.
+morning_channel: Put discord channel id here
+officer_channel: Put discord channel id here
+intro_channel: Put discord channel id here
+# The welcome message can be as long as you want, and is very customizable.
+welcome: |
+  This is a very long message meant to welcome you to our very special discord channel where we all do things!
+  And this is on a new line!
+
+administration:
+  private: # Private Channel ID
+  general: # General channel ID
+  reports: # Channel you want reports to go to, use same ID as private if you want
+
+    
+

@@ -6,9 +6,11 @@ venv/
 # Files
 *.log
 *.pyc
-config.yaml
+config/config.yaml
 cogs/_transfer.py
 cogs/transfer.py
 _config.yaml
 cogs/_scratchwork.py
 cogs/scratchwork.py
+config/roles.yaml
+config/roster.yaml
