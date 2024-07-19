@@ -1,0 +1,17 @@
+raids:
+  category: # Category ID where you want new rosters created under
+  lead: @everyone # Lead config is for the roles that are allowed to make new rosters.
+  timezone: US/Central # NOTE: IANA
+  roles: # Note: THE ROLES ARE CASE SENSITIVE
+    base: @everyone # the base rank to join in on raids. If everyone use "@everyone"
+    first: none
+    second: none
+    third: none
+    fourth: none
+  roster_defaults: # Sets the number of tanks, dps, and healers to open a roster with if none are set in the command
+    tanks: 0
+    dps: 0
+    healers: 0
+  dps_emoji: <:DPS:id> #Optional emoji use for rosters, make sure they are set in a server the bot is in. Example: <:Tank:933835838951948339>
+  healer_emoji: <:Healer:id>
+  tank_emoji: <:Tank:id>
