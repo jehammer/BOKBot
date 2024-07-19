@@ -38,3 +38,7 @@ class Utilities:
     @staticmethod
     def get_language_from_number(num):
         return languages[num-1].lower()
+
+    @staticmethod
+    def get_default_from_language(default_map, default):
+        pass
