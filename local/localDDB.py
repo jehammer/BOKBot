@@ -5,6 +5,7 @@
 #   Ranks
 #   Misc
 #   Count
+#   Birthdays
 
 import boto3
 import logging
@@ -180,12 +181,44 @@ def setup_ranks_table():
     except Exception as e:
         logging.error(f"Ranks Table setup error: {str(e)}")
 
+def setup_birthdays_table(): #TODO: Revisit this, this is just a setup for now.
+    table_name = 'Birthdays'
+    key_schema = [
+        {
+            'AttributeName': 'userID',
+            'KeyType': 'HASH'
+        }
+    ]
+    attribute_definitions = [
+        {
+            'AttributeName': 'userID',
+            'AttributeType': 'S'
+        }
+    ]
+    provisioned_throughput = {
+        'ReadCapacityUnits': 2,
+        'WriteCapacityUnits': 2
+    }
+    try:
+        response = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=key_schema,
+            AttributeDefinitions=attribute_definitions,
+            ProvisionedThroughput=provisioned_throughput
+        )
+        logging.info(f"Birthdays Table status: {response['TableDescription']['TableStatus']}")
+    except dynamodb.exceptions.ResourceInUseException:
+        logging.info(f"Birthdays Table already exists.")
+    except Exception as e:
+        logging.error(f"Birthdays Table setup error: {str(e)}")
+
 def main():
     setup_misc_table()
     setup_roster_table()
     setup_count_table()
     setup_default_table()
     setup_ranks_table()
+    setup_birthdays_table()
 
 
 main()
