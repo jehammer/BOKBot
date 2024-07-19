@@ -22,3 +22,6 @@ class UnknownError(commands.CommandError):
 
 class NoRoleError(commands.CommandError):
     pass
+
+class BotUserError(Exception):
+    pass
