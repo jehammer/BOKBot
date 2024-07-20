@@ -26,26 +26,6 @@ other = None
 
 # Events
 @bot.event
-async def on_member_join(member):
-    try:
-        guild = member.guild
-        base = bot.config["roles"]['default']
-        if base != "none":
-            await member.add_roles(role, ranks, poons, other)
-            logging.info(
-                f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
-        await guild.system_channel.send(f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
-                                        f"Please read the rules in <#847968244949844008> and follow the directions for "
-                                        f"access to the rest of the server.\n"
-                                        f"Once you do, I will send you a little DM to help you get started!\n"
-                                        f"If the bot does not work just ping the Storm Bringers.")
-    except Exception as e:
-        private_channel = guild.get_channel(bot.config['administration']['private'])
-        await private_channel.send("Unable to apply initial role and/or welcome the new user")
-        logging.error(f"Member Join Error: {str(e)}")
-
-
-@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("That is not a command I know.")
@@ -149,19 +129,6 @@ async def startup_logging():
 
     except Exception as e:
         logging.error(f"I was unable to set up the new logging information: {str(e)}")
-
-
-async def gather_roles(guild, config):
-    """Loads the starting roles for people when joining """
-    global role
-    global ranks
-    global poons
-    global other
-    role = discord.utils.get(guild.roles, name=config["roles"]["default"])
-    ranks = discord.utils.get(guild.roles, name=config["roles"]["ranks"])
-    poons = discord.utils.get(guild.roles, name=config["roles"]["poons"])
-    other = discord.utils.get(guild.roles, name=config["roles"]["other"])
-    logging.info(f"Global Roles Set")
 
 
 @bot.event

@@ -22,6 +22,23 @@ logging.basicConfig(
 scheduled_time = datetime.time(13, 0, 0, 0)
 
 
+role = None
+ranks = None
+poons = None
+other = None
+
+def gather_roles(guild, config):
+    """Loads the starting roles for people when joining """
+    global role
+    global ranks
+    global poons
+    global other
+    role = discord.utils.get(guild.roles, name=config["roles"]["default"])
+    ranks = discord.utils.get(guild.roles, name=config["roles"]["ranks"])
+    poons = discord.utils.get(guild.roles, name=config["roles"]["poons"])
+    other = discord.utils.get(guild.roles, name=config["roles"]["other"])
+    logging.info(f"Global Roles Set")
+
 def save_members_list(config, member_dict):
     client = MongoClient(config['mongo'])
     database = client['bot']
@@ -260,6 +277,32 @@ class Admin(commands.Cog, name="Admin"):
         except Exception as e:
             logging.error(f"GET ALL USER DATA COMMAND ERROR: {str(e)}")
             raise Exception(e)
+
+    # EVENTS:
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        gather_roles(self.bot.get_guild(self.bot.config["guild"]), self.bot.config)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        try:
+            guild = member.guild
+            base = self.bot.config["roles"]['default']
+            if base != "none":
+                await member.add_roles(role, ranks, poons, other)
+                logging.info(
+                    f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
+            await guild.system_channel.send(
+                f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
+                f"Please read the rules in <#847968244949844008> and follow the directions for "
+                f"access to the rest of the server.\n"
+                f"Once you do, I will send you a little DM to help you get started!\n"
+                f"If the bot does not work just ping the Storm Bringers.")
+        except Exception as e:
+            private_channel = guild.get_channel(bot.config['administration']['private'])
+            await private_channel.send("Unable to apply initial role and/or welcome the new user")
+            logging.error(f"Member Join Error: {str(e)}")
 
     # AUTOMATED TASKS
     @tasks.loop(time=scheduled_time)
