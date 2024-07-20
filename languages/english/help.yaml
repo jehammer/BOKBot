@@ -16,6 +16,14 @@ Trials:
           !su tank
           !su tank DK
           !su EC Cro / Colo
+      status:
+        short: "Prints the most up-to-date roster for a Trial."
+        long: None
+      default:
+        short: "Set or check your default role for rosters."
+        long: |
+          Set or Check your default for rosters, call just `!default` to check your current default, or use 
+          `!default [role]` to set a default such as `!default dps`
     Interaction: None
   RaidLeads:
     Text:
