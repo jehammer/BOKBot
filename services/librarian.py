@@ -91,11 +91,24 @@ class Librarian:
 
     @staticmethod
     def get_default(user_id, table_config, credentials):
-        pass
+        db_instance = create_instance(table_config, credentials)
+        query = {'userID': {'S': str(user_id)}}
+        db_data = db_instance.get(query)
+        if db_data is not None and 'Item' in db_data:
+            return deserialize(db_data['Item'])['default']
+        else:
+            return None
+
 
     @staticmethod
-    def put_default(user_id, default,table_config, credentials):
-        pass
+    def put_default(user_id, default, table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
+        item = {
+            'userID': {'S': str(user_id)},
+            'default': {'S': default}
+        }
+        db_instance.put(item)
+        return
 
     @staticmethod
     def get_count(user_id, table_config, credentials):
