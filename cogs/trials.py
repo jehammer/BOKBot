@@ -9,7 +9,7 @@ import asyncio
 import decor as permissions
 from errors import *
 from modals import *
-from models import roster, count
+from models import Roster, Count
 from services import Utilities, RosterExtended, Librarian
 from ui import RosterSelector
 
@@ -130,6 +130,44 @@ class Trials(commands.Cog, name="Trials"):
         else:
             new_command = ctx.invoked_with
         await ctx.reply(f"{self.bot.language[user_language]['replies']['MovedAnswer'] % new_command}")
+
+    @commands.command(name="default")
+    @permissions.language()
+    async def set_default_role(self, ctx: commands.Context, role="check", **kwargs):
+        """Set or check your default for rosters | `!default [optional: role]`"""
+        # TODO: Make Role mapper for this from the supported languages to dps, healer, or tank
+        language = kwargs.get('language')
+        try:
+            role = role.lower()
+            user_id = ctx.message.author.id
+            if role.lower() == "heal" or role.lower() == "heals":
+                role = "healer"
+            if role == "dps" or role == "healer" or role == "tank":
+                try:
+                    Librarian.put_default(user_id=user_id, default=role,  table_config=self.bot.config['Dynamo']['DefaultDB'],
+                                          credentials=self.bot.config['AWS'])
+                    await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['Set'] % role}")
+                except Exception as e:
+                    await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+                    logging.error(f"Default error: {str(e)}")
+                    return
+            elif role == "check":
+                try:
+                    default = Librarian.get_default(user_id, table_config=self.bot.config['Dynamo']['DefaultDB'],
+                                          credentials=self.bot.config['AWS'])
+                    if default is None:
+                        await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['NoneSet']}")
+                    else:
+                        await ctx.reply(f"{ctx.message.author.display_name} defaults to: {default}")
+                except Exception as e:
+                    await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+                    logging.error(f"Default error: {str(e)}")
+                    return
+            else:
+                await ctx.reply(f"{Utilities.format_error(language, self.bot.language[language]['replies']['Default']['BadRoleError'])}")
+        except Exception as e:
+            await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+            logging.error(f"Default Role Set Error: {str(e)}")
 
 
 

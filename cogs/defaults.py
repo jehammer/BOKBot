@@ -31,48 +31,6 @@ class Defaults(commands.Cog, name="Defaults"):
         self.bot = bot
         set_channels(self.bot.config)
 
-    @commands.command(name="default")
-    async def set_default_role(self, ctx: commands.Context, role="check"):
-        """Set or check your default for rosters | `!default [optional: role]`"""
-        try:
-            role = role.lower()
-            user_id = ctx.message.author.id
-            if role.lower() == "heal" or role.lower() == "heals":
-                role = "healer"
-            if role == "dps" or role == "healer" or role == "tank":
-                try:
-                    rec = defaults.find_one({'userID': user_id})
-                    if rec is None:
-                        rec = {
-                            'userID': user_id,
-                            'default': role
-                        }
-                        defaults.insert_one(rec)
-                    else:
-                        rec = {'$set': {'default': role}}
-                        defaults.update_one({'userID': user_id}, rec)
-                    await ctx.reply(f"{ctx.message.author.display_name}: default role has been set to {role}")
-                except Exception as e:
-                    await ctx.send(f"I was unable to access the database")
-                    logging.error(f"Default error: {str(e)}")
-                    return
-            elif role == "check":
-                try:
-                    rec = defaults.find_one({'userID': user_id})
-                    if rec is None:
-                        await ctx.reply(f"{ctx.message.author.display_name}: No default set")
-                    else:
-                        await ctx.reply(f"{ctx.message.author.display_name} defaults to: {rec['default']}")
-                except Exception as e:
-                    await ctx.send(f"I was unable to access the database")
-                    logging.error(f"Default error: {str(e)}")
-                    return
-            else:
-                await ctx.reply("Please specify an acceptable role. dps, healer, or tank.")
-        except Exception as e:
-            await ctx.send("Unable to set default role")
-            logging.error(f"Default Role Set Error: {str(e)}")
-
     @commands.command(name="setdef")
     @permissions.has_raid_lead()
     async def admin_set_default_role(self, ctx: commands.Context, m: discord.Member, role="check"):

@@ -58,8 +58,8 @@ class RosterSelect(ui.Select):
                                       table_config=self.config['Dynamo']["RosterDB"], credentials=self.config["AWS"])
 
         if self.cmd_called == "modify":
-            await interaction.response.send_modal(TrialModal(roster, interaction, self.bot, self.user_language,
-                                                             self.roster_map, channel_id))
+            await interaction.response.send_modal(TrialModal(roster=roster, interaction=interaction, bot=self.bot, lang=self.user_language,
+                                                             roster_map=self.roster_map, channel=channel_id))
         elif self.cmd_called == "call":
             await interaction.response.send_modal(CallModal(roster, interaction, self.bot, self.user_language, channel_id))
         elif self.cmd_called == "close":

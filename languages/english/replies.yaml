@@ -4,13 +4,18 @@ Roster:
   Added: "Added as %s"
   Removed: "Removed :("
   Full: "%s spots full, slotted for Backup"
-  NoDefault: > 
-            0002: You have no default set, please specify a role (ex: `%s dps`) or set a default 
-            (ex: `!default dps`) then sign up again.
+  NoDefault: >
+    0002: You have no default set, please specify a role (ex: `%s dps`) or set a default 
+    (ex: `!default dps`) then sign up again.
   NoRoleError: > 
     "0003: You do not have the right role to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
     "achieve them. You are looking for details on: %s"
+
+Default:
+  Set: "default role has been set to %s"
+  NoneSet: "No default set"
+  BadRoleError: "0026: Please specify an acceptable role. dps, healer, or tank."
 
 Help:
   NotReply: "0004: You need to reply to an error message to use this functionality."
@@ -74,3 +79,8 @@ Close:
   NoIncrease: "Roster %s closed and Runs not increased."
   Increase: "Roster %s closed and Runs increased."
   IncompleteError: "0024: I was unable to handle closing the roster. I have logged the details."
+
+Status:
+  NotRoster: "Sorry! This command only works in a roster channel!"
+
+DBConError: "0025: I was unable to access the Database."
