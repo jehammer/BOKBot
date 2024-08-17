@@ -25,7 +25,7 @@ class Dynamo:
             logging.error(f"Dynamo Get Item Error Table: %s, error: %s: %s",
                 self.table_name,
                 e.response['Error']['Code'],
-                e.response['Error']['Message'],
+                e.response['Error']['Message']
             )
             raise e
 
@@ -46,10 +46,10 @@ class Dynamo:
         try:
             self.client.delete_item(TableName=self.table_name, Key=query)
         except ClientError as e:
-            logging.error(f"Dynamo Put Item Error Table: %s, error: %s: %s",
+            logging.error(f"Dynamo Delete Item Error Table: %s, error: %s: %s",
                 self.table_name,
                 e.response['Error']['Code'],
-                e.response['Error']['Message'],
+                e.response['Error']['Message']
             )
             raise e
 
@@ -73,17 +73,26 @@ class Dynamo:
             logging.error(f"Dynamo Update Item Error Table: %s, error: %s: %s",
                 self.table.name,
                 e.response["Error"]["Code"],
-                e.response["Error"]["Message"],
+                e.response["Error"]["Message"]
             )
         else:
             return response["Attributes"]
 
-    def batch_get(self, query):
-        """Gets a batch of items from the db based upon the query"""
-        pass
-        # TODO: Implement a batch_get, useful for getting all counts to be increased in a roster.
-
-    def batch_put(self, data):
-        """Put a batch of items into the db"""
-        pass
-        #TODO: Implement a batch_put for mass data update, since we charge based upon total write requests
+    def scan_get_all(self):
+        """Gets all items in a DynamoDB Table in a Batch"""
+        try:
+            response = self.client.scan(TableName=self.table_name)
+            items = response['Items']
+            while 'LastEvaluatedKey' in response:
+                response = client.scan(
+                    TableName=self.table_name,
+                    ExclusiveStartKey=response['LastEvaluatedKey']
+                )
+                items.extend(response['Items'])
+            return items
+        except ClientError as e:
+            logging.error(f"Dynamo Scan Get All Items Error Table: %s, error: %s: %s",
+                self.table.name,
+                e.response["Error"]["Code"],
+                e.response["Error"]["Message"]
+            )

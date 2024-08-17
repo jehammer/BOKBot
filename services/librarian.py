@@ -33,6 +33,23 @@ class Librarian:
     """
 
     @staticmethod
+    def get_all_rosters(table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
+        db_data = db_instance.scan_get_all()
+        if db_data is None:
+            return None
+
+        all_rosters = {}
+        for i in db_data:
+            deserial = deserialize(i)
+            data = deserial['data']
+            channel_id = deserial['channelID']
+            all_rosters[int(channel_id)] = Roster(data['trial'], data['date'], data['leader'], data['dps'], data['healers'], data['tanks'],
+                      data['backup_dps'], data['backup_healers'], data['backup_tanks'], data['dps_limit'], data['healer_limit'],
+                      data['tank_limit'], data['role_limit'], data['memo'])
+        return all_rosters
+
+    @staticmethod
     def get_roster(channel_id, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
         query = {'channelID': {'S': str(channel_id)}}
