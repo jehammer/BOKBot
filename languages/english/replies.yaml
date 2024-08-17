@@ -16,6 +16,7 @@ Default:
   Set: "default role has been set to %s"
   NoneSet: "No default set"
   BadRoleError: "0026: Please specify an acceptable role. dps, healer, or tank."
+  Answer: "defaults to:"
 
 Help:
   NotReply: "0004: You need to reply to an error message to use this functionality."
