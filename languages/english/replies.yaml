@@ -1,3 +1,33 @@
+Zones:
+  - "EP: Bal Foyen, Blackrock, Deshaan, Eastmarch, The Rift, Shadowfen, Stonefalls"
+  - "DC Alik'r Desert, Bangkorai, Betnikh, Glenumbra, Rivenspire, Stormhaven, Stros M'Kai"
+  - "AD: Auridon, Grahtwood, Greenshade, Khenarthi's Roost, Malabal Tor, Reaper's March"
+  - "Craglorn"
+  - "Coldharbour, Wrothgar"
+  - "Daedric War Storyline: Vvardenfell, Clockwork City, Summerset, Artaeum"
+  - "Season of the Dragon: North Elsweyr, Southern Elsweyr"
+  - "Dark Heart of Skyrim: Western Skyrim, The Reach, Blackreach Caverns, Arkthzand Cavern"
+  - "Gates Of Oblivion: Blackwood, Fargrave, Deadlands"
+  - "Gold Coast, Hew's Bane, Murkmire"
+  - "Legacy of The Bretons: High Isle and Amenos, Galen and Y'ffelon"
+  - "Shadow Over Morrowind: Telvanni Peninsula and Apocrypha"
+  - "Gold Road: West Weald"
+
+Trials:
+  - "Hel Ra Citadel"
+  - "Atherian Archive"
+  - "Sanctum Ophidia"
+  - "Maw of Lorkhaj"
+  - "Halls of Fabrication"
+  - "Asylum Sanctorium"
+  - "Cloudrest"
+  - "Sunspire"
+  - "Kyne's Aegis"
+  - "Rockgrove"
+  - "Dreadsail Reef"
+  - "Sanity's Edge"
+  - "Lucent Citadel"
+
 Unreachable: "0001: Hey uh, you reached an unreachable part of the code lol."
 
 Roster:
@@ -85,3 +115,13 @@ Status:
   NotRoster: "Sorry! This command only works in a roster channel!"
 
 DBConError: "0025: I was unable to access the Database."
+
+
+Events:
+  Vet: "Veteran"
+  Norm: "Normal"
+  HM: "HM"
+  SSH: "Skyshard Hunt:"
+  WBC: "World Boss Crawl:"
+  PDC: "Public Dungeon Crawl:"
+  OL: "Overland:"
