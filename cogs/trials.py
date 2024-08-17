@@ -148,7 +148,7 @@ class Trials(commands.Cog, name="Trials"):
                                           credentials=self.bot.config['AWS'])
                     await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['Set'] % role}")
                 except Exception as e:
-                    await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+                    await ctx.reply(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
                     logging.error(f"Default error: {str(e)}")
                     return
             elif role == "check":
@@ -158,7 +158,7 @@ class Trials(commands.Cog, name="Trials"):
                     if default is None:
                         await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['NoneSet']}")
                     else:
-                        await ctx.reply(f"{ctx.message.author.display_name} defaults to: {default}")
+                        await ctx.reply(f"{ctx.message.author.display_name} {self.bot.language[language]['replies']['Default']['Answer']} {default}")
                 except Exception as e:
                     await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
                     logging.error(f"Default error: {str(e)}")
