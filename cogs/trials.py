@@ -118,18 +118,6 @@ class Trials(commands.Cog, name="Trials"):
             await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
             logging.error(f"Pin Error: {str(e)}")
 
-    @commands.command(name='trial',
-                      aliases=['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit', 'call', 'modify',
-                               'fill', 'close', 'runcount', 'remove', 'add'],
-                      hidden=True)
-    async def old_commands_alert(self, ctx: commands.Context):
-        user_language = Utilities.get_language(ctx.author)
-        now_modify = ['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit']
-        if ctx.invoked_with in now_modify:
-            new_command = 'modify'
-        else:
-            new_command = ctx.invoked_with
-        await ctx.reply(f"{self.bot.language[user_language]['replies']['MovedAnswer'] % new_command}")
 
     @commands.command(name="default")
     @permissions.language()
