@@ -2,6 +2,8 @@ from discord.ext import commands
 import random
 import logging
 
+from services import Utilities
+
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
     handlers=[
@@ -13,103 +15,40 @@ logging.basicConfig(
 last4z = []
 last4t = []
 
+#TODO: Change zone and trial to use the multi-language support by printing each after second language is added.
 
-# Singular function to get random zones
-def get_zone():
-    loop = True
-    while loop:
-        ran = random.randint(1, 12)
-        if ran not in last4z:
-            loop = False
-    zone = ""
-    match ran:
-        case 1:
-            zone = "EP - Bal Foyen, Blackrock, Deshaan, Eastmarch, The Rift, Shadowfen, Stonefalls"
-        case 2:
-            zone = "DC - Alik'r Desert, Bangkorai, Betnikh, Glenumbra, Rivenspire, Stormhaven, Stros M'Kai"
-        case 3:
-            zone = "AD - Auridon, Grahtwood, Greenshade, Khenarthi's Roost, Malabal Tor, Reaper's March"
-        case 4:
-            zone = "Craglorn"
-        case 5:
-            zone = "Coldharbour, Wrothgar"
-        case 6:
-            zone = "Daedric War Storyline - Vvardenfell, Clockwork City, Summerset, Artaeum"
-        case 7:
-            zone = "Season of the Dragon - North Elsweyr, Southern Elsweyr "
-        case 8:
-            zone = "Dark Heart of Skyrim - Western Skyrim, The Reach, Blackreach Caverns, Arkthzand Cavern"
-        case 9:
-            zone = "Gates Of Oblivion - Blackwood, Fargrave, Deadlands"
-        case 10:
-            zone = "Gold Coast, Hew's Bane, Murkmire"
-        case 11:
-            zone = "Legacy of The Bretons - High Isle and Amenos, Galen and Y'ffelon"
-        case 12:
-            zone = f"Shadow Over Morrowind - Telvanni Peninsula and Apocrypha"
-    if len(last4z) < 4:
-        last4z.append(ran)
-    else:
-        last4z.pop(0)
-        last4z.append(ran)
-    return zone
-
-
-def get_trial(cap):
+def get_trial_option(cap):
     loop = True
     while loop:
         ran = random.randint(1, cap)
         if ran not in last4t:
             loop = False
-    trial = ""
-    match ran:
-        case 1:
-            trial = "Hel Ra Citadel"
-        case 2:
-            trial = "Atherian Archive"
-        case 3:
-            trial = "Sanctum Ophidia"
-        case 4:
-            trial = "Maw of Lorkhaj"
-        case 5:
-            trial = "Halls of Fabrication"
-        case 6:
-            trial = "Asylum Sanctorium"
-        case 7:
-            trial = "Cloudrest"
-        case 8:
-            trial = "Sunspire"
-        case 9:
-            trial = "Kyne's Aegis"
-        case 10:
-            trial = "Rockgrove"
-        case 11:
-            trial = "Dreadsail Reef"
-        case 12:
-            trial = "Sanity's Edge"
     if len(last4t) < 4:
         last4t.append(ran)
     else:
         last4t.pop(0)
         last4t.append(ran)
-    return trial
+    return ran-1
 
 
-# Function to get a random event to do
-def get_event():
-    ran = random.randint(1, 4)
-    eve = ""
-    match ran:
-        case 1:
-            eve = "Shyshard Hunt starting: " + get_zone()
-        case 2:
-            eve = "World Boss Crawl starting: " + get_zone()
-        case 3:
-            eve = "Overland starting: " + get_zone()
-        case 4:
-            eve = f"Public Dungeon Crawl starting: {get_zone()}"
-    return eve
+# Singular function to get random zones
+def get_zone_option(cap):
+    loop = True
+    while loop:
+        ran = random.randint(1, cap)
+        if ran not in last4z:
+            loop = False
+    if len(last4z) < 4:
+        last4z.append(ran)
+    else:
+        last4z.pop(0)
+        last4z.append(ran)
+    return ran-1
 
+def get_event_option():
+    options = ['SSH', 'WBC', 'PDC', 'OL']
+    ran = random.randint(1, len(options))
+    return options[ran-1]
 
 class Events(commands.Cog, name="Events"):
     """For PVE/PVP Type Stuff"""
@@ -120,31 +59,65 @@ class Events(commands.Cog, name="Events"):
     @commands.command(name="event")
     async def event(self, ctx: commands.Context):
         """Gives you a random event and zone to do"""
-        await ctx.send(get_event())
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Zones']
+            ran =  get_zone_option(len(options))
+            event = get_event_option()
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Events'][event]} {options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Get Event Error: {str(e)}")
 
     @commands.command(name="zone")
     async def zone(self, ctx: commands.Context):
         """Gives you a random zone to do for your event"""
-        await ctx.send(get_zone())
+        """Gives you a random normal trial to do"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Zones']
+            ran =  get_zone_option(len(options))
+            await ctx.send(f"{options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Get Zone Error: {str(e)}")
 
     # Get a trial randomly chosen
     @commands.command(name="ntrial")
     async def ntrial(self, ctx: commands.Context):
         """Gives you a random normal trial to do"""
-        trial = get_trial(12)
-        await ctx.send("Normal " + trial)
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Trials']
+            ran =  get_trial_option(len(options))
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Events']['Norm']} {options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"NTrial Error: {str(e)}")
 
     @commands.command(name="vtrial")
     async def vtrial(self, ctx: commands.Context):
         """Gives you a random veteran trial to do"""
-        trial = get_trial(12)
-        await ctx.send("Veteran " + trial)
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Trials']
+            ran =  get_trial_option(len(options))
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Events']['Vet']} {options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"VTrial Error: {str(e)}")
 
     @commands.command(name="hmtrial")
     async def hmtrial(self, ctx: commands.Context):
         """Gives you a random veteran hm trial to do"""
-        trial = get_trial(5)
-        await ctx.send("Veteran " + trial + " HM")
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Trials']
+            ran =  get_trial_option(len(options))
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Events']['Vet']} {options[ran]} {self.bot.language[user_language]['replies']['Events']['HM']}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"HMTrial Error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
