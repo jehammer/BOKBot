@@ -38,7 +38,6 @@ class Trials(commands.Cog, name="Trials"):
         fetched = Librarian.get_roster_map(table_config=bot.config['Dynamo']["MapDB"], credentials=bot.config["AWS"])
         if fetched is not None:
             roster_map = fetched
-        logging.info(f"Loaded Roster Map")
             logging.info(f"Found and Loaded Roster Map")
         else:
             logging.info(f"No Roster Map Found")
