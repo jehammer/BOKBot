@@ -21,6 +21,8 @@ logging.basicConfig(
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 roster_map = {}
+rosters = {}
+
 
 class Trials(commands.Cog, name="Trials"):
     """Commands related to Trials And Rosters"""
@@ -32,10 +34,20 @@ class Trials(commands.Cog, name="Trials"):
     @commands.Cog.listener()
     async def on_load_on_ready(self, bot):
         global roster_map
+        global rosters
         fetched = Librarian.get_roster_map(table_config=bot.config['Dynamo']["MapDB"], credentials=bot.config["AWS"])
         if fetched is not None:
             roster_map = fetched
         logging.info(f"Loaded Roster Map")
+            logging.info(f"Found and Loaded Roster Map")
+        else:
+            logging.info(f"No Roster Map Found")
+        fetched = Librarian.get_all_rosters(table_config=bot.config['Dynamo']["RosterDB"], credentials=bot.config["AWS"])
+        if fetched is not None:
+            rosters = fetched
+            logging.info(f"Found and Loaded Rosters")
+        else:
+            logging.info(f"No Rosters Found")
 
     @commands.Cog.listener()
     async def on_reload_roster_map(self, new_roster_map):
