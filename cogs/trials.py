@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import random
 from discord.ext import commands
-from discord import app_commands, Interaction
+from discord import app_commands, Interaction, utils, TextStyle, Embed, Color, Member, Role, User
 import logging
 import asyncio
 
@@ -10,7 +10,7 @@ import decor as permissions
 from errors import *
 from modals import *
 from models import Roster, Count
-from services import Utilities, RosterExtended, Librarian
+from services import Utilities, RosterExtended, Librarian, EmbedFactory
 from ui import RosterSelector
 
 logging.basicConfig(
@@ -92,6 +92,51 @@ class Trials(commands.Cog, name="Trials"):
             await ctx.send(f"I was unable to print the limits")
             logging.error(f"Print Limits Error: {str(e)}")
 
+
+
+    @commands.command(name="status")
+    async def send_status_embed(self, ctx: commands.Context):
+        """Posts the current roster information"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            channel_id = ctx.message.channel.id
+            try:
+                roster_data = Librarian.get_roster(channel_id, table_config=self.bot.config['Dynamo']["RosterDB"],
+                                                   credentials=self.bot.config["AWS"])
+                if roster_data is None:
+                    await ctx.send(f"Sorry! This command only works in a roster channel!")
+                    return
+            except Exception as e:
+                await ctx.send("Unable to load raid.")
+                logging.error(f"Status Load Raid Error: {str(e)}")
+                return
+
+            guild = ctx.message.author.guild
+            ui_lang = self.bot.language[user_language]["ui"]
+            roles = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
+                                              roles_config=self.bot.config['raids']['ranks'],
+                                              creds_config=self.bot.config['AWS'])
+
+            if isinstance(roles[roster_data.role_limit], list):
+                # Need to work with 3 roles to check, dps | tank | healer order
+                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+                limiter_dps = utils.get(guild.roles, name=roles[roster_data.role_limit][0])
+                limiter_tank = utils.get(guild.roles, name=roles[roster_data.role_limit][1])
+                limiter_healer = utils.get(guild.roles, name=roles[roster_data.role_limit][2])
+
+                roles_req = f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
+            else:
+                limiter = utils.get(guild.roles, name=roles[roster_data.role_limit])
+                roles_req = f"{limiter.mention}"
+
+            embed = EmbedFactory.create_status(roster=roster_data, bot=self.bot, language=ui_lang['Status'],
+                                               roles_req=roles_req, guild=guild)
+
+            await ctx.send(embed=embed)
+        except Exception as e:
+            logging.error(f"Status check error: {str(e)}")
+            await ctx.send("Unable to send status.")
+            return
 
     @commands.command(name="pin", aliases=["unpin"])
     @permissions.has_raid_lead()

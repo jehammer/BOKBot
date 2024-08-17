@@ -37,3 +37,15 @@ Close:
     Label: "If Yes enter number of runs"
     Placeholder: "Defaults to 1"
 
+Status:
+  Author: "Raid Lead:"
+  Rank: "Rank(s) Required:"
+  DPS: "DPS"
+  Healers: "Healers"
+  Tanks: "Tanks"
+  Footer: "Remember to spay or neuter your support!\nAnd mention your sets!"
+  Backup_DPS: "Backup DPS"
+  Backup_Healers: "Backup Healers"
+  Backup_Tanks: "Backup Tanks"
+
+
