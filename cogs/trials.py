@@ -134,8 +134,8 @@ class Trials(commands.Cog, name="Trials"):
 
             await ctx.send(embed=embed)
         except Exception as e:
-            logging.error(f"Status check error: {str(e)}")
-            await ctx.send("Unable to send status.")
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Status Error: {str(e)}")
             return
 
     @commands.command(name="pin", aliases=["unpin"])
