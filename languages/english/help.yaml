@@ -37,3 +37,21 @@ Trials:
       modify:
         short: "Modify a Roster from a drop-down selection."
         long: None
+Events:
+  Everyone:
+    Text:
+      ntrial:
+        short: "Returns a random Normal Trial to run"
+        long: None
+      vtrial:
+        short: "Returns a random Veteran Trial to run"
+        long: None
+      hmtrial:
+        short: "Returns a random Veteran Trial to run in Hard Mode"
+        long: None
+      event:
+        short: "Returns a random event and zone to do the event in"
+        long: None
+      zone:
+        short: "Returns a random storyline zone to go to"
+        long: None
