@@ -22,6 +22,7 @@ class Utilities:
                 if lang == role.name:
                     return lang.lower()
         return "english"
+
     @staticmethod
     def suffix(d):
         try:
