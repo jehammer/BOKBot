@@ -76,6 +76,7 @@ class TrialModal(Modal):
             default=self.memo_val,
             placeholder=self.ui_language["TrialModify"]["Memo"]["Placeholder"],
             style=TextStyle.long,
+            max_length=200,
             required=True
         )
         self.add_item(self.leader_trial)
@@ -192,9 +193,9 @@ class TrialModal(Modal):
                         limiter = get(interaction.guild.roles, name=roles[role_limit])
                         roles_req += f"{limiter.mention}"
 
-                        embed = EmbedFactory.create_new_roster(trial=self.roster.trial, date=self.roster.date,
-                                                               roles_req=roles_req, leader=self.roster.leader, memo=self.roster.memo)
-                        await self.channel.send(embed=embed)
+                    embed = EmbedFactory.create_new_roster(trial=self.roster.trial, date=self.roster.date,
+                                                           roles_req=roles_req, leader=self.roster.leader, memo=self.roster.memo)
+                    await self.channel.send(embed=embed)
 
                     logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                     self.channel_id = self.channel.id
