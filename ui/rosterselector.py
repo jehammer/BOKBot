@@ -15,12 +15,14 @@ class RosterSelect(ui.Select):
         self.channel_mapper = {}
 
         options = []
-        if roster_map is None:
+        if roster_map is None or len(roster_map) == 0:
             options.append(SelectOption(label='N/A'))
         else:
             used = []
             for key in roster_map:
                 label = self.roster_map[key].strip()
+                if label == '':
+                    label = key
                 if label in used:
                     found = True
                     count = 1
@@ -47,8 +49,12 @@ class RosterSelect(ui.Select):
     async def callback(self, interaction: Interaction):
         selected = self.values[0]
 
+        if selected == 'N/A':
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoOptionsError'])}")
+            return
+
         if self.roster_map is None:
-            interaction.response.send_message(f"{self.language['SelectRoster']['NoMapError']}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoMapError'])}")
             return
 
         # Fetch Key from value for channel ID

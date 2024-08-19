@@ -3,7 +3,7 @@ from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color
 from discord.utils import get
 from aws import Dynamo
-from services import Utilities, RosterExtended, Librarian
+from services import Utilities, RosterExtended, Librarian, EmbedFactory
 import logging
 
 
@@ -17,7 +17,7 @@ logging.basicConfig(
 
 class TrialModal(Modal):
     def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel=None ):
-        self.language = bot.language[lang]["replies"]
+        self.language = bot.language[lang]['replies']
         self.ui_language = bot.language[lang]["ui"]
         self.config = bot.config
         self.leader_trial_val = None
@@ -31,6 +31,9 @@ class TrialModal(Modal):
         self.roster_map = roster_map
         self.bot = bot
         self.channel = None
+        self.change_name = True
+        self.sort_channels = True
+        self.roster = None
         if roster is not None:
             self.channel_id = channel
             self.new_roster = False
@@ -40,7 +43,7 @@ class TrialModal(Modal):
             self.limit_val = f"{roster.role_limit}"
             self.role_nums_val = f"{roster.dps_limit},{roster.healer_limit},{roster.tank_limit}"
             self.memo_val = f"{roster.memo}"
-        super().__init__(title=self.ui_language["TrialModify"]["Title"])
+        super().__init__(title=self.ui_language['TrialModify']['Title'])
         self.initialize()
 
     def initialize(self):
@@ -85,8 +88,9 @@ class TrialModal(Modal):
         # Split the values:
         try:
             roles = RosterExtended.get_limits(table_config=self.config['Dynamo']['ProgDB'],
-                                              roles_config=self.config['raids']['roles'],
+                                              roles_config=self.config['raids']['ranks'],
                                               creds_config=self.config['AWS'])
+
             role_limit = int(self.limit.value)
             if role_limit < 0 or role_limit > len(roles):
                 await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['BadLimit'] % len(roles))}")
@@ -125,6 +129,8 @@ class TrialModal(Modal):
             category = interaction.guild.get_channel(self.config["raids"]["category"])
 
             if self.new_roster is False:
+                old_date = self.roster.date
+                old_trial = self.roster.trial
                 # Update all values then update the DB
                 self.roster.trial = trial
                 self.roster.leader = leader
@@ -135,13 +141,24 @@ class TrialModal(Modal):
                 self.roster.memo = self.memo.value
                 self.roster.role_limit = role_limit
 
-                try:
-                    self.new_name = RosterExtended.generate_channel_name(formatted_date, trial, self.config['raids']['timezone'])
-                    self.channel = interaction.guild.get_channel(int(self.channel_id))
+                self.channel = interaction.guild.get_channel(int(self.channel_id))
 
-                    await self.channel.edit(name=self.new_name)
-                except ValueError:
+                try:
+                    if not RosterExtended.did_day_change(old_date, self.roster.date, self.config["raids"]["timezone"]):
+                        print("Day did not change")
+                        self.sort_channels = False
+
+                    if not RosterExtended.did_trial_change(old_trial, self.roster.trial):
+                        print("name did not change")
+                        self.change_name = False
+
+                    if self.sort_channels or self.change_name:
+                        self.new_name = RosterExtended.generate_channel_name(formatted_date, trial, self.config['raids']['timezone'])
+                        await self.channel.edit(name=self.new_name)
+
+                except ValueError as e:
                     await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['NewNameErr'])}")
+                    logging.info(f"New Name Value Error Existing Roster: {e}")
                     return
 
             elif self.new_roster is True:
@@ -151,8 +168,9 @@ class TrialModal(Modal):
                     logging.info(f"Creating new channel.")
                     try:
                         self.new_name = RosterExtended.generate_channel_name(self.roster.date, self.roster.trial, self.config["raids"]["timezone"])
-                    except ValueError:
+                    except ValueError as e:
                         await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['NewNameErr'])}")
+                        logging.info(f"New Name Value Error New Roster: {e}")
                         return
                     try:
                         self.channel = await category.create_text_channel(self.new_name)
@@ -163,7 +181,7 @@ class TrialModal(Modal):
                     roles_req = ""
                     if isinstance(roles[role_limit], list):
                         # Need to work with 3 roles to check, dps | tank | healer order
-                        # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
+
                         limiter_dps = get(interaction.guild.roles, name=roles[role_limit][0])
                         limiter_tank = get(interaction.guild.roles, name=roles[role_limit][1])
                         limiter_healer = get(interaction.guild.roles, name=roles[role_limit][2])
@@ -173,26 +191,11 @@ class TrialModal(Modal):
                     else:
                         limiter = get(interaction.guild.roles, name=roles[role_limit])
                         roles_req += f"{limiter.mention}"
-                    embed = Embed(
-                        title=f"{self.roster.trial} {self.roster.date}",
-                        description=f"Rank(s) Required: {roles_req}\n\nI hope people sign up for this.",
-                        color=Color.blue()
-                    )
-                    embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
-                    embed.set_author(name="Raid Lead: " + leader)
-                    embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
-                    embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
-                    embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
 
-                    if self.roster.memo != "None":
-                        embed_memo = Embed(
-                            title=" ",
-                            color=Color.dark_gray()
-                        )
-                        embed_memo.add_field(name=" ", value=self.roster.memo, inline=True)
-                        embed_memo.set_footer(text="This is very important!")
-                        await self.channel.send(embed=embed_memo)
-                    await self.channel.send(embed=embed)
+                        embed = EmbedFactory.create_new_roster(trial=self.roster.trial, date=self.roster.date,
+                                                               roles_req=roles_req, leader=self.roster.leader, memo=self.roster.memo)
+                        await self.channel.send(embed=embed)
+
                     logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                     self.channel_id = self.channel.id
                 except Exception as e:
@@ -213,34 +216,37 @@ class TrialModal(Modal):
                                  table_config=self.config['Dynamo']["RosterDB"], credentials=self.config["AWS"])
             logging.info(f"Saved Roster channelID: {str(self.channel.id)}")
 
-            # Save Roster Mapping
-            logging.info(f"Updating Roster Map")
-            self.roster_map[str(self.channel.id)] = self.new_name
-            Librarian.put_roster_map(data=self.roster_map,
-                                     table_config=self.config['Dynamo']["MapDB"], credentials=self.config["AWS"])
-            logging.info(f"Updated Roster Map")
+            if len(self.new_name) != 0:
+                # Save Roster Mapping
+                logging.info(f"Updating Roster Map")
+                self.roster_map[str(self.channel.id)] = self.new_name
+                Librarian.put_roster_map(data=self.roster_map,
+                                         table_config=self.config['Dynamo']["MapDB"], credentials=self.config["AWS"])
+                self.bot.dispatch("reload_roster_map", self.roster_map)
+                logging.info(f"Updated Roster Map")
 
         except Exception as e:
             await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['DBSaveError'])}")
             logging.error(f"Roster Save DynamoDB Error: {str(e)}")
             return
 
-        try:
-            # Put new channel into the right position
-            position = RosterExtended.get_channel_position(self.roster, self.config)
-            self.channel.position = position
-            await self.channel.edit(position=self.channel.position)
-        except Exception as e:
-            logging.error(f"Position Change Error: {str(e)}")
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantPosition'])}")
-            return
+        if self.sort_channels:
+            try:
+                # Put new channel into the right position
+                position = RosterExtended.get_channel_position(self.roster, self.config["raids"]["timezone"])
+                self.channel.position = position
+                await self.channel.edit(position=self.channel.position)
+            except Exception as e:
+                logging.error(f"Position Change Error: {str(e)}")
+                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantPosition'])}")
+                return
 
         if self.new_roster:
             await interaction.response.send_message(f"{self.language['TrialModify']['NewRosterCreated'] % self.new_name}")
         elif not self.new_roster:
             await interaction.response.send_message(f"{self.language['TrialModify']['ExistingUpdated'] % self.new_name}")
 
-        self.bot.dispatch("reload_roster_map", self.roster_map)
+        self.bot.dispatch("update_rosters_data",self.channel_id, self.roster)
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")

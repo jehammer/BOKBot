@@ -2,8 +2,8 @@ from services import Utilities
 from re import sub
 from aws import Dynamo
 import logging
-import datetime
-from pytz import timezone
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from models import Roster, Count
 
 logging.basicConfig(
@@ -12,6 +12,13 @@ logging.basicConfig(
         logging.FileHandler('log.log', mode='a'),
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+
+
+
+def generate_time_from_timestamp(timestamp, tz):
+    """Generates the time according to the bots default timezone in config from a timestamp"""
+    return datetime.utcfromtimestamp(int(sub('[^0-9]', '', timestamp))).replace(tzinfo=ZoneInfo(tz))
+
 
 class RosterExtended:
     """Class of static methods for trial operations."""
@@ -29,15 +36,13 @@ class RosterExtended:
                     fact_memo)
 
     @staticmethod
-    def get_channel_position(roster, config):
+    def get_channel_position(roster: Roster, tz):
         try:
             if roster.date == "ASAP":
                 weight = 50
             else:
-                new_time = datetime.datetime.utcfromtimestamp(int(sub('[^0-9]', '', roster.date)))
-                tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-                    tz=timezone(config["raids"]["timezone"]))
-                day = tz.timetuple().tm_yday
+                formatted_time = generate_time_from_timestamp(roster.date, tz)
+                day = formatted_time.timetuple().tm_yday
                 if day < 30:
                     day += 360
                 weight = day
@@ -47,30 +52,59 @@ class RosterExtended:
             raise Exception(e)
 
     @staticmethod
-    def generate_channel_name(date, raid_name, tz_info):
+    def generate_channel_name(date, raid_name, tz):
         """Function to generate channel names on changed information"""
         date = date.strip()
         if date.upper() == "ASAP":
             new_name = f"{raid_name}-ASAP"
+            if len(new_name) > 19:
+                max_char = len(new_name) - 19
+                new_name = f"{raid_name[:-max_char]}-ASAP"
             return new_name
-
-        new_time = datetime.datetime.utcfromtimestamp(int(sub('[^0-9]', '', date)))
-        tz = new_time.replace(tzinfo=datetime.timezone.utc).astimezone(
-            tz=timezone(tz_info))
-        weekday = tz.strftime("%a")
-        day = tz.day
-        new_name = f"{raid_name}-{weekday}-{str(day)}{Utilities.suffix(day)}"
+        formatted_time = generate_time_from_timestamp(date, tz)
+        weekday = formatted_time.strftime("%a")
+        day = formatted_time.day
+        suffix = Utilities.suffix(day)
+        new_name = f"{raid_name}-{weekday}-{day}{suffix}"
+        # Max channel name has to be 26 because modal max characters is 45, and 19 are already used
+        if len(new_name) > 19:
+            max_char = len(new_name) - 19
+            new_name = f"{raid_name[:-max_char]}-{weekday}-{day}{suffix}"
         return new_name
 
     @staticmethod
     def format_date(date):
         """Formats the timestamp date to the correct version"""
         date = date.strip()
-        if date.upper() == "ASAP":
+        if date.upper() == 'ASAP':
             return date.upper()
 
         formatted_date = f"<t:{sub('[^0-9]', '', date)}:f>"
         return formatted_date
+
+    @staticmethod
+    def did_day_change(original_date, new_date, tz):
+        """Returns Boolean Value if a passed in Timestamp has changed from the Day it was set at, but not the hour"""
+
+        # Check the ASAP dates
+        if original_date == 'ASAP' or new_date == 'ASAP':
+            if original_date == new_date:
+                return False
+            return True
+
+        og_timestamp = generate_time_from_timestamp(original_date.strip(), tz)
+        new_timestamp = generate_time_from_timestamp(new_date.strip(), tz)
+
+        if (og_timestamp.day != new_timestamp.day or
+                og_timestamp.month != new_timestamp.month or
+                og_timestamp.year != new_timestamp.year):
+            return True
+        return False
+
+    @staticmethod
+    def did_trial_change(old_trial, new_trial):
+        """Returns if a value changed that requires a roster name change not counting timestamp"""
+        return old_trial != new_trial
 
     @staticmethod
     def get_limits(table_config, roles_config, creds_config):

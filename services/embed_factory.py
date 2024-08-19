@@ -107,3 +107,28 @@ class EmbedFactory:
             embed.add_field(name=f"{language['Backup_Healers']} {healer_count}", value=names, inline=True)
 
         return embed
+
+    @staticmethod
+    def create_new_roster(trial, date, roles_req, leader, memo):
+        #Unlike with other commands, creating a new Roster is always in english
+
+        # Generate the description
+        desc = f"Rank(s) Required: {roles_req}"
+
+        if memo != "None":
+            desc += f"\n\n{memo}"
+
+        desc += f"\n\nI hope people sign up for this."
+
+        embed = Embed(
+            title=f"{trial} {date}",
+            description=desc,
+            color=Color.blue()
+        )
+        embed.set_footer(text="Remember to spay or neuter your support!\nAnd mention your sets!")
+        embed.set_author(name="Raid Lead: " + leader)
+        embed.add_field(name="Calling Healers!", value='To Heal Us!', inline=False)
+        embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
+        embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
+
+        return embed

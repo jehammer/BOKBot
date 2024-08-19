@@ -24,3 +24,4 @@
 '0024': "Close,IncompleteError"
 '0025': "DBConError"
 '0026': "Default,BadRoleError"
+'0027': "SelectRoster,NoOptionsError"
