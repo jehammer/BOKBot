@@ -112,7 +112,7 @@ class TrialModal(Modal):
         try:
             dps_limit = int(dps_limit.strip())
         except ValueError:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidDPS'] % dps_limit)}`")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidDPS'] % dps_limit)}")
             return
         try:
             healer_limit = int(healer_limit.strip())
