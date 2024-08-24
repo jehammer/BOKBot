@@ -247,7 +247,7 @@ class TrialModal(Modal):
         elif not self.new_roster:
             await interaction.response.send_message(f"{self.language['TrialModify']['ExistingUpdated'] % self.new_name}")
 
-        self.bot.dispatch("update_rosters_data",self.channel_id, self.roster)
+        self.bot.dispatch("update_rosters_data",self.channel_id, self.roster, "create_update")
         return
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
