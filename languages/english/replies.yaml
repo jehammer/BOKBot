@@ -60,29 +60,14 @@ Incomplete: "0006: I was unable to complete the command. Logs have more detail."
 Unknown: "0007: An unknown error has occurred with the command"
 
 TrialModify:
-  TrialLeader: >
-    "0008: Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
-    "You entered: %s"
+  TrialLeader: "0008: Invalid input: Leader and Trial should look like this: `Leader, Trial` \nYou entered: `%s`"
   BadLimit: "0009: Invalid input, the Role Limit must be between 0 and %s"
-  InvalidLimit: > 
-    "0010: Invalid input: Role Limit should be a number. Check with `!limits`\n" \
-    "You entered: %s"
-  BadLeaderTrial: >
-    "0011: Invalid input: Leader and Trial should look like this: `Leader, Trial`\n" \
-    "You entered: `%s`"
-  BadRoleNums: >
-    "0012: Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank " \
-    "and look like: `8,2,2` for example.\n" \
-    "You entered: `%s`"
-  InvalidDPS: >
-    "0013: Invalid input: DPS limit should be a number, ex: `8`\n" \
-    "You entered: `%s`
-  InvalidHealers: >
-    "0014: Invalid input: Healer limit should be a number, ex: `2`\n" \
-    "You entered: `%s`
-  InvalidTanks: >
-    "0015: Invalid input: Tank limit should be a number, ex: `2`\n" \
-    "You entered: `%s`
+  InvalidLimit: "0010: Invalid input: Role Limit should be a number. Check with `!limits` \nYou entered: `%s`"
+  BadLeaderTrial: "0011: Invalid input: Leader and Trial should look like this: `Leader, Trial` \nYou entered: `%s`"
+  BadRoleNums: "0012: Invalid input: The Role Numbers should be put in order of DPS, Healer, and Tank and look like: `8,2,2` for example. \nYou entered: `%s`"
+  InvalidDPS: "0013: Invalid input: DPS limit should be a number, ex: `8` \nYou entered: `%s`"
+  InvalidHealers: "0014: Invalid input: Healer limit should be a number, ex: `2` \nYou entered: `%s`"
+  InvalidTanks: "0015: Invalid input: Tank limit should be a number, ex: `2` \nYou entered: `%s`"
   NewNameErr: "0016: Invalid input, was the Date formatted correctly?"
   ExistingUpdated: "Roster %s and Channel updated."
   CantCreate: "0017: I was unable to create the channel."
