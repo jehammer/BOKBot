@@ -210,26 +210,9 @@ class TrialModal(Modal):
             logging.error(f"Trial/Modify Error During Channel Create and Embed: {str(e)}")
             await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Unreachable'])}")
             return
-        try:
-            # Save Roster
-            logging.info(f"Saving Roster channelID: {str(self.channel.id)}")
-            Librarian.put_roster(channel_id=self.channel_id, data=self.roster.get_roster_data(),
-                                 table_config=self.config['Dynamo']["RosterDB"], credentials=self.config["AWS"])
-            logging.info(f"Saved Roster channelID: {str(self.channel.id)}")
 
-            if len(self.new_name) != 0:
-                # Save Roster Mapping
-                logging.info(f"Updating Roster Map")
-                self.roster_map[str(self.channel.id)] = self.new_name
-                Librarian.put_roster_map(data=self.roster_map,
-                                         table_config=self.config['Dynamo']["MapDB"], credentials=self.config["AWS"])
-                self.bot.dispatch("reload_roster_map", self.roster_map)
-                logging.info(f"Updated Roster Map")
-
-        except Exception as e:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['DBSaveError'])}")
-            logging.error(f"Roster Save DynamoDB Error: {str(e)}")
-            return
+        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name, update_roster=self.roster, method="create_update",
+                          interaction=interaction, user_language=self.user_language)
 
         if self.sort_channels:
             try:
