@@ -18,7 +18,7 @@ class Roster:
         self.role_limit = role_limit
         self.memo = memo
 
-    def get_roster_data(self): # TODO: review this for DynamoDB
+    def get_roster_data(self):
         all_data = {
             "trial": self.trial,
             "date": self.date,
