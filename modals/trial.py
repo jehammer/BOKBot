@@ -16,9 +16,9 @@ logging.basicConfig(
 
 
 class TrialModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel=None ):
-        self.language = bot.language[lang]['replies']
-        self.ui_language = bot.language[lang]["ui"]
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel=None):
+        self.localization = bot.language[lang]['replies']
+        self.ui_localization = bot.language[lang]["ui"]
         self.config = bot.config
         self.leader_trial_val = None
         self.date_val = None
@@ -43,38 +43,38 @@ class TrialModal(Modal):
             self.limit_val = f"{roster.role_limit}"
             self.role_nums_val = f"{roster.dps_limit},{roster.healer_limit},{roster.tank_limit}"
             self.memo_val = f"{roster.memo}"
-        super().__init__(title=self.ui_language['TrialModify']['Title'])
+        super().__init__(title=self.ui_localization['TrialModify']['Title'])
         self.initialize()
 
     def initialize(self):
         # Add all the items here based on what is above
-        self.leader_trial =  TextInput(
-            label=self.ui_language["TrialModify"]["LeaderTrial"]["Label"],
-            placeholder=self.ui_language["TrialModify"]["LeaderTrial"]["Placeholder"],
+        self.leader_trial = TextInput(
+            label=self.ui_localization["TrialModify"]["LeaderTrial"]["Label"],
+            placeholder=self.ui_localization["TrialModify"]["LeaderTrial"]["Placeholder"],
             default = self.leader_trial_val,
             required=True
         )
         self.date = TextInput(
-            label=self.ui_language["TrialModify"]["Date"]["Label"],
-            placeholder=self.ui_language["TrialModify"]["Date"]["Placeholder"],
+            label=self.ui_localization["TrialModify"]["Date"]["Label"],
+            placeholder=self.ui_localization["TrialModify"]["Date"]["Placeholder"],
             default = self.date_val,
             required=True
         )
         self.limit = TextInput(
-            label=self.ui_language["TrialModify"]["Limit"]["Label"],
-            placeholder=self.ui_language["TrialModify"]["Limit"]["Placeholder"],
+            label=self.ui_localization["TrialModify"]["Limit"]["Label"],
+            placeholder=self.ui_localization["TrialModify"]["Limit"]["Placeholder"],
             default=self.limit_val,
             required=True,
         )
         self.role_nums = TextInput(
-            label=self.ui_language["TrialModify"]["RoleNums"]["Label"],
+            label=self.ui_localization["TrialModify"]["RoleNums"]["Label"],
             default=self.role_nums_val,
             required=True
         )
         self.memo = TextInput(
-            label=self.ui_language["TrialModify"]["Memo"]["Label"],
+            label=self.ui_localization["TrialModify"]["Memo"]["Label"],
             default=self.memo_val,
-            placeholder=self.ui_language["TrialModify"]["Memo"]["Placeholder"],
+            placeholder=self.ui_localization["TrialModify"]["Memo"]["Placeholder"],
             style=TextStyle.long,
             max_length=200,
             required=True
@@ -94,35 +94,36 @@ class TrialModal(Modal):
 
             role_limit = int(self.limit.value)
             if role_limit < 0 or role_limit > len(roles):
-                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['BadLimit'] % len(roles))}")
+                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['BadLimit'] % len(roles))}")
                 return
         except (NameError, ValueError) as e:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidLimit'] % self.limit.value)}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['InvalidLimit'] % self.limit.value)}")
             return
         try:
             leader, trial = self.leader_trial.value.split(",")
+            trial.lstrip()
         except (NameError, ValueError):
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['BadLeaderTrial'] % self.leader_trial.value)}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['BadLeaderTrial'] % self.leader_trial.value)}")
             return
         try:
             dps_limit, healer_limit, tank_limit = self.role_nums.value.split(",")
         except (NameError, ValueError):
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['BadRoleNums'] % self.role_nums.value)}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['BadRoleNums'] % self.role_nums.value)}")
             return
         try:
             dps_limit = int(dps_limit.strip())
         except ValueError:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidDPS'] % dps_limit)}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['InvalidDPS'] % dps_limit)}")
             return
         try:
             healer_limit = int(healer_limit.strip())
         except ValueError:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidHealers'] % healer_limit)}`")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['InvalidHealers'] % healer_limit)}`")
             return
         try:
             tank_limit = int(tank_limit.strip())
         except ValueError:
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['InvalidTanks'] % tank_limit)}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['InvalidTanks'] % tank_limit)}")
             return
 
         try:
@@ -158,7 +159,7 @@ class TrialModal(Modal):
                         await self.channel.edit(name=self.new_name)
 
                 except ValueError as e:
-                    await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['NewNameErr'])}")
+                    await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['NewNameErr'])}")
                     logging.info(f"New Name Value Error Existing Roster: {e}")
                     return
 
@@ -170,13 +171,13 @@ class TrialModal(Modal):
                     try:
                         self.new_name = RosterExtended.generate_channel_name(self.roster.date, self.roster.trial, self.config["raids"]["timezone"])
                     except ValueError as e:
-                        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['NewNameErr'])}")
+                        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['NewNameErr'])}")
                         logging.info(f"New Name Value Error New Roster: {e}")
                         return
                     try:
                         self.channel = await category.create_text_channel(self.new_name)
                     except Exception as e:
-                        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantCreate'])}")
+                        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantCreate'])}")
                         logging.error(f"Unable To Create New Roster Channel: {str(e)}")
                         return
                     roles_req = ""
@@ -200,15 +201,15 @@ class TrialModal(Modal):
                     logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                     self.channel_id = self.channel.id
                 except Exception as e:
-                    await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantEmbed'])}")
+                    await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantEmbed'])}")
                     logging.error(f"Raid Creation Channel And Embed Error: {str(e)}")
                     return
             else:
-                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Unreachable'])}")
+                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['Unreachable'])}")
                 return
         except Exception as e:
             logging.error(f"Trial/Modify Error During Channel Create and Embed: {str(e)}")
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Unreachable'])}")
+            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['Unreachable'])}")
             return
 
         self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name, update_roster=self.roster, method="create_update",
@@ -222,17 +223,11 @@ class TrialModal(Modal):
                 await self.channel.edit(position=self.channel.position)
             except Exception as e:
                 logging.error(f"Position Change Error: {str(e)}")
-                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['TrialModify']['CantPosition'])}")
+                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantPosition'])}")
                 return
-
-        if self.new_roster:
-            await interaction.response.send_message(f"{self.language['TrialModify']['NewRosterCreated'] % self.new_name}")
-        elif not self.new_roster:
-            await interaction.response.send_message(f"{self.language['TrialModify']['ExistingUpdated'] % self.new_name}")
-
-        self.bot.dispatch("update_rosters_data",self.channel_id, self.roster, "create_update")
         return
+
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
+        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.localization['Incomplete'])}")
         logging.error(f"Trial Creation/Modify Error: {str(error)}")
         return
