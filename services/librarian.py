@@ -2,9 +2,11 @@ from aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from models import Roster, Count
 
+
 def create_instance(table_config, credentials):
     return Dynamo(table=table_config['TableName'], endpoint=table_config['Endpoint'], region=table_config['Region'],
-                         access=credentials['Access'], secret=credentials['Secret'])
+                  access=credentials['Access'], secret=credentials['Secret'])
+
 
 def serialize(data):
     serializer = TypeSerializer()
@@ -16,6 +18,7 @@ def serialize(data):
         serialized = serializer.serialize(data)
     return serialized
 
+
 def deserialize(data):
     deserializer = TypeDeserializer()
     if isinstance(data, dict):
@@ -25,6 +28,7 @@ def deserialize(data):
     else:
         deserialized = deserializer.deserialize(data)
     return deserialized
+
 
 class Librarian:
     """
@@ -44,9 +48,11 @@ class Librarian:
             deserial = deserialize(i)
             data = deserial['data']
             channel_id = deserial['channelID']
-            all_rosters[int(channel_id)] = Roster(data['trial'], data['date'], data['leader'], data['dps'], data['healers'], data['tanks'],
-                      data['backup_dps'], data['backup_healers'], data['backup_tanks'], data['dps_limit'], data['healer_limit'],
-                      data['tank_limit'], data['role_limit'], data['memo'])
+            all_rosters[int(channel_id)] = Roster(data['trial'], data['date'], data['leader'], data['dps'],
+                                                  data['healers'], data['tanks'],
+                                                  data['backup_dps'], data['backup_healers'], data['backup_tanks'],
+                                                  data['dps_limit'], data['healer_limit'],
+                                                  data['tank_limit'], data['role_limit'], data['memo'])
         return all_rosters
 
     @staticmethod
@@ -57,7 +63,8 @@ class Librarian:
         if db_data is not None and 'Item' in db_data:
             data = deserialize(db_data['Item'])['data']
             return Roster(data['trial'], data['date'], data['leader'], data['dps'], data['healers'], data['tanks'],
-                          data['backup_dps'], data['backup_healers'], data['backup_tanks'], int(data['dps_limit']), int(data['healer_limit']),
+                          data['backup_dps'], data['backup_healers'], data['backup_tanks'], int(data['dps_limit']),
+                          int(data['healer_limit']),
                           int(data['tank_limit']), int(data['role_limit']), data['memo'])
         else:
             return None
@@ -74,7 +81,7 @@ class Librarian:
     @staticmethod
     def delete_roster(channel_id, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
-        query =  {'channelID': {'S': str(channel_id)}}
+        query = {'channelID': {'S': str(channel_id)}}
         db_instance.delete(query)
 
     @staticmethod
@@ -99,14 +106,6 @@ class Librarian:
         return
 
     @staticmethod
-    def get_rank(user_id, table_config, credentials):
-        pass
-
-    @staticmethod
-    def put_rank(user_id, data, table_config, credentials):
-        pass
-
-    @staticmethod
     def get_default(user_id, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
         query = {'userID': {'S': str(user_id)}}
@@ -115,7 +114,6 @@ class Librarian:
             return deserialize(db_data['Item'])['default']
         else:
             return None
-
 
     @staticmethod
     def put_default(user_id, default, table_config, credentials):
@@ -134,8 +132,8 @@ class Librarian:
         db_data = db_instance.get(query)
         if db_data is not None and 'Item' in db_data:
             data = deserialize(db_data['Item'])['data']
-            return Count(runs = data['count'], trial= data['lastTrial'], date= data['lastDate'], dps= data['dpsRuns'],
-                         tank= data['tankRuns'], healer= data['healerRuns'])
+            return Count(runs=data['count'], trial=data['lastTrial'], date=data['lastDate'], dps=data['dpsRuns'],
+                         tank=data['tankRuns'], healer=data['healerRuns'])
         else:
             return None
 
@@ -170,6 +168,13 @@ class Librarian:
         db_instance.put(item)
         return
 
+    @staticmethod
+    def get_rank(user_id, table_config, credentials):
+        pass
+
+    @staticmethod
+    def put_rank(user_id, data, table_config, credentials):
+        pass
 
     @staticmethod
     def get_role_channel(table_config, credentials):
