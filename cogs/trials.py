@@ -49,79 +49,120 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"No Rosters Found")
 
     @commands.Cog.listener()
-    async def on_update_rosters_data(self, channel_id, update_roster: Roster, method):
+    async def on_update_rosters_data(self, channel_id, channel_name, update_roster: Roster, method, interaction: Interaction, user_language):
         global rosters
+        global roster_map
+
+        update_roster_db = False
+        update_roster_map_db = False
+        is_new_roster = False
 
         channel_id = int(channel_id)
-
 
         if method == "create_update":
 
             if channel_id not in rosters.keys():
                 rosters[channel_id] = update_roster
                 logging.info(f"Loaded New Roster Into Memory")
+                roster_map[str(channel_id)] = channel_name
+                logging.info(f"Loaded New Roster Map")
+                update_roster_db = True
+                update_roster_map_db = True
+                is_new_roster = True
+
+            else:
+
+                # Account for role changes where there is overflow
+                if rosters[channel_id].dps_limit > update_roster.dps_limit:
+                    to_remove = rosters[channel_id].dps_limit - update_roster.dps_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(rosters[channel_id].dps.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del rosters[channel_id].dps[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        rosters[channel_id].backup_dps.update({user_id:msg})
+                    update_roster_db = True
+                    logging.info(f"Moved overflow DPS to backup")
+
+                if rosters[channel_id].healer_limit > update_roster.healer_limit:
+                    to_remove = rosters[channel_id].healer_limit - update_roster.healer_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(rosters[channel_id].healers.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del rosters[channel_id].healers[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        rosters[channel_id].backup_healers.update({user_id:msg})
+                    update_roster_db = True
+                    logging.info(f"Moved overflow Healers to backup")
+
+                if rosters[channel_id].tank_limit > update_roster.tank_limit:
+                    to_remove = rosters[channel_id].tank_limit - update_roster.tank_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(rosters[channel_id].tanks.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del rosters[channel_id].tanks[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        rosters[channel_id].backup_tanks.update({user_id:msg})
+                    update_roster_db = True
+                    logging.info(f"Moved overflow Tanks to backup")
+
+                rosters[channel_id].trial = update_roster.trial
+                rosters[channel_id].date = update_roster.date
+                rosters[channel_id].leader = update_roster.leader
+                rosters[channel_id].dps_limit = update_roster.dps_limit
+                rosters[channel_id].tank_limit = update_roster.tank_limit
+                rosters[channel_id].healer_limit = update_roster.healer_limit
+                rosters[channel_id].role_limit = update_roster.role_limit
+                rosters[channel_id].memo = update_roster.memo
+                logging.info(f"Memory Roster Values Updated")
+
+            if roster_map[str(channel_id)] != channel_name:
+                roster_map[str(channel_id)] = channel_name
+                update_roster_map_db = True
+
+        elif method == "close":
+            del roster_map[str(channel_id)]
+            logging.info(f"Loaded New Roster Map")
+            del rosters[str(channel_id)]
+
+        if update_roster_db:
+            try:
+                logging.info(f"Saving Roster to DB")
+                Librarian.put_roster(channel_id, rosters[channel_id].get_roster_data(),
+                                     table_config=self.bot.config['Dynamo']["RosterDB"], credentials=self.bot.config["AWS"])
+                logging.info(f"Saved Roster to DB")
+
+            except Exception as e:
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
+                logging.error(f"Roster Save DynamoDB Error: {str(e)}")
                 return
 
-            update_db = False
-            # Account for role changes where there is overflow
-            if rosters[channel_id].dps_limit > update_roster.dps_limit:
-                to_remove = rosters[channel_id].dps_limit - update_roster.dps_limit
-                # Get the last n items from the main roster
-                reversed_roster = list(rosters[channel_id].dps.items())[-to_remove:]
-                # Remove these items from the main roster
-                for user_id, _ in reversed_roster:
-                    del rosters[channel_id].dps[user_id]
-                # Insert these items at the beginning of the backup roster
-                for user_id, msg in reversed(reversed_roster):
-                    rosters[channel_id].backup_dps.update({user_id:msg})
-                update_db = True
-                logging.info(f"Moved overflow DPS to backup")
+        if update_roster_map_db:
+            try:
+                logging.info(f"Saving DB Roster Map")
+                Librarian.put_roster_map(data=roster_map,
+                                         table_config=self.bot.config['Dynamo']["MapDB"], credentials=self.bot.config["AWS"])
+                logging.info(f"Updated DB Roster Map")
+            except Exception as e:
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
+                logging.error(f"Roster Save DynamoDB Error: {str(e)}")
+                return
 
-            if rosters[channel_id].healer_limit > update_roster.healer_limit:
-                to_remove = rosters[channel_id].healer_limit - update_roster.healer_limit
-                # Get the last n items from the main roster
-                reversed_roster = list(rosters[channel_id].healers.items())[-to_remove:]
-                # Remove these items from the main roster
-                for user_id, _ in reversed_roster:
-                    del rosters[channel_id].healers[user_id]
-                # Insert these items at the beginning of the backup roster
-                for user_id, msg in reversed(reversed_roster):
-                    rosters[channel_id].backup_healers.update({user_id:msg})
-                update_db = True
-                logging.info(f"Moved overflow Healers to backup")
+        if is_new_roster:
+            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
+            return
 
-            if rosters[channel_id].tank_limit > update_roster.tank_limit:
-                to_remove = rosters[channel_id].tank_limit - update_roster.tank_limit
-                # Get the last n items from the main roster
-                reversed_roster = list(rosters[channel_id].tanks.items())[-to_remove:]
-                # Remove these items from the main roster
-                for user_id, _ in reversed_roster:
-                    del rosters[channel_id].tanks[user_id]
-                # Insert these items at the beginning of the backup roster
-                for user_id, msg in reversed(reversed_roster):
-                    rosters[channel_id].backup_tanks.update({user_id:msg})
-                update_db = True
-                logging.info(f"Moved overflow Tanks to backup")
-
-            rosters[channel_id].trial = update_roster.trial
-            rosters[channel_id].date = update_roster.date
-            rosters[channel_id].leader = update_roster.leader
-            rosters[channel_id].dps_limit = update_roster.dps_limit
-            rosters[channel_id].tank_limit = update_roster.tank_limit
-            rosters[channel_id].healer_limit = update_roster.healer_limit
-            rosters[channel_id].role_limit = update_roster.role_limit
-            rosters[channel_id].memo = update_roster.memo
-            logging.info(f"Memory Roster Values Updated")
-            if update_db:
-                Librarian.put_roster(channel_id, rosters[channel_id],
-                                     table_config=self.bot.config['Dynamo']["RosterDB"], credentials=self.bot.config["AWS"])
-
-
-    @commands.Cog.listener()
-    async def on_reload_roster_map(self, new_roster_map):
-        global roster_map
-        roster_map = new_roster_map
-        logging.info(f"Loaded New Roster Map")
+        elif method == "create_update" and not is_new_roster:
+            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
+            return
 
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
     @permissions.application_has_raid_lead()
