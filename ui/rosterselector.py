@@ -2,8 +2,9 @@ from discord import ui, SelectOption, Interaction
 from services import Utilities, Librarian
 from modals import *
 
+
 class RosterSelect(ui.Select):
-    def __init__(self, interaction: Interaction, cmd_called, bot, user_language, roster_map):
+    def __init__(self, interaction: Interaction, cmd_called, bot, user_language, roster_map, leader=None):
         self.channels = {}
         self.config = bot.config
         self.cmd_called = cmd_called
@@ -13,6 +14,7 @@ class RosterSelect(ui.Select):
         self.user_language = user_language
         self.bot = bot
         self.channel_mapper = {}
+        self.leader = leader
 
         options = []
         if roster_map is None or len(roster_map) == 0:
@@ -38,7 +40,7 @@ class RosterSelect(ui.Select):
                 self.channel_mapper[label] = key
                 used.append(label)
 
-        #discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
+        # discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
         super().__init__(placeholder=self.ui_language['SelectRoster']['Placeholder'],max_values=1,min_values=1,options=options)
 
     def update_options_timeout(self):
@@ -69,8 +71,9 @@ class RosterSelect(ui.Select):
         elif self.cmd_called == "call":
             await interaction.response.send_modal(CallModal(roster, interaction, self.bot, self.user_language, channel_id))
         elif self.cmd_called == "close":
-            await interaction.response.send_modal(CloseModal(roster, interaction, self.bot, self.user_language,
-                                                             self.roster_map, channel_id))
+            await interaction.response.send_modal(CloseModal(roster=roster, interaction=interaction, bot=self.bot,
+                                                             lang=self.user_language, roster_map=self.roster_map,
+                                                             channel_id=channel_id, leader=self.leader))
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(RemoveModal(roster, interaction, self.bot, self.user_language, channel_id))
         elif self.cmd_called == "run_count":
@@ -78,8 +81,9 @@ class RosterSelect(ui.Select):
         elif self.cmd_called == "fill":
             await interaction.response.send_modal(FillModal(roster, interaction, self.bot, self.user_language, channel_id))
 
+
 class RosterSelector(ui.View):
-    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, roster_map, *, timeout = 30):
+    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, roster_map, leader=None, *, timeout = 30):
         super().__init__(timeout=timeout)
         self.caller = caller
         self.bot = bot
@@ -89,6 +93,7 @@ class RosterSelector(ui.View):
         self.user_language = user_language
         self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language, roster_map)
         self.add_item(self.new_roster_select)
+        self.leader = leader
 
     async def interaction_check(self, interaction: Interaction):
         if interaction.user.id != self.caller.id:
