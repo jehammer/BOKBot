@@ -1,4 +1,3 @@
-import discord.role
 from discord import member
 import logging
 
@@ -10,6 +9,7 @@ logging.basicConfig(
         logging.FileHandler('log.log', mode='a'),
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+
 
 class Utilities:
     """Class to store one-off functions that don't otherwise have a home"""
