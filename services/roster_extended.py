@@ -1,4 +1,4 @@
-from services import Utilities
+from services import Utilities, Librarian
 from re import sub
 from aws import Dynamo
 import logging
@@ -130,6 +130,27 @@ class RosterExtended:
             for i in prog_roles:
                 list_roles.append(i)
         return list_roles
+
+    @staticmethod
+    def increase_individual_count(user_id, trial, role, date, runs, table_config, creds_config):
+        """Increases count of a user."""
+        try:
+            count: Count = Librarian.get_count(user_id=user_id, table_config=table_config, credentials=creds_config)
+
+            if role == "dps":
+                count.increase_data(runs=runs, trial=trial, date=date, dps=runs)
+            elif role == "tank":
+                count.increase_data(runs=runs, trial=trial, date=date, tank=runs)
+            elif role == "healer":
+                count.increase_data(runs=runs, trial=trial, date=date, dps=runs)
+            else:
+                raise Exception(f"Increase Individual Count Error: Unknown Role Input: {role}")
+
+            Librarian.put_count(user_id=user_id, count=count, table_config=table_config, credentials=creds_config)
+
+        except Exception as e:
+            logging.error(f"Increase Individual Run Count Error: {str(e)}")
+            raise e
 
     @staticmethod
     def increase_roster_count(roster: Roster, count, table_config, creds_config):
