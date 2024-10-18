@@ -3,7 +3,7 @@ from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color
 from discord.utils import get
 from aws import Dynamo
-from services import Utilities, RosterExtended, Librarian, EmbedFactory
+from services import Utilities, RosterExtended, EmbedFactory
 import logging
 
 
@@ -147,11 +147,9 @@ class TrialModal(Modal):
 
                 try:
                     if not RosterExtended.did_day_change(old_date, self.roster.date, self.config["raids"]["timezone"]):
-                        print("Day did not change")
                         self.sort_channels = False
 
                     if not RosterExtended.did_trial_change(old_trial, self.roster.trial):
-                        print("name did not change")
                         self.change_name = False
 
                     if self.sort_channels or self.change_name:
