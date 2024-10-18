@@ -123,3 +123,9 @@ class Roster:
             logging.info(f"Spots filled in roster id {str(num)}")
         except Exception as e:
             logging.error(f"Fill Spots error: {str(e)}")
+
+    def did_values_change(self, old_roster: Roster):
+        for key, value in vars(self).items():
+            if value != getattr(old_roster, key, None):
+                return True
+        return False
