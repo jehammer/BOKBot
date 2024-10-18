@@ -14,7 +14,6 @@ logging.basicConfig(
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
-
 def generate_time_from_timestamp(timestamp, tz):
     """Generates the time according to the bots default timezone in config from a timestamp"""
     return datetime.utcfromtimestamp(int(sub('[^0-9]', '', timestamp))).replace(tzinfo=ZoneInfo(tz))
@@ -25,15 +24,15 @@ class RosterExtended:
 
     @staticmethod
     def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-            fact_role_limit, fact_memo, config):
+                fact_role_limit, fact_memo, config):
         if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
             fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
             fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
             fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
         dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
         return Roster(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                    backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
-                    fact_memo)
+                      backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
+                      fact_memo)
 
     @staticmethod
     def get_channel_position(roster: Roster, tz):
