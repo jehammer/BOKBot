@@ -101,7 +101,7 @@ Status:
   NotRoster: "Sorry! This command only works in a roster channel!"
 
 DBConError: "0025: I was unable to access the Database."
-
+NoPermissions: "0028: You do not have permission to use this command. You require the role: %s"
 
 Events:
   Vet: "Veteran"

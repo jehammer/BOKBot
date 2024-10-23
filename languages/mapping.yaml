@@ -25,3 +25,4 @@
 '0025': "DBConError"
 '0026': "Default,BadRoleError"
 '0027': "SelectRoster,NoOptionsError"
+'0028': "NoPermissions"
