@@ -49,7 +49,8 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"No Rosters Found")
 
     @commands.Cog.listener()
-    async def on_update_rosters_data(self, channel_id, channel_name, update_roster: Roster, method, interaction: Interaction, user_language):
+    async def on_update_rosters_data(self, channel_id, channel_name, update_roster: Roster, method,
+                                     interaction: Interaction, user_language):
         global rosters
         global roster_map
 
@@ -72,6 +73,10 @@ class Trials(commands.Cog, name="Trials"):
 
             else:
 
+                # Validate if changes are needed or if someone clicked submit but nothing was changed.
+                if update_roster.did_values_change(rosters[channel_id]):
+                    update_roster_db = True
+
                 # Account for role changes where there is overflow
                 if rosters[channel_id].dps_limit > update_roster.dps_limit:
                     to_remove = rosters[channel_id].dps_limit - update_roster.dps_limit
@@ -82,8 +87,7 @@ class Trials(commands.Cog, name="Trials"):
                         del rosters[channel_id].dps[user_id]
                     # Insert these items at the beginning of the backup roster
                     for user_id, msg in reversed(reversed_roster):
-                        rosters[channel_id].backup_dps.update({user_id:msg})
-                    update_roster_db = True
+                        rosters[channel_id].backup_dps.update({user_id: msg})
                     logging.info(f"Moved overflow DPS to backup")
 
                 if rosters[channel_id].healer_limit > update_roster.healer_limit:
@@ -95,8 +99,7 @@ class Trials(commands.Cog, name="Trials"):
                         del rosters[channel_id].healers[user_id]
                     # Insert these items at the beginning of the backup roster
                     for user_id, msg in reversed(reversed_roster):
-                        rosters[channel_id].backup_healers.update({user_id:msg})
-                    update_roster_db = True
+                        rosters[channel_id].backup_healers.update({user_id: msg})
                     logging.info(f"Moved overflow Healers to backup")
 
                 if rosters[channel_id].tank_limit > update_roster.tank_limit:
@@ -108,8 +111,7 @@ class Trials(commands.Cog, name="Trials"):
                         del rosters[channel_id].tanks[user_id]
                     # Insert these items at the beginning of the backup roster
                     for user_id, msg in reversed(reversed_roster):
-                        rosters[channel_id].backup_tanks.update({user_id:msg})
-                    update_roster_db = True
+                        rosters[channel_id].backup_tanks.update({user_id: msg})
                     logging.info(f"Moved overflow Tanks to backup")
 
                 rosters[channel_id].trial = update_roster.trial
@@ -128,40 +130,48 @@ class Trials(commands.Cog, name="Trials"):
 
         elif method == "close":
             del roster_map[str(channel_id)]
-            logging.info(f"Loaded New Roster Map")
             del rosters[str(channel_id)]
+            update_roster_map_db = True
+            logging.info(f"Roster removed from Map and Roster List.")
 
-        if update_roster_db:
-            try:
-                logging.info(f"Saving Roster to DB")
-                Librarian.put_roster(channel_id, rosters[channel_id].get_roster_data(),
-                                     table_config=self.bot.config['Dynamo']["RosterDB"], credentials=self.bot.config["AWS"])
-                logging.info(f"Saved Roster to DB")
+        try:
+            if update_roster_db:
+                try:
+                    logging.info(f"Saving Roster to DB")
+                    Librarian.put_roster(channel_id, rosters[channel_id].get_roster_data(),
+                                         table_config=self.bot.config['Dynamo']["RosterDB"],
+                                         credentials=self.bot.config["AWS"])
+                    logging.info(f"Saved Roster to DB")
 
-            except Exception as e:
-                await interaction.response.send_message(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
-                logging.error(f"Roster Save DynamoDB Error: {str(e)}")
-                return
+                except Exception as e:
+                    await interaction.response.send_message(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
+                    logging.error(f"Roster Save DynamoDB Error: {str(e)}")
 
-        if update_roster_map_db:
-            try:
-                logging.info(f"Saving DB Roster Map")
-                Librarian.put_roster_map(data=roster_map,
-                                         table_config=self.bot.config['Dynamo']["MapDB"], credentials=self.bot.config["AWS"])
-                logging.info(f"Updated DB Roster Map")
-            except Exception as e:
-                await interaction.response.send_message(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
-                logging.error(f"Roster Save DynamoDB Error: {str(e)}")
-                return
+            if update_roster_map_db:
+                try:
+                    logging.info(f"Saving DB Roster Map")
+                    Librarian.put_roster_map(data=roster_map,
+                                             table_config=self.bot.config['Dynamo']["MapDB"],
+                                             credentials=self.bot.config["AWS"])
+                    logging.info(f"Updated DB Roster Map")
+                except Exception as e:
+                    await interaction.response.send_message(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
+                    logging.error(f"Roster Map Save DynamoDB Error: {str(e)}")
+        except Exception as e:
+            logging.info(f"Error on Saving Roster to DB: {str(e)}")
+            alert_channel = self.bot.get_guild(self.bot.config['guild']).get_channel(self.bot.config['private'])
+            await alert_channel.send(f"Saving Roster or Map error encountered: {str(e)}")
 
         if is_new_roster:
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
             return
 
         elif method == "create_update" and not is_new_roster:
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
             return
 
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
