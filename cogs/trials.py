@@ -41,7 +41,8 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"Found and Loaded Roster Map")
         else:
             logging.info(f"No Roster Map Found")
-        fetched = Librarian.get_all_rosters(table_config=bot.config['Dynamo']["RosterDB"], credentials=bot.config["AWS"])
+        fetched = Librarian.get_all_rosters(table_config=bot.config['Dynamo']["RosterDB"],
+                                            credentials=bot.config["AWS"])
         if fetched is not None:
             rosters = fetched
             logging.info(f"Found and Loaded Rosters")
@@ -184,17 +185,23 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.application_has_raid_lead()
     async def modify_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
-                                                view=RosterSelector(interaction, self.bot, interaction.user,"modify",
-                                                                    user_language, roster_map))
+        await interaction.response.send_message(
+            f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+            view=RosterSelector(interaction, self.bot, interaction.user, "modify",
+                                user_language, roster_map, leader=None))
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
     @permissions.application_has_raid_lead()
     async def close_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
-                                                view=RosterSelector(interaction, self.bot, interaction.user,"close",
-                                                                    user_language, roster_map))
+
+        if self.bot.config["raids"]["lead"] not in leader.roles:
+            leader = None
+
+        await interaction.response.send_message(
+            f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+            view=RosterSelector(interaction, self.bot, interaction.user, "close",
+                                user_language, roster_map, leader))
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
@@ -308,27 +315,34 @@ class Trials(commands.Cog, name="Trials"):
                 role = "healer"
             if role == "dps" or role == "healer" or role == "tank":
                 try:
-                    Librarian.put_default(user_id=user_id, default=role,  table_config=self.bot.config['Dynamo']['DefaultDB'],
+                    Librarian.put_default(user_id=user_id, default=role,
+                                          table_config=self.bot.config['Dynamo']['DefaultDB'],
                                           credentials=self.bot.config['AWS'])
-                    await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['Set'] % role}")
+                    await ctx.reply(
+                        f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['Set'] % role}")
                 except Exception as e:
-                    await ctx.reply(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+                    await ctx.reply(
+                        f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
                     logging.error(f"Default error: {str(e)}")
                     return
             elif role == "check":
                 try:
                     default = Librarian.get_default(user_id, table_config=self.bot.config['Dynamo']['DefaultDB'],
-                                          credentials=self.bot.config['AWS'])
+                                                    credentials=self.bot.config['AWS'])
                     if default is None:
-                        await ctx.reply(f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['NoneSet']}")
+                        await ctx.reply(
+                            f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['NoneSet']}")
                     else:
-                        await ctx.reply(f"{ctx.message.author.display_name} {self.bot.language[language]['replies']['Default']['Answer']} {default}")
+                        await ctx.reply(
+                            f"{ctx.message.author.display_name} {self.bot.language[language]['replies']['Default']['Answer']} {default}")
                 except Exception as e:
-                    await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
+                    await ctx.send(
+                        f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
                     logging.error(f"Default error: {str(e)}")
                     return
             else:
-                await ctx.reply(f"{Utilities.format_error(language, self.bot.language[language]['replies']['Default']['BadRoleError'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(language, self.bot.language[language]['replies']['Default']['BadRoleError'])}")
         except Exception as e:
             await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
             logging.error(f"Default Role Set Error: {str(e)}")
