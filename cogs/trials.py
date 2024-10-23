@@ -232,7 +232,7 @@ class Trials(commands.Cog, name="Trials"):
 
 
 
-    @commands.command(name="status")
+    @commands.command(name='status')
     async def send_status_embed(self, ctx: commands.Context):
         """Posts the current roster information"""
         user_language = Utilities.get_language(ctx.author)
