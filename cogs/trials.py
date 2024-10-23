@@ -301,7 +301,6 @@ class Trials(commands.Cog, name="Trials"):
             await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
             logging.error(f"Pin Error: {str(e)}")
 
-
     @commands.command(name="default")
     @permissions.language()
     async def set_default_role(self, ctx: commands.Context, role="check", **kwargs):
