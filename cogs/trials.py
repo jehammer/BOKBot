@@ -191,6 +191,7 @@ class Trials(commands.Cog, name="Trials"):
                                 user_language, roster_map, leader=None))
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
+    @app_commands.describe(leader="Raid Leader of the Roster being closed")
     @permissions.application_has_raid_lead()
     async def close_roster(self, interaction: Interaction, leader: Member) -> None:
         user_language = Utilities.get_language(interaction.user)
