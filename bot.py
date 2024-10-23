@@ -13,12 +13,12 @@ import re
 from errors import *
 from services import Utilities
 
-
 intents = Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix='!', case_insensitive=True, intents=intents)
 bot.remove_command('help')  # the help.py cog will replace the default command
 log_name = 'log.log'
+
 
 # Value Loaders
 def load_configurations():
@@ -27,7 +27,7 @@ def load_configurations():
     if not os.path.exists(directory):
         logging.error(f"The directory {directory} does not exist.")
         return
-    for filename in os.listdir(directory): # Go through all the config files but ignore templates
+    for filename in os.listdir(directory):  # Go through all the config files but ignore templates
         if filename.endswith('.yaml') or filename.endswith('.yml'):
             if not filename.lower().startswith('template'):
                 file_path = os.path.join(directory, filename)
@@ -43,6 +43,7 @@ def load_configurations():
                         logging.warning(f"Load Configuration Warning: {filename} is improperly formatted "
                                         f"and doesn't make a dictionary")
     return full_config
+
 
 def load_languages():
     """Function to load all the Language options for BOKBot"""
@@ -62,6 +63,7 @@ def load_languages():
                     languages[language][section] = data
     return languages
 
+
 async def load_cogs():
     """Load cogs from the cogs folder"""
     for filename in os.listdir('cogs'):
@@ -73,6 +75,7 @@ async def load_cogs():
             except Exception as e:
                 logging.info(f"Failed to load {filename}")
                 logging.error(f"cog load error: {str(e)}")
+
 
 async def startup_logging():
     """Checks if there are logs from a bad shutdown"""
@@ -107,6 +110,7 @@ async def startup_logging():
     except Exception as e:
         logging.error(f"I was unable to set up the new logging information: {str(e)}")
 
+
 # Events and Errors
 @bot.event
 async def on_command_error(ctx, error):
@@ -130,6 +134,7 @@ async def on_command_error(ctx, error):
         await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")
 
+
 async def on_tree_error(interaction: Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.MissingPermissions):
         return await interaction.response.send_message(f"You're missing permissions to use that")
@@ -138,11 +143,15 @@ async def on_tree_error(interaction: Interaction, error: app_commands.AppCommand
     else:
         await interaction.response.send_message(f"Some weird error is being thrown. Not sure what it is")
         logging.error(f"{str(error)}")
+
+
 bot.tree.on_error = on_tree_error
+
 
 async def set_playing():
     await bot.change_presence(activity=Game(name=bot.config['presence_message']))
     logging.info(f"Status has been set")
+
 
 @bot.event
 async def on_ready():
@@ -152,6 +161,7 @@ async def on_ready():
     logging.info('Sending out load_on_ready Event')
     bot.dispatch('load_on_ready', bot)
 
+
 async def main():
     async with bot:
         await startup_logging()
@@ -159,5 +169,6 @@ async def main():
         bot.language = load_languages()
         await load_cogs()
         await bot.start(bot.config['bot']['token'])
+
 
 asyncio.run(main())
