@@ -192,7 +192,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
     @permissions.application_has_raid_lead()
-    async def close_roster(self, interaction: Interaction) -> None:
+    async def close_roster(self, interaction: Interaction, leader: Member) -> None:
         user_language = Utilities.get_language(interaction.user)
 
         if self.bot.config["raids"]["lead"] not in leader.roles:
