@@ -1,6 +1,7 @@
 raids:
   category: # Category ID where you want new rosters created under
   lead: @everyone # Lead config is for the roles that are allowed to make new rosters.
+  trainee: @everyone # For Trainee RLs, if you do not do this then make it the same as lead.
   timezone: US/Central # NOTE: IANA
   roles: # Note: THE ROLES ARE CASE SENSITIVE
     base: @everyone # the base rank to join in on raids. If everyone use "@everyone"
