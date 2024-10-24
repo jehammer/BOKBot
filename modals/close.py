@@ -1,6 +1,6 @@
-from discord import Interaction, TextStyle
+from discord import Interaction, TextStyle, Member
 from discord.ui import Modal, TextInput
-from models import Roster
+from models import Roster, LeaderCheck
 from services import Utilities, RosterExtended, Librarian
 import logging
 
@@ -12,9 +12,11 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
+
 class CloseModal(Modal):
-    def __init__(self,  roster: Roster, interaction: Interaction, bot, lang, roster_map, channel_id=None):
-        self.language = bot.language[lang]["replies"]
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, leader: Member,
+                 channel_id=None):
+        self.localization = bot.language[lang]["replies"]
         self.ui_language = bot.language[lang]["ui"]
         self.bot = bot
         self.user_language = lang
@@ -23,12 +25,14 @@ class CloseModal(Modal):
         self.roster = roster
         self.roster_map = roster_map
         self.channel = interaction.guild.get_channel(int(self.channel_id))
+        self.leader = leader
         if self.channel is None:
             self.name = self.channel_id
         else:
             self.name = self.channel.name
         super().__init__(title=f"{self.ui_language['Close']['Title']}")
         self.initialize()
+
     def initialize(self):
         # Add all the items here based on what is above
         self.confirm = TextInput(
@@ -58,10 +62,12 @@ class CloseModal(Modal):
         confirm_value = self.confirm.value.strip().lower()
         runs_inc = self.runs.value.strip().lower()
         if confirm_value != "n" and confirm_value != "y" and runs_inc != "n" and runs_inc != "y":
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Close']['BadConfirmError'])}")
+            await interaction.response.send_message(
+                f"{Utilities.format_error(self.user_language, self.localization['Close']['BadConfirmError'])}")
             return
         if confirm_value != "y":
-            await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Close']['CloseWithoutClose'])}")
+            await interaction.response.send_message(
+                f"{Utilities.format_error(self.user_language, self.localization['Close']['CloseWithoutClose'])}")
             return
         runs_increased = False
         if runs_inc == "y":
@@ -69,35 +75,46 @@ class CloseModal(Modal):
                 inc_val = int(self.runscount.value)
                 if inc_val < 1:
                     inc_val = 1
-                RosterExtended.increase_roster_count(self.roster, inc_val, table_config=self.bot.config['Dynamo']["MapDB"],
+                RosterExtended.increase_roster_count(self.roster, inc_val,
+                                                     table_config=self.bot.config['Dynamo']["CountDB"],
                                                      creds_config=self.bot.config["AWS"])
                 runs_increased = True
             except ValueError:
-                await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Close']['NotNumberError'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(self.user_language, self.localization['Close']['NotNumberError'])}")
                 return
 
         logging.info(f"Deleting Roster {self.name}")
-        Librarian.delete_roster(self.channel_id, table_config=self.bot.config['Dynamo']["RosterDB"], credentials=self.bot.config["AWS"])
+        Librarian.delete_roster(self.channel_id, table_config=self.config['Dynamo']['RosterDB'],
+                                credentials=self.config['AWS'])
         logging.info(f"Roster Deleted")
+        rl_role_names = [self.config['raids']['lead'], self.config['raids']['trainee']]
 
-        # Save Roster Mapping
-        logging.info(f"Updating Roster Map")
-        del self.roster_map[str(self.channel_id)]
-        Librarian.put_roster_map(data=self.roster_map,
-                                 table_config=self.config['Dynamo']["MapDB"], credentials=self.config["AWS"])
-        logging.info(f"Updated Roster Map")
+        if any(role.name in rl_role_names for role in self.leader.roles) and runs_inc == 'y':
+            logging.info(f"Leader is a Raid Lead, recording last run")
+            check: LeaderCheck = Librarian.get_raid_lead_check(user_id=self.leader.id,
+                                                               table_config=self.config['Dynamo']['TrackerDB'],
+                                                               credentials=self.config['AWS'])
+            check.update(self.roster, int(self.runscount.value))
+            Librarian.put_raid_lead_check(user_id=self.leader.id, data=check.get_data(),
+                                          table_config=self.config['Dynamo']['TrackerDB'],
+                                          credentials=self.config['AWS'])
+            logging.info(f"Leader Last Run Check updated.")
+
+        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name,
+                          update_roster=self.roster, method="close", interaction=interaction,
+                          user_language=self.user_language)
 
         if self.channel is not None:
             await self.channel.delete()
         if runs_increased:
-            await interaction.response.send_message(f"{self.language['Close']['Increase'] % self.name}")
+            await interaction.response.send_message(f"{self.localization['Close']['Increase'] % self.name}")
         else:
-            await interaction.response.send_message(f"{self.language['Close']['NoIncrease'] % self.name}")
-
-        self.bot.dispatch("reload_roster_map", self.roster_map)
+            await interaction.response.send_message(f"{self.localization['Close']['NoIncrease'] % self.name}")
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
+        await interaction.response.send_message(
+            f"{Utilities.format_error(self.user_language, self.localization['Incomplete'])}")
         logging.error(f"Roster Close Error: {str(error)}")
         return
