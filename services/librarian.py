@@ -185,7 +185,7 @@ class Librarian:
         pass
 
     @staticmethod
-    def put_raid_lead_check(user_id, timestamp, raid, limit, table_config, credentials):
+    def put_raid_lead_check(user_id, data, table_config, credentials):
         pass
 
     @staticmethod
