@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from models import Roster, Count
+from discord import Member
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -185,4 +186,22 @@ class RosterExtended:
         except Exception as e:
             logging.error(f"Increase Roster Run Count Error: {str(e)}")
             raise e
+
+    @staticmethod
+    def validate_join_roster(roster_limit, limits, user: Member, roster_role):
+        try:
+            role_to_limit_num = {
+                'dps': 0,
+                'tank': 1,
+                'healer': 2
+            }
+            allowed = False
+            limit = limits[roster_limit]
+            if isinstance(limit, list):
+                limit = limit[role_to_limit_num[roster_role]]
+            if any(limit == role.name for role in user.roles):
+                allowed = True
+            return allowed
+        except Exception as e:
+            logging.error(f"Add User To Roster Validation Error: {str(e)}")
 
