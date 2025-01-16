@@ -22,6 +22,7 @@ logging.basicConfig(
 
 roster_map = {}
 rosters = {}
+limits = []
 
 
 class Trials(commands.Cog, name="Trials"):
@@ -35,6 +36,7 @@ class Trials(commands.Cog, name="Trials"):
     async def on_load_on_ready(self, bot):
         global roster_map
         global rosters
+        global limits
         fetched = Librarian.get_roster_map(table_config=bot.config['Dynamo']["MapDB"], credentials=bot.config["AWS"])
         if fetched is not None:
             roster_map = fetched
@@ -48,6 +50,14 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"Found and Loaded Rosters")
         else:
             logging.info(f"No Rosters Found")
+        fetched = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
+                                            roles_config=self.bot.config['raids']['ranks'],
+                                            creds_config=self.bot.config['AWS'])
+        if fetched is not None:
+            limits = fetched
+            logging.info(f"Found and Loaded Limits")
+        else:
+            logging.info(f"No Limits Found")
 
     @commands.Cog.listener()
     async def on_update_rosters_data(self, channel_id, channel_name, update_roster: Roster, method,
@@ -175,6 +185,13 @@ class Trials(commands.Cog, name="Trials"):
                 f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
             return
 
+    @commands.Cog.listener()
+    async def on_update_limits_data(self):
+        global limits
+        limits = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
+                                           roles_config=self.bot.config['raids']['ranks'],
+                                           creds_config=self.bot.config['AWS'])
+
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
     @permissions.application_has_raid_lead()
     async def create_roster(self, interaction: Interaction) -> None:
@@ -214,24 +231,32 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.has_raid_lead()
     async def print_limits(self, ctx: commands.Context):
         """For Raid Leads: Lists Values of Limits for Rosters"""
+        user_language = Utilities.get_language(ctx.author)
         try:
-            user_language = Utilities.get_language(ctx.author)
-            limits = f"{self.bot.language[user_language]['replies']['Limits']}\n"
+            all_limits = f"{self.bot.language[user_language]['replies']['Limits']}\n"
 
-            roles = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
-                                              roles_config=self.bot.config['raids']['ranks'],
-                                              creds_config=self.bot.config['AWS'])
-            for i in range(len(roles)):
-                if len(roles[i]) == 3:
-                    limits += f"{i}: {roles[i][0]} | {roles[i][1]} | {roles[i][2]}\n"
+            for i in range(len(limits)):
+                if len(limits[i]) == 3:
+                    all_limits += f"{i}: {limits[i][0]} | {limits[i][1]} | {limits[i][2]}\n"
                 else:
                     limits += f"{i}: {roles[i]}\n"
             await ctx.send(limits)
+            await ctx.send(all_limits)
         except Exception as e:
-            await ctx.send(f"I was unable to print the limits")
+            await ctx.send(f"{self.bot.language[user_language]['Incomplete']}")
             logging.error(f"Print Limits Error: {str(e)}")
 
+            # TODO:
+            #   PUT ROSTER JOIN CODE HERE TO ADD USER INTO THE ROSTER
 
+                update_db(channel_id, raid) # TODO: UPDATE TO NEW LIBRARIAN PROCESS AND NEW MULTI-LINGUAL SUPPORT
+            except Exception as e:
+                return
+            await ctx.reply(f"{result}")
+        except (UnknownError, NoDefaultError, NoRoleError) as e:
+            raise e
+        except Exception as e:
+            await ctx.send(f"I was was unable to sign you up due to processing errors.")
 
     @commands.command(name='status')
     async def send_status_embed(self, ctx: commands.Context):
