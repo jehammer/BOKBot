@@ -196,9 +196,13 @@ class RosterExtended:
                 'healer': 2
             }
             limit = limits[roster_req]
+
+            # If someone has the Raid Leads role, they can bypass requirements.
             if isinstance(limit, list):
                 limit = limit[role_to_limit_num[roster_role]]
             if any(limit == role.name for role in user.roles):
+                return True
+            elif any('Raid Leads' == role.name for role in user.roles):
                 return True
             return false
         except Exception as e:
