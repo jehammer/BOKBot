@@ -10,13 +10,16 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
+
 class ProgModal(Modal):
-    def __init__(self, interaction: Interaction, config, language):
+    def __init__(self, bot, interaction: Interaction, config, language):
         self.config = config
+        self.bot = bot
         self.language = language['replies']
         self.ui_language = language['ui']
         super().__init__(title=self.ui_language['Prog']['Title'])
         self.initialize()
+
     def initialize(self):
         roles = Librarian.get_progs(self.config['Dynamo']['ProgDB'], self.config['AWS'])
         default_vals = ""
@@ -24,9 +27,9 @@ class ProgModal(Modal):
             for i in roles:
                 default_vals += f"{str(i)}\n"
         self.roles_input = TextInput(
-            label= self.ui_language['Prog']['RolesInput']['Label'],
-            placeholder= self.ui_language['Prog']['RolesInput']['Placeholder'],
-            default = default_vals,
+            label=self.ui_language['Prog']['RolesInput']['Label'],
+            placeholder=self.ui_language['Prog']['RolesInput']['Placeholder'],
+            default=default_vals,
             style=TextStyle.long,
             required=True
         )
@@ -37,9 +40,12 @@ class ProgModal(Modal):
         logging.info(f"Updating Prog Role Data")
         Librarian.put_progs(role_list, self.config['Dynamo']['ProgDB'], self.config['AWS'])
         logging.info(f"Updated Prog Role Data")
+        self.bot.dispatch("update_limits_data")
         await interaction.response.send_message(self.language['Prog']['Updated'])
         return
+
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         logging.error(f"Prog Roles Update Error: {str(error)}")
-        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
+        await interaction.response.send_message(
+            f"{Utilities.format_error(self.user_language, self.language['Incomplete'])}")
         return
