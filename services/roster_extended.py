@@ -188,20 +188,19 @@ class RosterExtended:
             raise e
 
     @staticmethod
-    def validate_join_roster(roster_limit, limits, user: Member, roster_role):
+    def validate_join_roster(roster_req, limits, user: Member, roster_role):
         try:
             role_to_limit_num = {
                 'dps': 0,
                 'tank': 1,
                 'healer': 2
             }
-            allowed = False
-            limit = limits[roster_limit]
+            limit = limits[roster_req]
             if isinstance(limit, list):
                 limit = limit[role_to_limit_num[roster_role]]
             if any(limit == role.name for role in user.roles):
-                allowed = True
-            return allowed
+                return True
+            return false
         except Exception as e:
             logging.error(f"Add User To Roster Validation Error: {str(e)}")
 
