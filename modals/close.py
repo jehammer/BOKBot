@@ -1,9 +1,8 @@
 from discord import Interaction, TextStyle, Member
 from discord.ui import Modal, TextInput
-from models import Roster, LeaderCheck
+from models import Roster
 from services import Utilities, RosterExtended, Librarian
 import logging
-
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -14,8 +13,7 @@ logging.basicConfig(
 
 
 class CloseModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, leader: Member,
-                 channel_id=None):
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel_id=None):
         self.localization = bot.language[lang]["replies"]
         self.ui_language = bot.language[lang]["ui"]
         self.bot = bot
@@ -25,7 +23,6 @@ class CloseModal(Modal):
         self.roster = roster
         self.roster_map = roster_map
         self.channel = interaction.guild.get_channel(int(self.channel_id))
-        self.leader = leader
         if self.channel is None:
             self.name = self.channel_id
         else:
@@ -88,18 +85,6 @@ class CloseModal(Modal):
         Librarian.delete_roster(self.channel_id, table_config=self.config['Dynamo']['RosterDB'],
                                 credentials=self.config['AWS'])
         logging.info(f"Roster Deleted")
-        rl_role_names = [self.config['raids']['lead'], self.config['raids']['trainee']]
-
-        if any(role.name in rl_role_names for role in self.leader.roles) and runs_inc == 'y':
-            logging.info(f"Leader is a Raid Lead, recording last run")
-            check: LeaderCheck = Librarian.get_raid_lead_check(user_id=self.leader.id,
-                                                               table_config=self.config['Dynamo']['TrackerDB'],
-                                                               credentials=self.config['AWS'])
-            check.update(self.roster, int(self.runscount.value))
-            Librarian.put_raid_lead_check(user_id=self.leader.id, data=check.get_data(),
-                                          table_config=self.config['Dynamo']['TrackerDB'],
-                                          credentials=self.config['AWS'])
-            logging.info(f"Leader Last Run Check updated.")
 
         self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name,
                           update_roster=self.roster, method="close", interaction=interaction,
