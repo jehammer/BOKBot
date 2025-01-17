@@ -225,7 +225,8 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.application_has_raid_lead()
     async def set_prog_roles(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_modal(ProgModal(interaction, self.bot.config, self.bot.language[user_language]))
+        await interaction.response.send_modal(
+            ProgModal(self.bot, interaction, user_language))
 
     @commands.command(name='limits')
     @permissions.has_raid_lead()
@@ -239,24 +240,115 @@ class Trials(commands.Cog, name="Trials"):
                 if len(limits[i]) == 3:
                     all_limits += f"{i}: {limits[i][0]} | {limits[i][1]} | {limits[i][2]}\n"
                 else:
-                    limits += f"{i}: {roles[i]}\n"
-            await ctx.send(limits)
+                    all_limits += f"{i}: {limits[i]}\n"
             await ctx.send(all_limits)
         except Exception as e:
-            await ctx.send(f"{self.bot.language[user_language]['Incomplete']}")
+            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['Incomplete'])}")
             logging.error(f"Print Limits Error: {str(e)}")
 
-            # TODO:
-            #   PUT ROSTER JOIN CODE HERE TO ADD USER INTO THE ROSTER
-
-                update_db(channel_id, raid) # TODO: UPDATE TO NEW LIBRARIAN PROCESS AND NEW MULTI-LINGUAL SUPPORT
+    @commands.command(name='su', aliases=['signup', 'bu', 'backup'])
+    async def add_user_to_roster(self, ctx: commands.Context):
+        """Signs you up to a roster | `!su [optional role] [optional message]`"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            channel_id = ctx.message.channel.id
+            try:
+                roster = rosters[channel_id]
+                if roster is None:
+                    await ctx.send(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['Roster']['WrongChannel'])}")
+                    return
             except Exception as e:
+                await ctx.send("Unable to load raid.")
+                logging.error(f"SU Load Raid Error: {str(e)}")
                 return
-            await ctx.reply(f"{result}")
+
+            index = int(roster.role_limit)
+            prog_role = False
+            if index >= 4:
+                prog_role = True
+
+            # Check for an override otherwise fetch default.
+
+            acceptable_roles = ["dps", "tank", "healer", "heals", "heal"]  # TODO: Update this with multi-lingual later.
+            healer_roles = ["healer", "heals", "heal"]
+
+            msg = ''
+            role = None
+            user_id = ctx.author.id
+
+            cmd_vals = og_cmd.split(" ", 2)
+            if len(cmd_vals) > 1 and cmd_vals[1].lower() in acceptable_roles:
+                role = cmd_vals[1].lower()
+                if len(cmd_vals) > 2:
+                    msg = cmd_vals[2]
+            elif len(cmd_vals) >= 2:
+                if len(cmd_vals) == 2:
+                    msg = cmd_vals[1]
+                else:
+                    msg = cmd_vals[1] + " " + cmd_vals[2]
+
+            if role is None:
+                # Check for a default! If there is no default and no role specified then tell the person.
+                role = Librarian.get_default(user_id, table_config=self.bot.config['Dynamo']['DefaultDB'],
+                                             credentials=self.bot.config['AWS'])
+                if role is None:
+                    # Role is still none, tell the user there is a problem.
+                    await ctx.reply(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['Roster']['NoDefault'] % ctx.invoked_with)}")
+                    return
+
+            if role in healer_roles:
+                role = 'healer'
+
+            allowed = RosterExtended.validate_join_roster(roster_req=index, limits=limits, user=ctx.author,
+                                                          roster_role=role)
+
+            if allowed is False and prog_role is False:
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['Roster']['NoRankError'] % (role, self.bot.config['ranks_channel'], index))}")
+                return
+            elif allowed is False and prog_role is True:
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['Roster']['ProgRoster'])}")
+                return
+
+            primary = ['su', 'signup']
+            backup = ['bu', 'backup']
+
+            # TODO: Update with multi-lingual support later.
+            which = None
+            if ctx.invoked_with in primary:
+                which = 'su'
+            elif ctx.invoked_with in backup:
+                which = 'bu'
+            else:
+                raise UnknownError(f"Unreachable segment not sure how I got here.")
+
+            validation = rosters[channel_id].add_member(user_id=user_id, role=role, msg=msg, which=which)
+            if validation == 0:
+                await ctx.reply(f"{self.bot.language[user_language]['Roster']['Added'] % role}")  # Added into roster
+            elif validation == 1:
+                await ctx.reply(f"{self.bot.language[user_language]['Roster']['Full'] % role}")  # Slots full, added as backup
+            elif validation == 2:   # Unable to find role
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['Roster']['NoDefault'] % ctx.invoked_with)}")
+                return
+            else:  # Unreachable
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['Unknown'])}")
+                return
+
+            try:
+                Librarian.put_roster(channel_id=channel_id, data=rosters[channel_id].get_roster_data(),
+                                     table_config=self.bot.config['Dynamo']["RosterDB"],
+                                     credentials=self.bot.config["AWS"])
+            except Exception as e:
+                await ctx.send("I was unable to save the updated roster.")
+                logging.error(f"SU Error saving new roster: {str(e)}")
+                return
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
-            await ctx.send(f"I was was unable to sign you up due to processing errors.")
+            await ctx.send(f"{self.bot.language[user_language]['Unknown']}")
+            logging.error(f"SUBU Error: {str(e)}")
+            return
 
     @commands.command(name='status')
     async def send_status_embed(self, ctx: commands.Context):
@@ -277,20 +369,17 @@ class Trials(commands.Cog, name="Trials"):
 
             guild = ctx.message.author.guild
             ui_lang = self.bot.language[user_language]["ui"]
-            roles = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
-                                              roles_config=self.bot.config['raids']['ranks'],
-                                              creds_config=self.bot.config['AWS'])
 
-            if isinstance(roles[roster_data.role_limit], list):
+            if isinstance(limits[roster_data.role_limit], list):
                 # Need to work with 3 roles to check, dps | tank | healer order
                 # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
-                limiter_dps = utils.get(guild.roles, name=roles[roster_data.role_limit][0])
-                limiter_tank = utils.get(guild.roles, name=roles[roster_data.role_limit][1])
-                limiter_healer = utils.get(guild.roles, name=roles[roster_data.role_limit][2])
+                limiter_dps = utils.get(guild.roles, name=limits[roster_data.role_limit][0])
+                limiter_tank = utils.get(guild.roles, name=limits[roster_data.role_limit][1])
+                limiter_healer = utils.get(guild.roles, name=limits[roster_data.role_limit][2])
 
                 roles_req = f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
             else:
-                limiter = utils.get(guild.roles, name=roles[roster_data.role_limit])
+                limiter = utils.get(guild.roles, name=limits[roster_data.role_limit])
                 roles_req = f"{limiter.mention}"
 
             embed = EmbedFactory.create_status(roster=roster_data, bot=self.bot, language=ui_lang['Status'],

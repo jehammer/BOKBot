@@ -65,15 +65,39 @@ class Roster:
 
     def add_backup_dps(self, n_dps, p_class=""):
         self.backup_dps[n_dps] = p_class
-        return
+        return False
 
     def add_backup_healer(self, n_healer, p_class=""):
         self.backup_healers[n_healer] = p_class
-        return
+        return False
 
     def add_backup_tank(self, n_tank, p_class=""):
         self.backup_tanks[n_tank] = p_class
-        return
+        return False
+
+    def add_member(self, user_id, role, which, msg=''):
+        check = None
+        # return code: 0 = added in slot, 1 = added in backup, 2 = unable to find role.
+        if role == 'dps':
+            if which == 'su':
+                check = self.add_dps(user_id, msg)
+            else:
+                check = self.add_backup_dps(user_id, msg)
+        elif role == 'tank':
+            if which == 'su':
+                check = self.add_tank(user_id, msg)
+            else:
+                check = self.add_backup_tank(user_id, msg)
+        elif role == 'healer':
+            if which == 'su':
+                check = self.add_healer(user_id, msg)
+            else:
+                check = self.add_backup_healer(user_id, msg)
+        else:
+            return 2
+        if check:
+            return 0
+        return 1
 
     # remove people from right spots
     def remove_dps(self, n_dps):

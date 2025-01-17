@@ -37,10 +37,12 @@ Roster:
   NoDefault: >
     0002: You have no default set, please specify a role (ex: `%s dps`) or set a default 
     (ex: `!default dps`) then sign up again.
-  NoRoleError: > 
-    "0003: You do not have the right role to sign up as %s for this roster. " \
+  NoRankError: > 
+    "0003: You do not have the right rank to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
-    "achieve them. You are looking for details on: %s"
+    "achieve them. You are looking for details on Tier %s"
+  WrongChannel: "0029: Sorry! This command only works in a roster channel!"
+  ProgRoster: "0030: This is a Prog roster, in order to join reach out to the Raid Lead for this Prog. "
 
 Default:
   Set: "default role has been set to %s"
