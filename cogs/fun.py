@@ -8,7 +8,8 @@ import calendar
 import random
 from pymongo import MongoClient
 
-from services import Utilities, Librarian
+from services import Utilities
+from database import Librarian
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',

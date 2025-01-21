@@ -1,7 +1,8 @@
 from discord import Interaction, TextStyle, Member
 from discord.ui import Modal, TextInput
 from models import Roster
-from services import Utilities, RosterExtended, Librarian
+from services import Utilities, RosterExtended
+from database import Librarian
 import logging
 
 logging.basicConfig(

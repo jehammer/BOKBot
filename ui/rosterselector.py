@@ -1,5 +1,6 @@
 from discord import ui, SelectOption, Interaction
-from services import Utilities, Librarian
+from services import Utilities
+from database import Librarian
 from modals import *
 
 

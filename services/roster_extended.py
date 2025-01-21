@@ -1,4 +1,5 @@
-from services import Utilities, Librarian
+from services import Utilities
+from database import Librarian
 from re import sub
 from aws import Dynamo
 import logging
@@ -110,8 +111,6 @@ class RosterExtended:
     def get_limits(table_config, roles_config, creds_config):
         """Create list of roles with nested lists for 1-3 indexes"""
 
-        from services import Librarian
-
         list_roles = [
             roles_config['base'],
             [
@@ -157,8 +156,6 @@ class RosterExtended:
     def increase_roster_count(roster: Roster, count, table_config, creds_config):
         """Increase run count of all users in a roster."""
         try:
-            from services import Librarian
-
             for i in roster.dps:
                 db_count = Librarian.get_count(i, table_config, creds_config)
                 if db_count is None:

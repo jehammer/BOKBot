@@ -10,7 +10,8 @@ import decor as permissions
 from errors import *
 from modals import *
 from models import Roster, Count
-from services import Utilities, RosterExtended, Librarian, EmbedFactory
+from services import Utilities, RosterExtended, EmbedFactory
+from database import Librarian
 from ui import RosterSelector
 
 logging.basicConfig(
