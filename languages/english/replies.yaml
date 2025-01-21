@@ -99,9 +99,6 @@ Close:
   Increase: "Roster %s closed and Runs increased."
   IncompleteError: "0024: I was unable to handle closing the roster. I have logged the details."
 
-Status:
-  NotRoster: "Sorry! This command only works in a roster channel!"
-
 DBConError: "0025: I was unable to access the Database."
 NoPermissions: "0028: You do not have permission to use this command. You require the role: %s"
 

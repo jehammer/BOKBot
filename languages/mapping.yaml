@@ -26,3 +26,4 @@
 '0026': "Default,BadRoleError"
 '0027': "SelectRoster,NoOptionsError"
 '0028': "NoPermissions"
+'0029': "Roster,WrongChannel"
