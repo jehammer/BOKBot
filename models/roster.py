@@ -77,7 +77,46 @@ class Roster:
 
     def add_member(self, user_id, role, which, msg=''):
         check = None
+        og_msg = ''
+        slotted = ''
+
+        # Check if user swapped their roles
+        if user_id in self.dps.keys():
+            og_msg = self.dps.get(user_id)
+            slotted = 'dps'
+            self.remove_dps(user_id)
+
+        elif user_id in self.backup_dps.keys():
+            og_msg = self.backup_dps.get(user_id)
+            self.remove_dps(user_id)
+            slotted = 'dps'
+
+        elif user_id in self.healers.keys():
+            og_msg = self.healers.get(user_id)
+            self.remove_healer(user_id)
+            slotted = 'healer'
+
+        elif user_id in self.backup_healers.keys():
+            og_msg = self.backup_healers.get(user_id)
+            raid.remove_healer(user_id)
+            slotted = 'healer'
+
+        elif user_id in self.tanks.keys():
+            og_msg = self.tanks.get(user_id)
+            self.remove_tank(user_id)
+            slotted = 'tank'
+
+        elif user_id in self.backup_tanks.keys():
+            og_msg = self.backup_tanks.get(user_id)
+            self.remove_tank(user_id)
+            slotted = 'tank'
+
+        if slotted == role:  # If they are swapping to the same role, copy the message between rosters.
+            if msg == '' and og_msg != '':
+                msg = og_msg
+
         # return code: 0 = added in slot, 1 = added in backup, 2 = unable to find role.
+
         if role == 'dps':
             if which == 'su':
                 check = self.add_dps(user_id, msg)

@@ -51,8 +51,9 @@ class Librarian:
             all_rosters[int(channel_id)] = Roster(data['trial'], data['date'], data['leader'], data['dps'],
                                                   data['healers'], data['tanks'],
                                                   data['backup_dps'], data['backup_healers'], data['backup_tanks'],
-                                                  data['dps_limit'], data['healer_limit'],
-                                                  data['tank_limit'], data['role_limit'], data['memo'])
+                                                  int(data['dps_limit']),
+                                                  int(data['healer_limit']),
+                                                  int(data['tank_limit']), int(data['role_limit']), data['memo'])
         return all_rosters
 
     @staticmethod

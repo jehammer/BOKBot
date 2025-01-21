@@ -276,9 +276,9 @@ class Trials(commands.Cog, name="Trials"):
 
             msg = ''
             role = None
-            user_id = ctx.author.id
+            user_id = f"{ctx.author.id}"
 
-            cmd_vals = og_cmd.split(" ", 2)
+            cmd_vals = ctx.message.content.split(" ", 2)
             if len(cmd_vals) > 1 and cmd_vals[1].lower() in acceptable_roles:
                 role = cmd_vals[1].lower()
                 if len(cmd_vals) > 2:
@@ -327,8 +327,11 @@ class Trials(commands.Cog, name="Trials"):
             validation = rosters[channel_id].add_member(user_id=user_id, role=role, msg=msg, which=which)
             if validation == 0:
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
-            elif validation == 1:
-                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+            elif validation == 1 and ctx.invoked_with in primary:
+                await ctx.reply(
+                    f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+            elif validation == 1 and ctx.invoked_with in backup:
+                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Backup'] % role}")  # Slots full, added as backup
             elif validation == 2:   # Unable to find role
                 await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NoDefault'] % ctx.invoked_with)}")
                 return
@@ -358,7 +361,7 @@ class Trials(commands.Cog, name="Trials"):
         try:
             channel_id = ctx.message.channel.id
             try:
-                roster_data = rosters.get(channel_id)
+                roster_data: Roster = rosters.get(channel_id)
                 if roster_data is None:
                     await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return

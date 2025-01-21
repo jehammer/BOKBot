@@ -35,7 +35,7 @@ Roster:
   Removed: "Removed :("
   Full: "%s spots full, slotted for Backup"
   NoDefault: >
-    0002: You have no default set, please specify a role (ex: `%s dps`) or set a default 
+    0002: You have no default set, please specify a role (ex: `!%s dps`) or set a default 
     (ex: `!default dps`) then sign up again.
   NoRankError: > 
     "0003: You do not have the right rank to sign up as %s for this roster. " \
@@ -43,6 +43,7 @@ Roster:
     "achieve them. You are looking for details on Tier %s"
   WrongChannel: "0029: Sorry! This command only works in a roster channel!"
   ProgRoster: "0030: This is a Prog roster, in order to join reach out to the Raid Lead for this Prog. "
+  Backup: "Added as backup %s"
 
 Default:
   Set: "default role has been set to %s"
