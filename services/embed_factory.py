@@ -35,18 +35,6 @@ class EmbedFactory:
             embed.set_author(name=f"{language['Author']} {roster.leader}")
 
             names = ""
-            # DPS
-            if not len(roster.dps) == 0:
-                dps = roster.dps
-                for i in dps:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.dps[i]}\n"
-                        dps_count += 1
-
-            embed.add_field(name=f"{language['DPS']} {dps_count}/{roster.dps_limit}", value=names, inline=True)
-
-            names = ""
             # TANKS
             if not len(roster.tanks) == 0:
                 tanks = roster.tanks
@@ -70,23 +58,23 @@ class EmbedFactory:
             embed.add_field(name=f"{language['Healers']} {healer_count}/{roster.healer_limit}", value=names,
                             inline=True)
 
+            names = ""
+            # DPS
+            if not len(roster.dps) == 0:
+                dps = roster.dps
+                for i in dps:
+                    member_name = guild.get_member(int(i))
+                    if member_name is not None:
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.dps[i]}\n"
+                        dps_count += 1
+
+            embed.add_field(name=f"{language['DPS']} {dps_count}/{roster.dps_limit}", value=names, inline=True)
+
+
             # Show Backup/Overflow Roster
             dps_count = 0
             healer_count = 0
             tank_count = 0
-
-            names = ""
-            # BACKUP DPS
-            if not len(roster.backup_dps) == 0:
-                dps = roster.backup_dps
-                for i in dps:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.backup_dps[i]}\n"
-                        dps_count += 1
-
-            if dps_count > 0:
-                embed.add_field(name=f"{language['Backup_DPS']} {dps_count}", value=names, inline=True)
 
             names = ""
             # BACKUP TANKS
@@ -113,6 +101,19 @@ class EmbedFactory:
 
             if healer_count > 0:
                 embed.add_field(name=f"{language['Backup_Healers']} {healer_count}", value=names, inline=True)
+
+            names = ""
+            # BACKUP DPS
+            if not len(roster.backup_dps) == 0:
+                dps = roster.backup_dps
+                for i in dps:
+                    member_name = guild.get_member(int(i))
+                    if member_name is not None:
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.backup_dps[i]}\n"
+                        dps_count += 1
+
+            if dps_count > 0:
+                embed.add_field(name=f"{language['Backup_DPS']} {dps_count}", value=names, inline=True)
 
             return embed
         except Exception as e:
