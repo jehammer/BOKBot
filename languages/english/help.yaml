@@ -16,6 +16,16 @@ Trials:
           !su tank
           !su tank DK
           !su EC Cro / Colo
+      bu:
+        short: "Backup to a roster | !bu [Optional Role] [Optional Msg]"
+        long: |
+          Signs you up to a roster as a backup, if you have a default set there is no need to specify your role after the !bu.
+          Note that if you say a role it will override your default. Otherwise you can include a message after.
+          Do not join as Backup if you are tentative. You will be noted for failing to show up.
+          !bu
+          !bu tank
+          !bu tank DK
+          !bu EC Cro / Colo
       status:
         short: "Prints the most up-to-date roster for a Trial."
         long: None
