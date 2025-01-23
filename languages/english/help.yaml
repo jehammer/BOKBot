@@ -8,7 +8,7 @@ Trials:
   Everyone:
     Text:
       su:
-        short: "Signup to a roster | !su [Optional Role] [Optional Msg]"
+        short: "Signup to a Roster | !su [Optional Role] [Optional Msg]"
         long: |
           Signs you up to a roster, if you have a default set there is no need to specify your role after the !su.
           Note that if you say a role it will override your default. Otherwise you can include a message after.
@@ -17,7 +17,7 @@ Trials:
           !su tank DK
           !su EC Cro / Colo
       bu:
-        short: "Backup to a roster | !bu [Optional Role] [Optional Msg]"
+        short: "Backup to a Roster | !bu [Optional Role] [Optional Msg]"
         long: |
           Signs you up to a roster as a backup, if you have a default set there is no need to specify your role after the !bu.
           Note that if you say a role it will override your default. Otherwise you can include a message after.
@@ -27,10 +27,18 @@ Trials:
           !bu tank DK
           !bu EC Cro / Colo
       status:
-        short: "Prints the most up-to-date roster for a Trial."
+        short: "Prints the most up-to-date Roster for a Trial."
         long: None
+      wd:
+        short: "Removes you from the Roster"
+        long: None
+      msg:
+        short: "Allows you to update your message | !msg [message]"
+        long: |
+          Allows you to update your message on the roster, does not matter if you are primary or backup.
+          `!msg new message!`
       default:
-        short: "Set or check your default role for rosters."
+        short: "Set or check your default role for Rosters."
         long: |
           Set or Check your default for rosters, call just `!default` to check your current default, or use 
           `!default [role]` to set a default such as `!default dps`
@@ -40,12 +48,18 @@ Trials:
       limits:
         short: "Prints the current Roster limit options."
         long: "Prints the current Roster limit options that you can use in the Roster Creation Modal"
+      pin:
+        short: "Reply to a message with !pin to pin it!"
+        long: None
     Interactions:
       trial:
         short: "Opens the Roster Creation Modal"
         long: None
       modify:
         short: "Modify a Roster from a drop-down selection."
+        long: None
+      close:
+        short: "Close out a Roster from a drop-down selection"
         long: None
 Events:
   Everyone:
