@@ -27,12 +27,12 @@ class EmbedFactory:
                 desc += f"\n\n{roster.memo}"
 
             embed = Embed(
-                title=f"{roster.trial} {roster.date}",
+                title=f"{roster.trial.replace("_", r"\_")} {roster.date}",
                 description=desc,
                 color=Color.green()
             )
             embed.set_footer(text=f"{language['Footer']}")
-            embed.set_author(name=f"{language['Author']} {roster.leader}")
+            embed.set_author(name=f"{language['Author']} {roster.leader.replace("_", r"\_")}")
 
             names = ""
             # TANKS
@@ -41,7 +41,7 @@ class EmbedFactory:
                 for i in tanks:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name} {roster.tanks[i]}\n"
+                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.tanks[i].replace("_", r"\_")}\n"
                         tank_count += 1
 
             embed.add_field(name=f"{language['Tanks']} {tank_count}/{roster.tank_limit}", value=names, inline=True)
@@ -52,7 +52,7 @@ class EmbedFactory:
                 for i in roster.healers:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name} {roster.healers[i]}\n"
+                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.healers[i].replace("_", r"\_")}\n"
                         healer_count += 1
 
             embed.add_field(name=f"{language['Healers']} {healer_count}/{roster.healer_limit}", value=names,
@@ -65,11 +65,10 @@ class EmbedFactory:
                 for i in dps:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.dps[i]}\n"
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.dps[i].replace("_", r"\_")}\n"
                         dps_count += 1
 
             embed.add_field(name=f"{language['DPS']} {dps_count}/{roster.dps_limit}", value=names, inline=True)
-
 
             # Show Backup/Overflow Roster
             dps_count = 0
@@ -83,7 +82,7 @@ class EmbedFactory:
                 for i in tanks:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name} {roster.backup_tanks[i]}\n"
+                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.backup_tanks[i].replace("_", r"\_")}\n"
                         tank_count += 1
 
             if tank_count > 0:
@@ -96,7 +95,7 @@ class EmbedFactory:
                 for i in backup_healers:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name} {roster.backup_healers[i]}\n"
+                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.backup_healers[i].replace("_", r"\_")}\n"
                         healer_count += 1
 
             if healer_count > 0:
@@ -109,7 +108,7 @@ class EmbedFactory:
                 for i in dps:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name} {roster.backup_dps[i]}\n"
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")} {roster.backup_dps[i].replace("_", r"\_")}\n"
                         dps_count += 1
 
             if dps_count > 0:
@@ -122,7 +121,7 @@ class EmbedFactory:
 
     @staticmethod
     def create_new_roster(trial, date, roles_req, leader, memo):
-        #Unlike with other commands, creating a new Roster is always in english
+        # Unlike with other commands, creating a new Roster is always in english
 
         # Generate the description
         desc = f"Rank(s) Required: {roles_req}"
