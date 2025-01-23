@@ -133,8 +133,8 @@ class Librarian:
         db_data = db_instance.get(query)
         if db_data is not None and 'Item' in db_data:
             data = deserialize(db_data['Item'])['data']
-            return Count(runs=data['count'], trial=data['lastTrial'], date=data['lastDate'], dps=data['dpsRuns'],
-                         tank=data['tankRuns'], healer=data['healerRuns'])
+            return Count(runs=int(data['count']), trial=data['lastTrial'], date=data['lastDate'], dps=int(data['dpsRuns']),
+                         tank=int(data['tankRuns']), healer=int(data['healerRuns']))
         else:
             return Count()
 
@@ -143,7 +143,7 @@ class Librarian:
         db_instance = create_instance(table_config, credentials)
         data = count.get_count_data()
         item = {
-            'key': {'S': str(user_id)},
+            'userID': {'S': str(user_id)},
             'data': {'M': serialize(data)}
         }
         db_instance.put(item)

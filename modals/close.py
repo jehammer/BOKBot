@@ -87,7 +87,7 @@ class CloseModal(Modal):
                                 credentials=self.config['AWS'])
         logging.info(f"Roster Deleted")
 
-        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name,
+        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.name,
                           update_roster=self.roster, method="close", interaction=interaction,
                           user_language=self.user_language)
 
