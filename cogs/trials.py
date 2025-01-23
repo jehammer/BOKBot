@@ -349,6 +349,47 @@ class Trials(commands.Cog, name="Trials"):
             logging.error(f"SUBU Error: {str(e)}")
             return
 
+    @commands.command(name='wd', aliases=['withdraw'])
+    async def remove_user_from_roster(self, ctx: commands.Context):
+        """Removes you from a roster."""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            channel_id = ctx.message.channel.id
+            try:
+                if not rosters.get(channel_id):
+                    await ctx.reply(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
+                    return
+            except Exception as e:
+                await ctx.send("Unable to load raid.")
+                logging.error(f"WD Load Raid Error: {str(e)}")
+                return
+
+            validation = rosters[channel_id].remove_member(user_id=f"{ctx.author.id}")
+            if validation:  # Found and removed from roster
+                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Removed']}")
+            elif not validation:  # User not in roster
+                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['NotInRoster']}")
+                return
+            else:  # Unreachable
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+                return
+
+            try:
+                Librarian.put_roster(channel_id=channel_id, data=rosters[channel_id].get_roster_data(),
+                                     table_config=self.bot.config['Dynamo']["RosterDB"],
+                                     credentials=self.bot.config["AWS"])
+            except Exception as e:
+                await ctx.send("I was unable to save the updated roster.")
+                logging.error(f"WD Error saving new roster: {str(e)}")
+                return
+        except (UnknownError, NoDefaultError, NoRoleError) as e:
+            raise e
+        except Exception as e:
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"WD Error: {str(e)}")
+            return
+
     @commands.command(name='status')
     async def send_status_embed(self, ctx: commands.Context):
         """Posts the current roster information"""
