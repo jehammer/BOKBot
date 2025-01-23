@@ -16,10 +16,11 @@ logging.basicConfig(
 
 
 class TrialModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel=None):
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, limits, channel=None):
         self.localization = bot.language[lang]['replies']
         self.ui_localization = bot.language[lang]["ui"]
         self.config = bot.config
+        self.limits = limits
         self.leader_trial_val = None
         self.date_val = None
         self.limit_val = None
@@ -88,9 +89,7 @@ class TrialModal(Modal):
     async def on_submit(self, interaction: Interaction):
         # Split the values:
         try:
-            roles = RosterExtended.get_limits(table_config=self.config['Dynamo']['ProgDB'],
-                                              roles_config=self.config['raids']['ranks'],
-                                              creds_config=self.config['AWS'])
+            roles = self.limits
 
             role_limit = int(self.limit.value)
             if role_limit < 0 or role_limit > len(roles):

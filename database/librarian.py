@@ -129,7 +129,7 @@ class Librarian:
     @staticmethod
     def get_count(user_id, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
-        query = {'key': {'S': str(user_id)}}
+        query = {'userID': {'S': str(user_id)}}
         db_data = db_instance.get(query)
         if db_data is not None and 'Item' in db_data:
             data = deserialize(db_data['Item'])['data']

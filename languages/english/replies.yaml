@@ -44,6 +44,7 @@ Roster:
   WrongChannel: "0029: Sorry! This command only works in a roster channel!"
   ProgRoster: "0030: This is a Prog roster, in order to join reach out to the Raid Lead for this Prog. "
   Backup: "Added as backup %s"
+  NotInRoster: "You are not signed up for this roster"
 
 Default:
   Set: "default role has been set to %s"
@@ -94,7 +95,7 @@ Pin:
 
 Close:
   BadConfirmError: "0022: You must enter a `y` or an `n` in the Confirmation fields."
-  CloseWithoutClose: "Wait why did you do that instead of just clicking cancel?"
+  CloseWithoutClose: "0031: Wait why did you do that instead of just clicking cancel?"
   NotNumberError: "0023: Runs Count Increase must be a number only."
   NoIncrease: "Roster %s closed and Runs not increased."
   Increase: "Roster %s closed and Runs increased."

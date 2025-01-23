@@ -201,7 +201,7 @@ class RosterExtended:
                 return True
             elif any('Raid Leads' == role.name for role in user.roles):
                 return True
-            return false
+            return False
         except Exception as e:
             logging.error(f"Add User To Roster Validation Error: {str(e)}")
 

@@ -75,12 +75,29 @@ class Roster:
         self.backup_tanks[n_tank] = p_class
         return False
 
-    def add_member(self, user_id, role, which, msg=''):
-        check = None
+    # remove people from right spots
+    def remove_dps(self, n_dps):
+        if n_dps in self.dps:
+            del self.dps[n_dps]
+        else:
+            del self.backup_dps[n_dps]
+
+    def remove_healer(self, n_healer):
+        if n_healer in self.healers:
+            del self.healers[n_healer]
+        else:
+            del self.backup_healers[n_healer]
+
+    def remove_tank(self, n_tank):
+        if n_tank in self.tanks:
+            del self.tanks[n_tank]
+        else:
+            del self.backup_tanks[n_tank]
+
+    def remove_member(self, user_id, need_vals=False):
+        check = True  # If True, user was found and removed. If False, they were not found in the roster.
         og_msg = ''
         slotted = ''
-
-        # Check if user swapped their roles
         if user_id in self.dps.keys():
             og_msg = self.dps.get(user_id)
             slotted = 'dps'
@@ -110,6 +127,17 @@ class Roster:
             og_msg = self.backup_tanks.get(user_id)
             self.remove_tank(user_id)
             slotted = 'tank'
+        else:
+            check = False
+
+        # need_vals is true: add_member called this function so return og_msg and slotted, otherwise if found or not.
+        if need_vals:
+            return og_msg, slotted
+        return check
+
+    def add_member(self, user_id, role, which, msg=''):
+        check = None
+        og_msg, slotted = self.remove_member(user_id, need_vals=True)
 
         if slotted == role:  # If they are swapping to the same role, copy the message between rosters.
             if msg == '' and og_msg != '':
@@ -137,25 +165,6 @@ class Roster:
         if check:
             return 0
         return 1
-
-    # remove people from right spots
-    def remove_dps(self, n_dps):
-        if n_dps in self.dps:
-            del self.dps[n_dps]
-        else:
-            del self.backup_dps[n_dps]
-
-    def remove_healer(self, n_healer):
-        if n_healer in self.healers:
-            del self.healers[n_healer]
-        else:
-            del self.backup_healers[n_healer]
-
-    def remove_tank(self, n_tank):
-        if n_tank in self.tanks:
-            del self.tanks[n_tank]
-        else:
-            del self.backup_tanks[n_tank]
 
     def fill_spots(self, num):
         try:
