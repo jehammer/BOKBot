@@ -182,13 +182,5 @@ class Librarian:
         pass
 
     @staticmethod
-    def put_role_chanel(data, table_config, credentials):
-        pass
-
-    @staticmethod
-    def put_raid_lead_check(user_id, data, table_config, credentials):
-        pass
-
-    @staticmethod
-    def get_raid_lead_check(user_id, table_config, credentials):
+    def put_role_channel(data, table_config, credentials):
         pass
