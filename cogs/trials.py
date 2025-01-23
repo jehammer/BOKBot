@@ -142,7 +142,7 @@ class Trials(commands.Cog, name="Trials"):
 
         elif method == "close":
             del roster_map[str(channel_id)]
-            del rosters[str(channel_id)]
+            del rosters[channel_id]
             update_roster_map_db = True
             logging.info(f"Roster removed from Map and Roster List.")
 
@@ -197,7 +197,7 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.application_has_raid_lead()
     async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_modal(TrialModal(None, interaction, self.bot, user_language, roster_map))
+        await interaction.response.send_modal(TrialModal(None, interaction, self.bot, user_language, roster_map, limits=limits))
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
@@ -206,21 +206,17 @@ class Trials(commands.Cog, name="Trials"):
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction, self.bot, interaction.user, "modify",
-                                user_language, roster_map, leader=None))
+                                user_language, roster_map, rosters, limits=limits))
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
-    @app_commands.describe(leader="Raid Leader of the Roster being closed")
     @permissions.application_has_raid_lead()
-    async def close_roster(self, interaction: Interaction, leader: Member) -> None:
+    async def close_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-
-        if self.bot.config["raids"]["lead"] not in leader.roles:
-            leader = None
 
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction, self.bot, interaction.user, "close",
-                                user_language, roster_map, leader))
+                                user_language, roster_map, rosters))
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
@@ -254,8 +250,7 @@ class Trials(commands.Cog, name="Trials"):
         try:
             channel_id = ctx.message.channel.id
             try:
-                roster = rosters.get(channel_id)
-                if roster is None:
+                if not rosters.get(channel_id):
                     await ctx.reply(
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
@@ -264,7 +259,7 @@ class Trials(commands.Cog, name="Trials"):
                 logging.error(f"SU Load Raid Error: {str(e)}")
                 return
 
-            index = int(roster.role_limit)
+            index = int(rosters[channel_id].role_limit)
             prog_role = False
             if index >= 4:
                 prog_role = True
