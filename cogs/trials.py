@@ -197,7 +197,8 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.application_has_raid_lead()
     async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-        await interaction.response.send_modal(TrialModal(None, interaction, self.bot, user_language, roster_map, limits=limits))
+        await interaction.response.send_modal(
+            TrialModal(None, interaction, self.bot, user_language, roster_map, limits=limits))
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
@@ -240,7 +241,8 @@ class Trials(commands.Cog, name="Trials"):
                     all_limits += f"{i}: {limits[i]}\n"
             await ctx.send(all_limits)
         except Exception as e:
-            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Incomplete'])}")
+            await ctx.send(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Incomplete'])}")
             logging.error(f"Print Limits Error: {str(e)}")
 
     @commands.command(name='su', aliases=['signup', 'bu', 'backup'])
@@ -301,10 +303,12 @@ class Trials(commands.Cog, name="Trials"):
                                                           roster_role=role)
 
             if allowed is False and prog_role is False:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['NoRankError'] % (role, self.bot.config['ranks_channel'], index))}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['NoRankError'] % (role, self.bot.config['ranks_channel'], index))}")
                 return
             elif allowed is False and prog_role is True:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['ProgRoster'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['ProgRoster'])}")
                 return
 
             primary = ['su', 'signup']
@@ -321,17 +325,21 @@ class Trials(commands.Cog, name="Trials"):
 
             validation = rosters[channel_id].add_member(user_id=user_id, role=role, msg=msg, which=which)
             if validation == 0:
-                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
+                await ctx.reply(
+                    f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
             elif validation == 1 and ctx.invoked_with in primary:
                 await ctx.reply(
                     f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
             elif validation == 1 and ctx.invoked_with in backup:
-                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Backup'] % role}")  # Slots full, added as backup
-            elif validation == 2:   # Unable to find role
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NoDefault'] % ctx.invoked_with)}")
+                await ctx.reply(
+                    f"{self.bot.language[user_language]['replies']['Roster']['Backup'] % role}")  # Slots full, added as backup
+            elif validation == 2:  # Unable to find role
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NoDefault'] % ctx.invoked_with)}")
                 return
             else:  # Unreachable
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
                 return
 
             try:
@@ -345,7 +353,7 @@ class Trials(commands.Cog, name="Trials"):
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
-            await ctx.send(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
             logging.error(f"SUBU Error: {str(e)}")
             return
 
@@ -372,7 +380,8 @@ class Trials(commands.Cog, name="Trials"):
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['NotInRoster']}")
                 return
             else:  # Unreachable
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
                 return
 
             try:
@@ -399,7 +408,8 @@ class Trials(commands.Cog, name="Trials"):
             try:
                 roster_data: Roster = rosters.get(channel_id)
                 if roster_data is None:
-                    await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
+                    await ctx.send(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
                 await ctx.send("Unable to load raid.")
