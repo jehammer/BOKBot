@@ -257,7 +257,7 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.send("Unable to load raid.")
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"SU Load Raid Error: {str(e)}")
                 return
 
@@ -353,7 +353,8 @@ class Trials(commands.Cog, name="Trials"):
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
-            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            await ctx.send(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
             logging.error(f"SUBU Error: {str(e)}")
             return
 
@@ -369,7 +370,7 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.send("Unable to load raid.")
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"WD Load Raid Error: {str(e)}")
                 return
 
@@ -412,7 +413,7 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.send("Unable to load raid.")
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"Status Load Raid Error: {str(e)}")
                 return
 
