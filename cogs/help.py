@@ -61,27 +61,29 @@ class Helpers(commands.Cog):
                 # Top-Level Error
                 main = unpacked[0]
                 error = self.bot.language[lang]['replies'][main]
-                og_lang_error  = self.bot.language[og_lang]['replies'][main]
+                og_lang_error = self.bot.language[og_lang]['replies'][main]
             else:
                 main = unpacked[0]
                 sub = unpacked[1]
                 error = self.bot.language[lang]['replies'][main][sub]
                 og_lang_error = self.bot.language[og_lang]['replies'][main][sub]
 
-            # Strip out the error number portion of each
-            sent_message = sent_message[6:]
-            og_lang_error = og_lang_error[5:]
+            # Error fixing - if there is no %s formatting needed then just reply with the translated error.
+            if '%s' in error:
+                # Strip out the error number portion of each
+                sent_message = sent_message[6:]
+                og_lang_error = og_lang_error[5:]
 
-            # Compare the two and get the missing bits
-            diff = ndiff(sent_message.split(), og_lang_error.split())
-            diffs = [line for line in diff if line.startswith('- ') or line.startswith('+ ')]
-            missing = [line[2:] for line in diffs if line.startswith('- ')]
+                # Compare the two and get the missing bits
+                diff = ndiff(sent_message.split(), og_lang_error.split())
+                diffs = [line for line in diff if line.startswith('- ') or line.startswith('+ ')]
+                missing = [line[2:] for line in diffs if line.startswith('- ')]
 
-            # Join the missing bits into strings
-            added = ''.join(missing).replace('`', '')
+                # Join the missing bits into strings
+                added = ''.join(missing).replace('`', '')
 
-            # Format the error and send it back
-            error = error % added
+                # Format the error and send it back
+                error = error % added
             await ctx.reply(Utilities.format_error(lang, error))
 
         except (ValueError, KeyError) as e:
