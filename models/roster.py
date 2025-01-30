@@ -98,6 +98,7 @@ class Roster:
         check = True  # If True, user was found and removed. If False, they were not found in the roster.
         og_msg = ''
         slotted = ''
+        user_id = str(user_id)
         if user_id in self.dps.keys():
             og_msg = self.dps.get(user_id)
             slotted = 'dps'
@@ -137,6 +138,7 @@ class Roster:
 
     def add_member(self, user_id, role, which, msg=''):
         check = None
+        user_id = str(user_id)
         og_msg, slotted = self.remove_member(user_id, need_vals=True)
 
         if slotted == role:  # If they are swapping to the same role, copy the message between rosters.
@@ -189,7 +191,6 @@ class Roster:
             check = False
 
         return check
-
 
     def fill_spots(self, num):
         try:
