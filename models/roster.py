@@ -166,6 +166,31 @@ class Roster:
             return 0
         return 1
 
+    def update_message(self, user_id, new_message):
+        check = True
+        if user_id in self.dps.keys():
+            self.dps[user_id] = new_message
+
+        elif user_id in self.backup_dps.keys():
+            self.backup_dps[user_id] = new_message
+
+        elif user_id in self.healers.keys():
+            self.healers[user_id] = new_message
+
+        elif user_id in self.backup_healers.keys():
+            self.backup_healers[user_id] = new_message
+
+        elif user_id in self.tanks.keys():
+            self.tanks[user_id] = new_message
+
+        elif user_id in self.backup_tanks.keys():
+            self.backup_tanks[user_id] = new_message
+        else:
+            check = False
+
+        return check
+
+
     def fill_spots(self, num):
         try:
             loop = True
