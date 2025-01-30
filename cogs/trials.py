@@ -61,8 +61,8 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"No Limits Found")
 
     @commands.Cog.listener()
-    async def on_update_rosters_data(self, channel_id, channel_name, update_roster: Roster, method,
-                                     interaction: Interaction, user_language):
+    async def on_update_rosters_data(self, channel_id, method, channel_name=None, update_roster: Roster = None,
+                                     interaction: Interaction = None, user_language=None):
         global rosters
         global roster_map
 
@@ -72,7 +72,10 @@ class Trials(commands.Cog, name="Trials"):
 
         channel_id = int(channel_id)
 
-        if method == "create_update":
+        if method == "save_roster":
+            update_roster_db = True
+
+        elif method == "create_update":
 
             if channel_id not in rosters.keys():
                 rosters[channel_id] = update_roster
@@ -343,14 +346,7 @@ class Trials(commands.Cog, name="Trials"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
                 return
 
-            try:
-                Librarian.put_roster(channel_id=channel_id, data=rosters[channel_id].get_roster_data(),
-                                     table_config=self.bot.config['Dynamo']["RosterDB"],
-                                     credentials=self.bot.config["AWS"])
-            except Exception as e:
-                await ctx.send("I was unable to save the updated roster.")
-                logging.error(f"SU Error saving new roster: {str(e)}")
-                return
+            self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
@@ -433,14 +429,7 @@ class Trials(commands.Cog, name="Trials"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
                 return
 
-            try:
-                Librarian.put_roster(channel_id=channel_id, data=rosters[channel_id].get_roster_data(),
-                                     table_config=self.bot.config['Dynamo']["RosterDB"],
-                                     credentials=self.bot.config["AWS"])
-            except Exception as e:
-                await ctx.send("I was unable to save the updated roster.")
-                logging.error(f"WD Error saving new roster: {str(e)}")
-                return
+            self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
         except Exception as e:
@@ -569,18 +558,22 @@ class Trials(commands.Cog, name="Trials"):
         user_language = Utilities.get_language(interaction.user)
         try:
             if member.bot is True:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
                 return
             elif interaction.user not in role.members:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
                 return
             if role.name not in limits:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
                 return
             logging.info(
                 f"Grant Role called by {interaction.user.display_name} to grant {role.name} to {member.display_name}")
             await member.add_roles(role)
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Granted'] % (role.name, member.display_name)}")
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Granted'] % (role.name, member.display_name)}")
         except Exception as e:
             logging.error(f"Grant Role Error: {str(e)}")
             raise e
@@ -593,18 +586,22 @@ class Trials(commands.Cog, name="Trials"):
         user_language = Utilities.get_language(interaction.user)
         try:
             if member.bot is True:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
                 return
             elif interaction.user not in role.members:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
                 return
             if role.name not in limits:
-                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
                 return
             logging.info(
                 f"Remove Role called by {interaction.user.display_name} to remove {role.name} from {member.display_name}")
             await member.remove_roles(role)
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Removed'] % (role.name, member.display_name)}")
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Removed'] % (role.name, member.display_name)}")
         except Exception as e:
             logging.error(f"Remove Role Error: {str(e)}")
             raise e
