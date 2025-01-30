@@ -391,7 +391,8 @@ class Trials(commands.Cog, name="Trials"):
             if check:
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['MsgUpdated']}")
             else:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
                 return
             self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
 
@@ -422,7 +423,8 @@ class Trials(commands.Cog, name="Trials"):
             if validation:  # Found and removed from roster
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Removed']}")
             elif not validation:  # User not in roster
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
                 return
             else:  # Unreachable
                 await ctx.reply(
