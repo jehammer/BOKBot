@@ -257,7 +257,8 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"SU Load Raid Error: {str(e)}")
                 return
 
@@ -304,11 +305,11 @@ class Trials(commands.Cog, name="Trials"):
 
             if allowed is False and prog_role is False:
                 await ctx.reply(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['NoRankError'] % (role, self.bot.config['ranks_channel'], index))}")
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NoRankError'] % (role, self.bot.config['ranks_channel'], index))}")
                 return
             elif allowed is False and prog_role is True:
                 await ctx.reply(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['replies']['ProgRoster'])}")
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['ProgRoster'])}")
                 return
 
             primary = ['su', 'signup']
@@ -358,6 +359,52 @@ class Trials(commands.Cog, name="Trials"):
             logging.error(f"SUBU Error: {str(e)}")
             return
 
+    @commands.command(name='msg', aliases=['message'])
+    async def update_user_message(self, ctx: commands.Context):
+        """Update a users message"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            channel_id = ctx.message.channel.id
+            try:
+                if not rosters.get(channel_id):
+                    await ctx.reply(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
+                    return
+
+                self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
+            except Exception as e:
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+                logging.error(f"SU Load Raid Error: {str(e)}")
+                return
+
+            msg = ''
+            msg_vals = ctx.message.content.split(" ", 2)
+            if len(msg_vals) == 2:
+                msg = msg_vals[1]
+            elif len(msg_vals) > 2:
+                msg = f"{msg_vals[1]} {msg_vals[2]}"
+
+            if len(msg) > 30:
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['MsgLength'])}")
+                return
+
+            user_id = f"{ctx.author.id}"
+            check = rosters[channel_id].update_message(user_id=user_id, new_message=msg)
+            if check:
+                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['MsgUpdated']}")
+            else:
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
+                return
+            self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
+
+        except Exception as e:
+            await ctx.send(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            logging.error(f"MSG Error: {str(e)}")
+            return
+
     @commands.command(name='wd', aliases=['withdraw'])
     async def remove_user_from_roster(self, ctx: commands.Context):
         """Removes you from a roster."""
@@ -370,7 +417,8 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"WD Load Raid Error: {str(e)}")
                 return
 
@@ -378,7 +426,7 @@ class Trials(commands.Cog, name="Trials"):
             if validation:  # Found and removed from roster
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Removed']}")
             elif not validation:  # User not in roster
-                await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['NotInRoster']}")
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NotInRoster'])}")
                 return
             else:  # Unreachable
                 await ctx.reply(
@@ -413,7 +461,8 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                     return
             except Exception as e:
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
                 logging.error(f"Status Load Raid Error: {str(e)}")
                 return
 

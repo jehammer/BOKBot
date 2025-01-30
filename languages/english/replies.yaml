@@ -44,7 +44,7 @@ Roster:
   WrongChannel: "0029: Sorry! This command only works in a roster channel!"
   ProgRoster: "0030: This is a Prog roster, in order to join reach out to the Raid Lead for this Prog. "
   Backup: "Added as backup %s"
-  NotInRoster: "You are not signed up for this roster"
+  NotInRoster: "0036: You are not signed up for this roster"
   MsgUpdated: "Message Updated!"
   MsgLength: "0035: Max Message Length is 30 characters (including whitespace)."
 
