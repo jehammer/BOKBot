@@ -13,10 +13,10 @@ logging.basicConfig(
 
 class ProgModal(Modal):
     def __init__(self, bot, interaction: Interaction, user_language):
-        self.config = self.bot.config
+        self.config = bot.config
         self.bot = bot
-        self.language = self.bot.language[user_language]['replies']
-        self.ui_language = self.bot.language[user_language]['ui']
+        self.language = bot.language[user_language]['replies']
+        self.ui_language = bot.language[user_language]['ui']
         super().__init__(title=self.ui_language['Prog']['Title'])
         self.initialize()
 
