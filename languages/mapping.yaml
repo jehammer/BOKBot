@@ -34,3 +34,4 @@
 '0034': "ProgLeadRole,NoRole"
 '0035': "Roster,MsgLength"
 '0036': "Roster,NotInRoster"
+'0037': "Roster,AddBad"

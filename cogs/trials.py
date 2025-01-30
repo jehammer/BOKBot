@@ -549,6 +549,54 @@ class Trials(commands.Cog, name="Trials"):
             await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
             logging.error(f"Default Role Set Error: {str(e)}")
 
+    @app_commands.command(name='add', description='For Raid Leads: Manually add to roster')
+    @app_commands.describe(role='Tank, Healer, or DPS Role to add user into.')
+    @app_commands.describe(member='Discord user to add to roster.')
+    @permissions.application_has_raid_lead()
+    async def add_to_roster(self, interaction: Interaction, role: str, member: Member):
+        user_language = Utilities.get_language(interaction.user)
+        try:
+            channel_id = interaction.channel_id
+            if not rosters.get(channel_id):
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
+                return
+            if member.bot is True:
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
+                return
+
+            # Validate the role input
+            acceptable_roles = ['dps', 'tank', 'healer']  # TODO: Update with multi-lingual later.
+            role = role.lower()
+
+            if role not in acceptable_roles:
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['AddBad'])}")
+                return
+
+            logging.info(f"Add called by {interaction.user.display_name} to add {member.display_name} as {role}")
+
+            validation = rosters[channel_id].add_member(user_id=member.id, role=role, msg='', which='su')
+            if validation == 0:
+                await interaction.response.send_message(
+                    f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
+            elif validation == 1:
+                await interaction.response.send_message(
+                    f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+                return
+            else:  # Unreachable
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+                return
+
+            self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster",
+                              user_language=user_language)
+
+        except Exception as e:
+            await interaction.response.send_message(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            logging.error(f"Add To Roster Error: {str(e)}")
 
     @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
     @app_commands.describe(member="Discord user to grant role to.")
