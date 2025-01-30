@@ -36,7 +36,7 @@ Roster:
   Full: "%s spots full, slotted for Backup"
   NoDefault: >
     0002: You have no default set, please specify a role (ex: `!%s dps`) or set a default 
-    (ex: `!default dps`) then sign up again.
+    (ex: `!default dps`) then try again.
   NoRankError: > 
     "0003: You do not have the right rank to sign up as %s for this roster. " \
     "Head on over to %s to explore ranks and what you need to do to " \
@@ -45,6 +45,8 @@ Roster:
   ProgRoster: "0030: This is a Prog roster, in order to join reach out to the Raid Lead for this Prog. "
   Backup: "Added as backup %s"
   NotInRoster: "You are not signed up for this roster"
+  MsgUpdated: "Message Updated!"
+  MsgLength: "0035: Max Message Length is 30 characters (including whitespace)."
 
 Default:
   Set: "default role has been set to %s"
