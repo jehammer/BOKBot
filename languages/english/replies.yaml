@@ -109,7 +109,7 @@ NoPermissions: "0028: You do not have permission to use this command. You requir
 ProgLeadRole:
   NoBots: "0033: You can only use this command on people, not bots."
   NoRole: "0034: You do not have the Role you selected."
-  NotProg: "0032: You can only grant Prog Roles with this command."
+  NotProg: "0032: You can only manage Prog Roles with this command."
   Granted: "Added %s to %s"
   Removed: "Removed %s from %s"
 
