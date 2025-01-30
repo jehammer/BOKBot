@@ -511,6 +511,54 @@ class Trials(commands.Cog, name="Trials"):
             logging.error(f"Default Role Set Error: {str(e)}")
 
 
+    @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
+    @app_commands.describe(member="Discord user to grant role to.")
+    @app_commands.describe(role="Discord role to grant to the user.")
+    @permissions.application_has_prog_lead()
+    async def grant_discord_role(self, interaction: Interaction, member: Member, role: Role):
+        user_language = Utilities.get_language(interaction.user)
+        try:
+            if member.bot is True:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
+                return
+            elif interaction.user not in role.members:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
+                return
+            if role.name not in limits:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
+                return
+            logging.info(
+                f"Grant Role called by {interaction.user.display_name} to grant {role.name} to {member.display_name}")
+            await member.add_roles(role)
+            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Granted'] % (role.name, member.display_name)}")
+        except Exception as e:
+            logging.error(f"Grant Role Error: {str(e)}")
+            raise e
+
+    @app_commands.command(name="remove-role", description="For Leads: Removes mentioned user a prog role.")
+    @app_commands.describe(member="Discord user to remove role from.")
+    @app_commands.describe(role="Discord role to remove from user.")
+    @permissions.application_has_prog_lead()
+    async def remove_discord_role(self, interaction: Interaction, member: Member, role: Role):
+        user_language = Utilities.get_language(interaction.user)
+        try:
+            if member.bot is True:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
+                return
+            elif interaction.user not in role.members:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoRole'])}")
+                return
+            if role.name not in limits:
+                await interaction.response.send_message(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NotProg'])}")
+                return
+            logging.info(
+                f"Remove Role called by {interaction.user.display_name} to remove {role.name} from {member.display_name}")
+            await member.remove_roles(role)
+            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['ProgLeadRole']['Removed'] % (role.name, member.display_name)}")
+        except Exception as e:
+            logging.error(f"Remove Role Error: {str(e)}")
+            raise e
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Trials(bot))
