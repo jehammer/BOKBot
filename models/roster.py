@@ -39,60 +39,60 @@ class Roster:
 
     # Add people into the right spots
     # True for Main, False of Backup
-    def add_dps(self, n_dps, p_class=""):
+    def add_dps(self, user_id, msg=""):
         if len(self.dps) < self.dps_limit:
-            self.dps[n_dps] = p_class
+            self.dps[user_id] = msg
             return True
         else:
-            self.backup_dps[n_dps] = p_class
+            self.backup_dps[user_id] = msg
             return False
 
-    def add_healer(self, n_healer, p_class=""):
+    def add_healer(self, user_id, msg=""):
         if len(self.healers) < self.healer_limit:
-            self.healers[n_healer] = p_class
+            self.healers[user_id] = msg
             return True
         else:
-            self.backup_healers[n_healer] = p_class
+            self.backup_healers[user_id] = msg
             return False
 
-    def add_tank(self, n_tank, p_class=""):
+    def add_tank(self, user_id, msg=""):
         if len(self.tanks) < self.tank_limit:
-            self.tanks[n_tank] = p_class
+            self.tanks[user_id] = msg
             return True
         else:
-            self.backup_tanks[n_tank] = p_class
+            self.backup_tanks[user_id] = msg
             return False
 
-    def add_backup_dps(self, n_dps, p_class=""):
-        self.backup_dps[n_dps] = p_class
+    def add_backup_dps(self, user_id, msg=""):
+        self.backup_dps[user_id] = msg
         return False
 
-    def add_backup_healer(self, n_healer, p_class=""):
-        self.backup_healers[n_healer] = p_class
+    def add_backup_healer(self, user_id, msg=""):
+        self.backup_healers[user_id] = msg
         return False
 
-    def add_backup_tank(self, n_tank, p_class=""):
-        self.backup_tanks[n_tank] = p_class
+    def add_backup_tank(self, user_id, msg=""):
+        self.backup_tanks[user_id] = msg
         return False
 
     # remove people from right spots
-    def remove_dps(self, n_dps):
-        if n_dps in self.dps:
-            del self.dps[n_dps]
+    def remove_dps(self, user_id):
+        if user_id in self.dps:
+            del self.dps[user_id]
         else:
-            del self.backup_dps[n_dps]
+            del self.backup_dps[user_id]
 
-    def remove_healer(self, n_healer):
-        if n_healer in self.healers:
-            del self.healers[n_healer]
+    def remove_healer(self, user_id):
+        if user_id in self.healers:
+            del self.healers[user_id]
         else:
-            del self.backup_healers[n_healer]
+            del self.backup_healers[user_id]
 
-    def remove_tank(self, n_tank):
-        if n_tank in self.tanks:
-            del self.tanks[n_tank]
+    def remove_tank(self, user_id):
+        if user_id in self.tanks:
+            del self.tanks[user_id]
         else:
-            del self.backup_tanks[n_tank]
+            del self.backup_tanks[user_id]
 
     def remove_member(self, user_id, need_vals=False):
         check = True  # If True, user was found and removed. If False, they were not found in the roster.
