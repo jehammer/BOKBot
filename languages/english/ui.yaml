@@ -37,6 +37,12 @@ Close:
     Label: "If Yes enter number of runs"
     Placeholder: "Defaults to 1"
 
+RunCount:
+  Title: "%s Runs"
+  Num:
+    Label: "Run Increase Number"
+    Placeholder: "Just click cancel if you want to cancel."
+
 Status:
   Author: "Raid Lead:"
   Rank: "Rank(s) Required:"
