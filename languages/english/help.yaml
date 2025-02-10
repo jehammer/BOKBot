@@ -61,6 +61,18 @@ Trials:
       close:
         short: "Close out a Roster from a drop-down selection"
         long: None
+      runcount:
+        short: "Increase the runcount for roster members without closing"
+        long: None
+  ProgLeads:
+    Text: None
+    Interactions:
+      grant-role:
+        short: "Grant a Prog role to someone."
+        long: None
+      remove-role:
+        short: "Remove a Prog role from someone."
+        long: None
 Events:
   Everyone:
     Text:
