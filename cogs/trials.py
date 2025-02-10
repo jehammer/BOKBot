@@ -219,8 +219,8 @@ class Trials(commands.Cog, name="Trials"):
 
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
-            view=RosterSelector(interaction, self.bot, interaction.user, "close",
-                                user_language, roster_map, rosters))
+            view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="close",
+                                user_language=user_language, roster_map=roster_map, rosters=rosters))
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
@@ -228,6 +228,15 @@ class Trials(commands.Cog, name="Trials"):
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
             ProgModal(self.bot, interaction, user_language))
+
+    @app_commands.command(name="runcount", description="For Raid Leads: Increases a rosters members run counts.")
+    @permissions.application_has_raid_lead()
+    async def increase_run_count(self, interaction: discord.Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_message(
+            f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+            view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="run_count",
+                                user_language=user_language, roster_map=roster_map, rosters=rosters))
 
     @commands.command(name='limits')
     @permissions.has_raid_lead()
