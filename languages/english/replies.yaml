@@ -101,7 +101,7 @@ Close:
   CloseWithoutClose: "0031: Wait why did you do that instead of just clicking cancel?"
   NotNumberError: "0023: Runs Count Increase must be a number only."
   NoIncrease: "Roster %s closed and Runs not increased."
-  Increase: "Roster %s closed and Runs increased."
+  Increase: "Roster %s closed and Runs increased %s times."
   IncompleteError: "0024: I was unable to handle closing the roster. I have logged the details."
 
 DBConError: "0025: I was unable to access the Database."

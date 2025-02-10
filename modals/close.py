@@ -68,6 +68,7 @@ class CloseModal(Modal):
                 f"{Utilities.format_error(self.user_language, self.localization['Close']['CloseWithoutClose'])}")
             return
         runs_increased = False
+        inc_val = 0
         if runs_inc == "y":
             try:
                 inc_val = int(self.runscount.value)
@@ -94,7 +95,8 @@ class CloseModal(Modal):
         if self.channel is not None:
             await self.channel.delete()
         if runs_increased:
-            await interaction.response.send_message(f"{self.localization['Close']['Increase'] % self.name}")
+            await interaction.response.send_message(
+                f"{self.localization['Close']['Increase'] % (self.name, inc_val)}")
         else:
             await interaction.response.send_message(f"{self.localization['Close']['NoIncrease'] % self.name}")
         return
