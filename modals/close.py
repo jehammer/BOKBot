@@ -74,6 +74,8 @@ class CloseModal(Modal):
                 inc_val = int(self.runscount.value)
                 if inc_val < 1:
                     inc_val = 1
+                elif inc_val > 10:
+                    raise ValueError
                 RosterExtended.increase_roster_count(self.roster, inc_val,
                                                      table_config=self.bot.config['Dynamo']["CountDB"],
                                                      creds_config=self.bot.config["AWS"])

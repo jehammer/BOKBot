@@ -99,10 +99,14 @@ Pin:
 Close:
   BadConfirmError: "0022: You must enter a `y` or an `n` in the Confirmation fields."
   CloseWithoutClose: "0031: Wait why did you do that instead of just clicking cancel?"
-  NotNumberError: "0023: Runs Count Increase must be a number only."
+  NotNumberError: "0023: Runs Count Increase must be a number only and less than 10."
   NoIncrease: "Roster %s closed and Runs not increased."
   Increase: "Roster %s closed and Runs increased %s times."
   IncompleteError: "0024: I was unable to handle closing the roster. I have logged the details."
+
+RunCount:
+  Increase: "Runs for %s increased by %s"
+  BadNumber: "Runs must be a number value at most 10"
 
 DBConError: "0025: I was unable to access the Database."
 NoPermissions: "0028: You do not have permission to use this command. You require the role: %s"
