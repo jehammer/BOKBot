@@ -216,7 +216,6 @@ class Trials(commands.Cog, name="Trials"):
     @permissions.application_has_raid_lead()
     async def close_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
-
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="close",
