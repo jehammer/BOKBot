@@ -1,10 +1,10 @@
 from models import Roster
 from services import RosterExtended
 from discord import Interaction, TextStyle
-from discord.ui import TextInput
+from discord.ui import TextInput, Modal
 
 
-class RunCountModal(discord.ui.Modal):
+class RunCountModal(Modal):
     def __init__(self, roster: Roster, interaction: Interaction, bot, users_language):
         self.bot = bot
         self.language = bot.language[users_language]['replies']
