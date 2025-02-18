@@ -1,6 +1,6 @@
 from aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from models import Roster, Count
+from models import Roster, Count, Rank
 
 
 def create_instance(table_config, credentials):
@@ -171,11 +171,27 @@ class Librarian:
 
     @staticmethod
     def get_rank(user_id, table_config, credentials):
-        pass
+        db_instance = create_instance(table_config, credentials)
+        query = {'userID': {'S': str(user_id)}}
+        db_data = db_instance.get(query)
+        if db_data is not None and 'Item' in db_data:
+            data = deserialize(db_data['Item'])['data']
+            return Rank(count=int(data['count']), last_called=data['last_called'], lowest=int(data['lowest']), highest=int(data['highest']),
+                        doubles=int(data['doubles']), singles=int(data['singles']), six_nine=int(data['six_nine']),
+                        four_twenty=int(data['four_twenty']), boob=int(data['boob']), pie=int(data['pie']), samsies=int(data['samsies']))
+        else:
+            return None
 
     @staticmethod
-    def put_rank(user_id, data, table_config, credentials):
-        pass
+    def put_rank(user_id, rank_data: Rank, table_config, credentials):
+        db_instance = create_instance(table_config, credentials)
+        data = rank_data.get_data()
+        item = {
+            'userID': {'S': str(user_id)},
+            'data': {'M': serialize(data)}
+        }
+        db_instance.put(item)
+        return
 
     @staticmethod
     def get_role_channel(table_config, credentials):
