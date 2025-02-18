@@ -14,17 +14,20 @@ logging.basicConfig(
 
 mapping = None
 
+
 async def send_embed(ctx, embed):
     try:
         await ctx.send(embed=embed)
     except Exception as e:
         logging.error(f"Help Embed Send Error: {str(e)}")
 
+
 def load_mapping():
     with open("languages/mapping.yaml", 'r') as stream:
         data_loaded = yaml.safe_load(stream)
     logging.info(f"Translate Error Mapping Loaded")
     return data_loaded
+
 
 class Helpers(commands.Cog):
     """Commands for Bot help and more"""
@@ -34,6 +37,9 @@ class Helpers(commands.Cog):
         global mapping
         mapping = load_mapping()
 
+    @commands.command(name='intro')
+    async def send_welcome_intro(self, ctx: commands.Context):
+        pass
 
     @commands.command(name='translate')
     async def translate_error(self, ctx: commands.Context):
@@ -142,13 +148,14 @@ class Helpers(commands.Cog):
 
                         # making title - getting description from doc-string below class
                         page = discord.Embed(title=f'{cog} - Commands', description=self.bot.cogs[cog].__doc__,
-                                            color=discord.Color.green())
+                                             color=discord.Color.green())
 
                         page.add_field(name="", value="Use `!help <command>` for specific command information",
-                                      inline=False)
+                                       inline=False)
 
-                        next_page = discord.Embed(title=f'{cog} - Commands (Cont)', description=self.bot.cogs[cog].__doc__,
-                                            color=discord.Color.green())
+                        next_page = discord.Embed(title=f'{cog} - Commands (Cont)',
+                                                  description=self.bot.cogs[cog].__doc__,
+                                                  color=discord.Color.green())
 
                         # getting commands from cog
                         count = 0
@@ -170,7 +177,8 @@ class Helpers(commands.Cog):
                                 count = 0
                                 page = next_page
                             else:
-                                page.add_field(name=f"", value=f"`/{command.name}`\t{command.description}", inline=False)
+                                page.add_field(name=f"", value=f"`/{command.name}`\t{command.description}",
+                                               inline=False)
                             count += 1
                         pages.append(page)
                         # found cog - breaking loop
@@ -194,7 +202,7 @@ class Helpers(commands.Cog):
                                     else:
                                         emb = discord.Embed(title=f'{cog}: !{command}', color=discord.Color.blurple())
                                     emb.add_field(name=f"", value=f"{command.help}", inline=False)
-                                # found so break
+                                    # found so break
                                     found = True
                                 else:
                                     break
@@ -216,7 +224,8 @@ class Helpers(commands.Cog):
                         emb = discord.Embed(title="Impossible. Perhaps the archives are incomplete?",
                                             description=f"I do not have a module or command called `{input[0]}`",
                                             color=discord.Color.orange())
-                        emb.set_image(url='https://media.discordapp.net/attachments/911730032286785536/1073645138506694806/Incomplete.png')
+                        emb.set_image(
+                            url='https://media.discordapp.net/attachments/911730032286785536/1073645138506694806/Incomplete.png')
 
             # too many cogs requested - only one at a time allowed
             elif len(input) > 1:
@@ -238,6 +247,7 @@ class Helpers(commands.Cog):
         except Exception as e:
             await ctx.send("I was unable to complete the help command")
             logging.error(f"Help command Error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Helpers(bot))
