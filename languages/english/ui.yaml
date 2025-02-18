@@ -54,4 +54,19 @@ Status:
   Backup_Healers: "Backup Healers"
   Backup_Tanks: "Backup Tanks"
 
+Rank:
+  Author: "Rank Information Board"
+  Footer: "Be sure to get ranked again!"
+  Total: "Total Times Ranked: %s"
+  Last: "Last Ranked: %s"
+  Lowest: "Lowest Rank: %s"
+  Highest: "Highest Rank: %s"
+  Singles: "Singles: %s"
+  Doubles: "Doubles: %s"
+  Samsies: "Samsies: %s"
+  SixNine: "69 Count: %s"
+  FourTwenty: "420 Count: %s"
+  Boob: "Boob Count: %s"
+  Pie: "Pie Count: %s"
+
 
