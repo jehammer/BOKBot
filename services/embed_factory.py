@@ -1,6 +1,6 @@
 from discord import TextStyle, Embed, Color
 import logging
-from models import Roster
+from models import Roster, Rank
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -142,4 +142,25 @@ class EmbedFactory:
         embed.add_field(name="Calling Tanks!", value='To Be Stronk!', inline=False)
         embed.add_field(name="Calling DPS!", value='To Stand In Stupid!', inline=False)
 
+        return embed
+
+    @staticmethod
+    def create_ranking(rank: Rank, lang, name):
+        embed = Embed(
+            title=name,
+            color=Color.red()
+        )
+        embed.set_footer(text=f"{lang['Footer']}")
+        embed.set_author(name=f"{lang['Author']}")
+        embed.add_field(name=f"{lang['Total'] % rank.count}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Last'] % rank.last_called}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Lowest'] % rank.lowest}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Highest'] % rank.highest}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Singles'] % rank.singles}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Doubles'] % rank.doubles}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Samsies'] % rank.samsies}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['SixNine'] % rank.six_nine}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['FourTwenty'] % rank.four_twenty}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Boob'] % rank.boob}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Pie'] % rank.pie}", value=" ", inline=False)
         return embed
