@@ -230,7 +230,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="runcount", description="For Raid Leads: Increases a rosters members run counts.")
     @permissions.application_has_raid_lead()
-    async def increase_run_count(self, interaction: discord.Interaction) -> None:
+    async def increase_run_count(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
