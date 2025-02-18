@@ -118,6 +118,13 @@ ProgLeadRole:
   Granted: "Added %s to %s"
   Removed: "Removed %s from %s"
 
+NoBots: "0033: You can only use this command on people, not bots."
+
+Rank:
+  Generated: "%s ranks %s!"
+  NoHistory: "You have not been ranked before."
+
+
 Events:
   Vet: "Veteran"
   Norm: "Normal"
