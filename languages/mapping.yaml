@@ -30,7 +30,7 @@
 '0030': "Roster,ProgRoster"
 '0031': "Close,CloseWithoutClose"
 '0032': "ProgLeadRole,NotProg"
-'0033': "ProgLeadRole,NoBots"
+'0033': "NoBots"
 '0034': "ProgLeadRole,NoRole"
 '0035': "Roster,MsgLength"
 '0036': "Roster,NotInRoster"
