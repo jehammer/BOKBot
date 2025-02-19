@@ -18,7 +18,7 @@ logging.basicConfig(
 
 def generate_time_from_timestamp(timestamp, tz):
     """Generates the time according to the bots default timezone in config from a timestamp"""
-    return datetime.utcfromtimestamp(int(sub('[^0-9]', '', timestamp))).replace(tzinfo=ZoneInfo(tz))
+    return datetime.fromtimestamp(int(sub('[^0-9]', '', timestamp)), ZoneInfo(tz))
 
 
 class RosterExtended:
