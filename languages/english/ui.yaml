@@ -53,6 +53,7 @@ Status:
   Backup_DPS: "Backup DPS"
   Backup_Healers: "Backup Healers"
   Backup_Tanks: "Backup Tanks"
+  Pingable: "Group:"
 
 Rank:
   Author: "Rank Information Board"

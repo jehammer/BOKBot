@@ -21,7 +21,7 @@ class EmbedFactory:
             healer_count = 0
             tank_count = 0
 
-            desc = f"{language['Rank']} {roles_req}"
+            desc = f"{language['Rank']} {roles_req}\n{language['Pingable']} <@&{roster.pingable}>"
 
             if roster.memo != "None":
                 desc += f"\n\n{roster.memo}"
@@ -120,11 +120,11 @@ class EmbedFactory:
             raise e
 
     @staticmethod
-    def create_new_roster(trial, date, roles_req, leader, memo):
+    def create_new_roster(trial, date, roles_req, leader, memo, pingable):
         # Unlike with other commands, creating a new Roster is always in english
 
         # Generate the description
-        desc = f"Rank(s) Required: {roles_req}"
+        desc = f"Rank(s) Required: {roles_req}\nGroup: <@&{pingable}>"
 
         if memo != "None":
             desc += f"\n\n{memo}"

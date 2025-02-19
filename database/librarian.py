@@ -53,7 +53,7 @@ class Librarian:
                                                   data['backup_dps'], data['backup_healers'], data['backup_tanks'],
                                                   int(data['dps_limit']),
                                                   int(data['healer_limit']),
-                                                  int(data['tank_limit']), int(data['role_limit']), data['memo'])
+                                                  int(data['tank_limit']), int(data['role_limit']), data['memo'], data['pingable'])
         return all_rosters
 
     @staticmethod
@@ -66,7 +66,7 @@ class Librarian:
             return Roster(data['trial'], data['date'], data['leader'], data['dps'], data['healers'], data['tanks'],
                           data['backup_dps'], data['backup_healers'], data['backup_tanks'], int(data['dps_limit']),
                           int(data['healer_limit']),
-                          int(data['tank_limit']), int(data['role_limit']), data['memo'])
+                          int(data['tank_limit']), int(data['role_limit']), data['memo'], data['pingable'])
         else:
             return None
 

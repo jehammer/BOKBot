@@ -101,6 +101,8 @@ class CloseModal(Modal):
                 f"{self.localization['Close']['Increase'] % (self.name, inc_val)}")
         else:
             await interaction.response.send_message(f"{self.localization['Close']['NoIncrease'] % self.name}")
+
+        await interaction.guild.get_role(self.roster.pingable).delete()
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:

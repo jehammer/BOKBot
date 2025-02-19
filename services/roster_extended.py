@@ -6,7 +6,9 @@ import logging
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from models import Roster, Count
-from discord import Member
+from discord import Member, Guild
+from discord.utils import get
+
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -19,6 +21,24 @@ logging.basicConfig(
 def generate_time_from_timestamp(timestamp, tz):
     """Generates the time according to the bots default timezone in config from a timestamp"""
     return datetime.fromtimestamp(int(sub('[^0-9]', '', timestamp)), ZoneInfo(tz))
+
+
+def create_pingable_role(trial, date, tz, guild: Guild):
+    new_name = False
+    name = ''
+    inc = 0
+    while not new_name:
+        timestamp = generate_time_from_timestamp(date, tz)
+        name = f"{trial} {timestamp.strftime("%a")} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
+        if len(name) > 20:
+            chars_to_remove = len(name) - 20
+            name = f"{trial[:-chars_to_remove]} {date.strftime("%a")} {date.day}{Utilities.suffix(date.day)} {inc}"
+        checker = get(guild.roles, name=name)
+        if not checker:
+            new_name = True
+        else:
+            inc += 1
+    return name
 
 
 class RosterExtended:
@@ -205,3 +225,7 @@ class RosterExtended:
         except Exception as e:
             logging.error(f"Add User To Roster Validation Error: {str(e)}")
 
+    @staticmethod
+    def create_pingable_role_name(trial, date, tz, guild: Guild):
+        name = create_pingable_role(trial=trial, date=date, tz=tz, guild=guild)
+        return name
