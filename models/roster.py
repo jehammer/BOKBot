@@ -2,7 +2,7 @@ class Roster:
     """Class for handling roster and related information"""
 
     def __init__(self, trial, date, leader, dps={}, healers={}, tanks={}, backup_dps={}, backup_healers={},
-                 backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0, memo="delete"):
+                 backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0, memo="delete", pingable="None"):
         self.trial = trial
         self.date = date
         self.leader = leader
@@ -17,6 +17,7 @@ class Roster:
         self.healer_limit = healer_limit
         self.role_limit = role_limit
         self.memo = memo
+        self.pingable = pingable
 
     def get_roster_data(self):
         all_data = {
@@ -33,7 +34,8 @@ class Roster:
             "healer_limit": self.healer_limit,
             "tank_limit": self.tank_limit,
             "role_limit": self.role_limit,
-            "memo": self.memo
+            "memo": self.memo,
+            "pingable": self.pingable
         }
         return all_data
 
