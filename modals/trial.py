@@ -2,7 +2,6 @@ from models.roster import Roster
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color, Role
 from discord.utils import get
-from aws import Dynamo
 from services import Utilities, RosterExtended, EmbedFactory
 import logging
 
