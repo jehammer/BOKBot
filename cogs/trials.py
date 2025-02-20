@@ -62,7 +62,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @commands.Cog.listener()
     async def on_update_rosters_data(self, channel_id, method, channel_name=None, update_roster: Roster = None,
-                                     interaction: Interaction = None, user_language=None):
+                                     interaction: Interaction = None, user_language=None, removed=None, people=None):
         global rosters
         global roster_map
 
@@ -149,6 +149,25 @@ class Trials(commands.Cog, name="Trials"):
             update_roster_map_db = True
             logging.info(f"Roster removed from Map and Roster List.")
 
+        elif method == "remove":
+            names = ""
+            for i in removed:
+                if people[i] in rosters[channel_id].dps.keys() or i in rosters[channel_id].backup_dps.keys():
+                    rosters[channel_id].remove_dps(people[i])
+                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
+                elif people[i] in rosters[channel_id].healers.keys() or people[i] in rosters[channel_id].backup_healers.keys():
+                    rosters[channel_id].remove_healer(people[i])
+                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
+                elif people[i] in rosters[channel_id].tanks.keys() or people[i] in rosters[channel_id].backup_tanks.keys():
+                    rosters[channel_id].remove_tank(people[i])
+                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
+            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Remove']['Removed']
+                                                       % (channel_name, names)}")
+            update_roster_db = True
+
+        # TODO: On create or modify stop the existing async task for that roster if there is one, and restart with the new timestamp
+        #   IF the timestamp changed.
+        #   As part of this will need to keep the tasks in an dictionary so they can be accessible in some way.
         try:
             if update_roster_db:
                 try:
@@ -236,6 +255,15 @@ class Trials(commands.Cog, name="Trials"):
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="run_count",
                                 user_language=user_language, roster_map=roster_map, rosters=rosters))
+
+    @app_commands.command(name="remove", description="For Raid Leads: Remove people from a roster")
+    @permissions.application_has_raid_lead()
+    async def remove_people_from_roster(self, interaction: Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_message("Select the roster",
+                                                view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user,
+                                                                      cmd_called="remove", user_language=user_language,
+                                                                      roster_map=roster_map, rosters=rosters))
 
     @commands.command(name='limits')
     @permissions.has_raid_lead()

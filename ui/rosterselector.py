@@ -79,7 +79,7 @@ class RosterSelect(ui.Select):
                                                              channel_id=channel_id))
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(
-                RemoveModal(roster, interaction, self.bot, self.user_language, channel_id))
+                RemoveModal(roster=roster, interaction=interaction, bot=self.bot, user_lang=self.user_language, channel_id=channel_id))
         elif self.cmd_called == "run_count":
             await interaction.response.send_modal(
                 RunCountModal(roster=roster, interaction=interaction, bot=self.bot, users_language=self.user_language))

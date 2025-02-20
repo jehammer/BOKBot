@@ -124,6 +124,10 @@ Rank:
   Generated: "%s ranks %s!"
   NoHistory: "You have not been ranked before."
 
+Remove:
+  Removed: "User(s) have been removed from roster %s\n %s"
+  NumbersOnly: "0038 Numbers Only. ex: `1,2,3,4`"
+
 
 Events:
   Vet: "Veteran"

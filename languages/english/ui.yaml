@@ -55,6 +55,11 @@ Status:
   Backup_Tanks: "Backup Tanks"
   Pingable: "Group:"
 
+Remove:
+  Title: "Remove From Roster"
+  Placeholder: "Enter your choices as a comma for multiple ex: 1,5,12"
+  Label: "Input"
+
 Rank:
   Author: "Rank Information Board"
   Footer: "Be sure to get ranked again!"
