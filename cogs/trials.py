@@ -354,6 +354,7 @@ class Trials(commands.Cog, name="Trials"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
                 return
 
+            await ctx.author.add_roles(ctx.guild.get_role(rosters[channel_id].pingable))
             self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
         except (UnknownError, NoDefaultError, NoRoleError) as e:
             raise e
@@ -429,6 +430,7 @@ class Trials(commands.Cog, name="Trials"):
 
             validation = rosters[channel_id].remove_member(user_id=f"{ctx.author.id}")
             if validation:  # Found and removed from roster
+                await ctx.author.remove_roles(ctx.guild.get_role(rosters[channel_id].pingable))
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['Roster']['Removed']}")
             elif not validation:  # User not in roster
                 await ctx.reply(

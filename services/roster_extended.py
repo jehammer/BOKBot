@@ -32,9 +32,9 @@ def create_pingable_role(trial, date, tz, guild: Guild):
         name = f"{trial} {timestamp.strftime("%a")} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
         if len(name) > 20:
             chars_to_remove = len(name) - 20
-            name = f"{trial[:-chars_to_remove]} {date.strftime("%a")} {date.day}{Utilities.suffix(date.day)} {inc}"
-        checker = get(guild.roles, name=name)
-        if not checker:
+            name = f"{trial[:-chars_to_remove]} {date.strftime("%a")} {date.day}{Utilities.suffix(date.day)} {inc if inc > 0 else ''}"
+        checker = get(guild.roles, name=name.strip())
+        if checker is None:
             new_name = True
         else:
             inc += 1
