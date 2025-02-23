@@ -27,11 +27,16 @@ def create_pingable_role(trial, date, tz, guild: Guild):
     name = ''
     inc = 0
     while not new_name:
-        timestamp = generate_time_from_timestamp(date, tz)
-        name = f"{trial} {timestamp.strftime("%a")} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
+        second_part = ''
+        if date.upper() == 'ASAP':
+            second_part = f"{date} {inc if inc > 0 else ''}"
+        else:
+            timestamp = generate_time_from_timestamp(date, tz)
+            second_part = f"{timestamp.strftime("%a")} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
+        name = f"{trial} {second_part}"
         if len(name) > 20:
             chars_to_remove = len(name) - 20
-            name = f"{trial[:-chars_to_remove]} {date.strftime("%a")} {date.day}{Utilities.suffix(date.day)} {inc if inc > 0 else ''}"
+            name = f"{trial[:-chars_to_remove]} {second_part}"
         checker = get(guild.roles, name=name.strip())
         if checker is None:
             new_name = True
