@@ -80,4 +80,14 @@ Rank:
   Boob: "Boob Count: %s"
   Pie: "Pie Count: %s"
 
-
+Count:
+  Author: "Runs with %s"
+  Footer: "Thank you for coming! Come again!"
+  Total: "Total Runs:"
+  LastRan: "Last Ran:"
+  LastDate: "Last Date:"
+  Stats: "Stats"
+  RoleRuns: "Role Runs"
+  DPS: "DPS Runs:"
+  Tank: "Tank Runs:"
+  Healer: "Healer Runs:"

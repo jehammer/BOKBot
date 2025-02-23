@@ -136,7 +136,7 @@ class Librarian:
             return Count(runs=int(data['count']), trial=data['lastTrial'], date=data['lastDate'], dps=int(data['dpsRuns']),
                          tank=int(data['tankRuns']), healer=int(data['healerRuns']))
         else:
-            return Count()
+            return None
 
     @staticmethod
     def put_count(user_id, count, table_config, credentials):

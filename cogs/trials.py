@@ -611,6 +611,24 @@ class Trials(commands.Cog, name="Trials"):
             await ctx.send(f"{Utilities.format_error(language, self.bot.language[language]['replies']['DBConError'])}")
             logging.error(f"Default Role Set Error: {str(e)}")
 
+    @commands.command(name="count")
+    async def check_own_count(self, ctx: commands.Context):
+        """A way for people to check their number of raid runs"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            counts: Count = Librarian.get_count(ctx.author.id, table_config=self.bot.config['Dynamo']["CountDB"],
+                                                credentials=self.bot.config["AWS"])
+            if counts is not None:
+                embed = EmbedFactory.create_count(counts, self.bot.language[user_language]['ui']['Count'],
+                                                  ctx.author.name, ctx.guild.name)
+                await ctx.reply(embed=embed)
+            else:
+                await ctx.send(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Count']['NoHistory'])}")
+        except Exception as e:
+            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+            logging.error(f"Count check error: {str(e)}")
+
     @app_commands.command(name='add', description='For Raid Leads: Manually add to roster')
     @app_commands.describe(role='Tank, Healer, or DPS Role to add user into.')
     @app_commands.describe(member='Discord user to add to roster.')

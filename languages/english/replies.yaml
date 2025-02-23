@@ -134,6 +134,8 @@ Fill:
   Filled: "Filled Spots for %s"
   "NotFilled": "0039: Unable To Fill Spots"
 
+Count:
+  NoHistory: "0040: You have not been counted in a Roster yet."
 
 Events:
   Vet: "Veteran"

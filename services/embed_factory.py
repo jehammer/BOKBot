@@ -1,6 +1,6 @@
 from discord import TextStyle, Embed, Color
 import logging
-from models import Roster, Rank
+from models import Roster, Rank, Count
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -164,3 +164,21 @@ class EmbedFactory:
         embed.add_field(name=f"{lang['Boob'] % rank.boob}", value=" ", inline=False)
         embed.add_field(name=f"{lang['Pie'] % rank.pie}", value=" ", inline=False)
         return embed
+
+    @staticmethod
+    def create_count(count: Count, lang, name, guild_name):
+        embed = Embed(
+            title=name,
+            color=Color.orange()
+        )
+        embed.set_footer(text=f"{lang['Footer']}")
+        embed.set_author(name=f"{lang['Author'] % guild_name}")
+        embed.add_field(name=f"{lang['Total']}", value=count.count, inline=True)
+        embed.add_field(name=f"{lang['LastRan']}", value=count.lastTrial, inline=True)
+        embed.add_field(name=f"{lang['LastDate']}", value=count.lastDate, inline=True)
+        embed.add_field(name=f"{lang['Stats']}", value=f"{lang['RoleRuns']}", inline=False)
+        embed.add_field(name=f"{lang['DPS']}", value=count.dpsRuns, inline=True)
+        embed.add_field(name=f"{lang['Tank']}", value=count.tankRuns, inline=True)
+        embed.add_field(name=f"{lang['Healer']}", value=count.healerRuns, inline=True)
+        return embed
+
