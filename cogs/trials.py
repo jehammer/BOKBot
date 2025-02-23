@@ -165,6 +165,17 @@ class Trials(commands.Cog, name="Trials"):
                                                        % (channel_name, names)}")
             update_roster_db = True
 
+        elif method == "fill":
+            result = rosters[channel_id].fill_spots()
+            if result:
+                await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Fill']['Filled']
+                                                           % channel_name}")
+                update_roster_db = True
+            else:
+                await interaction.response.send_message(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Fill']['NotFilled'])}")
+                return
+
         # TODO: On create or modify stop the existing async task for that roster if there is one, and restart with the new timestamp
         #   IF the timestamp changed.
         #   As part of this will need to keep the tasks in an dictionary so they can be accessible in some way.
@@ -261,9 +272,19 @@ class Trials(commands.Cog, name="Trials"):
     async def remove_people_from_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message("Select the roster",
-                                                view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user,
-                                                                      cmd_called="remove", user_language=user_language,
-                                                                      roster_map=roster_map, rosters=rosters))
+                                                view=RosterSelector(interaction=interaction, bot=self.bot,
+                                                                    caller=interaction.user,
+                                                                    cmd_called="remove", user_language=user_language,
+                                                                    roster_map=roster_map, rosters=rosters))
+
+    @app_commands.command(name="fill", description="For Raid Leads: Fill a roster from backup")
+    @permissions.application_has_raid_lead()
+    async def fill_roster(self, interaction: Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_message(
+            f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
+            view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="fill",
+                                user_language=user_language, roster_map=roster_map, rosters=rosters))
 
     @commands.command(name='limits')
     @permissions.has_raid_lead()
@@ -500,7 +521,6 @@ class Trials(commands.Cog, name="Trials"):
 
             if isinstance(limits[roster_data.role_limit], list):
                 # Need to work with 3 roles to check, dps | tank | healer order
-                # TODO: Make the prog roles be gotten if they exist, but for the main limiters consider global permanent variables
                 limiter_dps = utils.get(guild.roles, name=limits[roster_data.role_limit][0])
                 limiter_tank = utils.get(guild.roles, name=limits[roster_data.role_limit][1])
                 limiter_healer = utils.get(guild.roles, name=limits[roster_data.role_limit][2])

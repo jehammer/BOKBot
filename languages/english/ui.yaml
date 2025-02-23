@@ -60,6 +60,11 @@ Remove:
   Placeholder: "Enter your choices as a comma for multiple ex: 1,5,12"
   Label: "Input"
 
+Fill:
+  Title: "Fill Roster"
+  Label: "Fill %s"
+  Placeholder: "Y or N? Click cancel to close this"
+
 Rank:
   Author: "Rank Information Board"
   Footer: "Be sure to get ranked again!"

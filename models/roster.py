@@ -194,7 +194,7 @@ class Roster:
 
         return check
 
-    def fill_spots(self, num):
+    def fill_spots(self):
         try:
             loop = True
             while loop:
@@ -220,9 +220,10 @@ class Roster:
                     del self.backup_tanks[first]
                 else:
                     loop = False
-            logging.info(f"Spots filled in roster id {str(num)}")
+            return True
         except Exception as e:
             logging.error(f"Fill Spots error: {str(e)}")
+            return False
 
     def did_values_change(self, old_roster):
         for key, value in vars(self).items():

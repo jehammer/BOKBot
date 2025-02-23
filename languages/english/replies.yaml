@@ -126,7 +126,13 @@ Rank:
 
 Remove:
   Removed: "User(s) have been removed from roster %s\n %s"
-  NumbersOnly: "0038 Numbers Only. ex: `1,2,3,4`"
+  NumbersOnly: "0038: Numbers Only. ex: `1,2,3,4`"
+
+Fill:
+  InvalidInput: "Only `y` or `n` input is allowed for this."
+  NInput: "Wait why did you do that instead of just clicking cancel?"
+  Filled: "Filled Spots for %s"
+  "NotFilled": "0039: Unable To Fill Spots"
 
 
 Events:
