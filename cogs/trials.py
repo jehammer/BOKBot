@@ -155,10 +155,12 @@ class Trials(commands.Cog, name="Trials"):
                 if people[i] in rosters[channel_id].dps.keys() or i in rosters[channel_id].backup_dps.keys():
                     rosters[channel_id].remove_dps(people[i])
                     names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
-                elif people[i] in rosters[channel_id].healers.keys() or people[i] in rosters[channel_id].backup_healers.keys():
+                elif (people[i] in rosters[channel_id].healers.keys() or people[i] in
+                        rosters[channel_id].backup_healers.keys()):
                     rosters[channel_id].remove_healer(people[i])
                     names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
-                elif people[i] in rosters[channel_id].tanks.keys() or people[i] in rosters[channel_id].backup_tanks.keys():
+                elif (people[i] in rosters[channel_id].tanks.keys() or people[i] in
+                      rosters[channel_id].backup_tanks.keys()):
                     rosters[channel_id].remove_tank(people[i])
                     names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
             await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Remove']['Removed']
