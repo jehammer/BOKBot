@@ -797,6 +797,77 @@ class Trials(commands.Cog, name="Trials"):
             logging.error(f"Remove Role Error: {str(e)}")
             raise e
 
+    # Creator-Only commands
+
+    @commands.command(name="roster")
+    @permissions.creator_only()
+    async def printout_roster(self, ctx: commands.Context, channel_id):
+        """Printout a roster directly for any debugging needs"""
+        try:
+            await ctx.reply(rosters[str(channel_id)].get_roster_data())
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
+    @commands.command(name="map")
+    @permissions.creator_only()
+    async def printout_roster_map(self, ctx: commands.Context):
+        """Printout roster map directly for any debugging needs"""
+        try:
+            await ctx.reply(f"{roster_map}")
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
+    @commands.command(name="allrosters")
+    @permissions.creator_only()
+    async def printout_all_rosters(self, ctx: commands.Context):
+        """Printout all rosters directly for any debugging needs"""
+        try:
+            for i in rosters:
+                await ctx.reply(rosters[i].get_roster_data())
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
+    @commands.command(name="saverosters")
+    @permissions.creator_only()
+    async def save_roster_info(self, ctx: commands.Context):
+        """Force Save current Roster Map and Rosters"""
+        try:
+            for i in rosters:
+                Librarian.put_roster(i, rosters[i].get_roster_data(),
+                                     table_config=self.bot.config['Dynamo']["RosterDB"],
+                                     credentials=self.bot.config["AWS"])
+            Librarian.put_roster_map(data=roster_map,
+                                     table_config=self.bot.config['Dynamo']["MapDB"],
+                                     credentials=self.bot.config["AWS"])
+            await ctx.reply(f"Rosters and Mapping saved.")
+
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
+    @commands.command(name="reloadrosters")
+    @permissions.creator_only()
+    async def reload_roster_info(self, ctx: commands.Context):
+        """Force Reload all Roster information"""
+        try:
+            logging.info("Force Reload Roster Information Called")
+            global roster_map
+            global rosters
+            fetched = Librarian.get_roster_map(table_config=self.bot.config['Dynamo']["MapDB"],
+                                               credentials=self.bot.config["AWS"])
+            if fetched is not None:
+                roster_map = fetched
+                logging.info(f"Found and Loaded Roster Map")
+            else:
+                logging.info(f"No Roster Map Found")
+            fetched = Librarian.get_all_rosters(table_config=self.bot.config['Dynamo']["RosterDB"],
+                                                credentials=self.bot.config["AWS"])
+            if fetched is not None:
+                rosters = fetched
+                logging.info(f"Found and Loaded Rosters")
+            await ctx.reply(f"Roster Information Reloaded.")
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Trials(bot))
