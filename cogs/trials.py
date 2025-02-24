@@ -277,9 +277,7 @@ class Trials(commands.Cog, name="Trials"):
                     is_on = True
                 if is_on:
                     logging.info(f"Updating Roster {channel_name} for member removal")
-                    Librarian.put_roster(i, rosters[i].get_roster_data(),
-                                         table_config=self.bot.config['Dynamo']["RosterDB"],
-                                         credentials=self.bot.config["AWS"])
+                    self.bot.dispatch("update_rosters_data", channel_id=i, method="save_roster")
             if was_on:
                 to_send += f"The Traitor has been removed from all active rosters."
             else:
