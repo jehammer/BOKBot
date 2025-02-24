@@ -8,15 +8,15 @@ import shutil
 import yaml
 import os
 import re
+import random
 
 # Bot-Specific Imports
-from errors import *
-from services import Utilities
+from bot.errors import *
 
 intents = Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix='!', case_insensitive=True, intents=intents)
-bot.remove_command('help')  # the help.py cog will replace the default command
+main_bot = commands.Bot(command_prefix='!', case_insensitive=True, intents=intents)
+main_bot.remove_command('help')  # the help.py cog will replace the default command
 log_name = 'log.log'
 
 
@@ -66,10 +66,10 @@ def load_languages():
 
 async def load_cogs():
     """Load cogs from the cogs folder"""
-    for filename in os.listdir('cogs'):
+    for filename in os.listdir('bot/cogs'):
         if filename.endswith('.py') and not filename.startswith('_'):
             try:
-                await bot.load_extension(f"cogs.{filename[:-3]}")
+                await main_bot.load_extension(f"bot.cogs.{filename[:-3]}")
                 logging.info(f"Successfully loaded {filename}")
 
             except Exception as e:
@@ -112,19 +112,21 @@ async def startup_logging():
 
 
 # Events and Errors
-@bot.event
+@main_bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send("That is not a command I know.")
+        styles = ["(ツ)", "(•_•)", "(°_°)", "(¬‿¬)", "(ಠ_ಠ)"]
+        shrug = f"¯\\\\\\_{random.choice(styles)}\\_/¯"
+        await ctx.reply(f"{shrug}")
     elif isinstance(error, commands.MissingRole):
-        await ctx.send(f"You do not have permission to use this command. {str(error)}")
+        await ctx.reply(f"You do not have permission to use this command. {str(error)}")
     elif isinstance(error, commands.NotOwner):
-        await ctx.send(f"You are not my creator. You may not use this command.")
+        await ctx.reply(f"You are not my creator. You may not use this command.")
     elif isinstance(error, UnknownError):
         logging.error(f"UNKNOWN ERROR REACHED: {str(error)}")
-        await ctx.send(f"Unreachable code has been reached. Logging details. Alerting Creator.")
-        guild = bot.get_guild(bot.config['guild'])
-        creator = guild.get_member(bot.config["creator"])
+        await ctx.reply(f"Unreachable code has been reached. Logging details. Alerting Creator.")
+        guild = main_bot.get_guild(main_bot.config['guild'])
+        creator = guild.get_member(main_bot.config["creator"])
         await creator.send(f"{str(error)}")
     elif isinstance(error, NoDefaultError):
         await ctx.reply(f"{str(error)}")
@@ -145,30 +147,30 @@ async def on_tree_error(interaction: Interaction, error: app_commands.AppCommand
         logging.error(f"{str(error)}")
 
 
-bot.tree.on_error = on_tree_error
+main_bot.tree.on_error = on_tree_error
 
 
 async def set_playing():
-    await bot.change_presence(activity=Game(name=bot.config['presence_message']))
+    await main_bot.change_presence(activity=Game(name=main_bot.config['presence_message']))
     logging.info(f"Status has been set")
 
 
-@bot.event
+@main_bot.event
 async def on_ready():
-    logging.info(f"Logged in as: {bot.user.name}")
+    logging.info(f"Logged in as: {main_bot.user.name}")
     await set_playing()
     logging.info('Bot is ready for use')
     logging.info('Sending out load_on_ready Event')
-    bot.dispatch('load_on_ready', bot)
+    main_bot.dispatch('load_on_ready', main_bot)
 
 
 async def main():
-    async with bot:
+    async with main_bot:
         await startup_logging()
-        bot.config = load_configurations()
-        bot.language = load_languages()
+        main_bot.config = load_configurations()
+        main_bot.language = load_languages()
         await load_cogs()
-        await bot.start(bot.config['bot']['token'])
+        await main_bot.start(main_bot.config['bot']['token'])
 
 
 asyncio.run(main())
