@@ -620,7 +620,7 @@ class Trials(commands.Cog, name="Trials"):
                                                 credentials=self.bot.config["AWS"])
             if counts is not None:
                 embed = EmbedFactory.create_count(counts, self.bot.language[user_language]['ui']['Count'],
-                                                  ctx.author.name, ctx.guild.name)
+                                                  ctx.author.display_name, ctx.guild.name)
                 await ctx.reply(embed=embed)
             else:
                 await ctx.send(
