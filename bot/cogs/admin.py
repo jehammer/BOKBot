@@ -2,13 +2,11 @@ import discord
 from discord.ext import commands, tasks
 import logging
 import asyncio
-import decor.perms as permissions
-import os
+from bot import decor as permissions
 import datetime
 import shutil
 import re
 import yaml
-from pymongo import MongoClient
 import os
 import time
 

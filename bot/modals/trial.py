@@ -1,8 +1,8 @@
-from models.roster import Roster
+from bot.models.roster import Roster
 from discord.ui import Modal, TextInput
-from discord import Interaction, TextStyle, Embed, Color, Role
+from discord import Interaction, TextStyle, Role
 from discord.utils import get
-from services import Utilities, RosterExtended, EmbedFactory
+from bot.services import Utilities, RosterExtended, EmbedFactory
 import logging
 
 logging.basicConfig(

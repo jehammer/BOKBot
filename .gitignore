@@ -7,10 +7,10 @@ venv/
 *.log
 *.pyc
 config/config.yaml
-cogs/_transfer.py
-cogs/transfer.py
+bot/cogs/_transfer.py
+bot/cogs/transfer.py
 _config.yaml
-cogs/_scratchwork.py
-cogs/scratchwork.py
+bot/cogs/_scratchwork.py
+bot/cogs/scratchwork.py
 config/roles.yaml
 config/roster.yaml

@@ -1,6 +1,6 @@
 from discord.ui import Modal, TextInput
-from discord import Interaction, TextStyle, Embed, Color
-from database import Librarian
+from discord import Interaction, TextStyle
+from bot.database import Librarian
 import logging
 
 logging.basicConfig(

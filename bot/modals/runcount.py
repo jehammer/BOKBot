@@ -1,5 +1,5 @@
-from models import Roster
-from services import RosterExtended
+from bot.models import Roster
+from bot.services import RosterExtended
 from discord import Interaction, TextStyle
 from discord.ui import TextInput, Modal
 

@@ -1,6 +1,6 @@
 from aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from models import Roster, Count, Rank
+from bot.models import Roster, Count, Rank
 
 
 def create_instance(table_config, credentials):

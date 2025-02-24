@@ -6,9 +6,9 @@ import time
 from discord import app_commands, Interaction, Member
 from discord.ext import commands
 
-from models import Rank
-from services import Utilities, EmbedFactory
-from database import Librarian
+from bot.models import Rank
+from bot.services import Utilities, EmbedFactory
+from bot.database import Librarian
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -26,14 +26,14 @@ class Fun(commands.Cog, name="Fun"):
 
 
     @commands.command(name="joined")
-    async def joined(self, ctx: commands.context, m: discord.Member = None):
+    async def joined(self, ctx: commands.context, m: Member = None):
         """Tells you when you joined the server in M-D-Y Format"""
         try:
             if m is None:
                 user = ctx.message.author
                 await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
                                 f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}{Utilities.suffix(user.joined_at.day)}"
-                                f"{user.joined_at.year}")
+                                f" {user.joined_at.year}")
             else:
                 await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
                                 f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}{Utilities.suffix(m.joined_at.day)}"

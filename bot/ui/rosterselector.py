@@ -1,7 +1,6 @@
 from discord import ui, SelectOption, Interaction
-from services import Utilities
-from database import Librarian
-from modals import *
+from bot.services import Utilities
+from bot.modals import *
 
 
 class RosterSelect(ui.Select):

@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 from functools import wraps
 
-from services import Utilities
+from bot.services import Utilities
 
 
 # TODO: Change these to use Role Names rather than getting the Roles themselves

@@ -1,18 +1,16 @@
 #!/usr/bin/python3
-import random
 from discord.ext import commands
-from discord import app_commands, Interaction, utils, TextStyle, Embed, Color, Member, Role, User
+from discord import app_commands, Interaction, utils, Member, Role
 import logging
-import asyncio
 
 # My created imports
-import decor as permissions
-from errors import *
-from modals import *
-from models import Roster, Count
-from services import Utilities, RosterExtended, EmbedFactory
-from database import Librarian
-from ui import RosterSelector
+from bot import decor as permissions
+from bot.errors import *
+from bot.modals import *
+from bot.models import Roster, Count
+from bot.services import Utilities, RosterExtended, EmbedFactory
+from bot.database import Librarian
+from bot.ui import RosterSelector
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -31,7 +29,6 @@ class Trials(commands.Cog, name="Trials"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
 
     @commands.Cog.listener()
     async def on_load_on_ready(self, bot):

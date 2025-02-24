@@ -2,7 +2,7 @@ import logging
 import discord
 import yaml
 from discord.ext import commands
-from services import Utilities
+from bot.services import Utilities
 from difflib import ndiff
 
 logging.basicConfig(

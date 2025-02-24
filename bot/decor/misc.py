@@ -1,7 +1,7 @@
-from services import Utilities
+from bot.services import Utilities
 from functools import wraps
 from discord.ext import commands
-from errors import BotUserError
+from bot.errors import BotUserError
 
 def language():
     """Decorator to get set language for a function"""

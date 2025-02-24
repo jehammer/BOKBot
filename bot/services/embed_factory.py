@@ -1,6 +1,6 @@
-from discord import TextStyle, Embed, Color
+from discord import Embed, Color
 import logging
-from models import Roster, Rank, Count
+from bot.models import Roster, Rank, Count
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',

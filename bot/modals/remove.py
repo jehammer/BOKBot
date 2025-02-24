@@ -1,8 +1,7 @@
-from models.roster import Roster
+from bot.models.roster import Roster
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle
-from discord.utils import get
-from services import Utilities
+from bot.services import Utilities
 import logging
 
 

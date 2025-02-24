@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import logging
-import decor.perms as permissions
+from bot import decor as permissions
 from pymongo import MongoClient
 
 logging.basicConfig(

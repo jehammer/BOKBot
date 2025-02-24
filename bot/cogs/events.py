@@ -2,7 +2,7 @@ from discord.ext import commands
 import random
 import logging
 
-from services import Utilities
+from bot.services import Utilities
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
