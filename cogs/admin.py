@@ -39,15 +39,6 @@ def gather_roles(guild, config):
     other = discord.utils.get(guild.roles, name=config["roles"]["other"])
     logging.info(f"Global Roles Set")
 
-def save_members_list(config, member_dict):
-    client = MongoClient(config['mongo'])
-    database = client['bot']
-    misc = database.misc
-    rec = {
-        'members': 'list',
-        'data': member_dict
-    }
-    misc.update_one({'members': 'list'},  {'$set': rec})
 
 class Admin(commands.Cog, name="Admin"):
     """Receives Administration commands"""
@@ -55,7 +46,6 @@ class Admin(commands.Cog, name="Admin"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.scheduled_good_morning.start()
-        self.update_name_mapping.start()
 
     @commands.command(name="servers", hidden=True)
     @permissions.creator_only()
@@ -207,92 +197,6 @@ class Admin(commands.Cog, name="Admin"):
             new_command = ctx.invoked_with
         await ctx.reply(f"{self.bot.language[user_language]['replies']['MovedAnswer'] % new_command}")
 
-
-    @commands.command(name="data")
-    async def dm_users_date(self, ctx: commands.Context):
-        """Get a DM of all Information BOKBot has on you"""
-        try:
-            await ctx.author.send(f"Hello! Just a moment as I gather up all your information. Please note this only includes "
-                                  f"saved information that is permanent, so any rosters you are on right now "
-                                  f"will not be included in the data sent to you.")
-
-            client = MongoClient(self.bot.config['mongo'])
-            database = client['bot']
-            ranks = database.ranks
-            defaults = database.defaults
-            counts = database.count
-
-            user_id = ctx.message.author.id
-
-            rec = defaults.find_one({'userID': user_id})
-            if rec is None:
-                default = "No Default Set"
-            else:
-                default = f"Default is set to: {rec['default']}"
-
-            rec = ranks.find_one({'userID': user_id})
-            if rec is None:
-                rank = "No Rankings Done"
-            else:
-                rec = rec['data']
-                rank = f"Total Times Ranked: {rec['count']}\n" \
-                       f"Last Ranked: {rec['last_called']}\n" \
-                       f"Lowest Rank: {rec['lowest']}\n" \
-                       f"Highest Rank: {rec['highest']}\n" \
-                       f"Doubles: {rec['doubles']}\n" \
-                       f"Singles: {rec['singles']}\n" \
-                       f"69 Count: {rec['six_nine']}\n" \
-                       f"420 Count: {rec['four_twenty']}\n" \
-                       f"Boob Count: {rec['boob']}"
-
-            rec = counts.find_one({'userID': user_id})
-            if rec is None:
-                count = "No Raid Counts Recorded"
-            else:
-                count = f"Total Runs: {rec['raidCount']}\n" \
-                        f"Last Ran: {rec['lastRaid']}\n" \
-                        f"Last Date: {rec['lastDate']}\n" \
-                        f"DPS Runs: {rec['dpsRuns']}\n" \
-                        f"Tank Runs: {rec['tankRuns']}\n" \
-                        f"Healer Runs: {rec['healerRuns']}"
-
-            today = datetime.datetime.today()
-            name = ctx.message.author.display_name
-
-            text_lines = f"Data Request for {name} as of {today}\n\n" \
-                         f"Discord User ID: {user_id}\n\n" \
-                         f"##ROSTER DEFAULT INFORMATION##\n" \
-                         f"{default}\n\n" \
-                         f"##RANKING INFORMATION##\n" \
-                         f"{rank}\n\n" \
-                         f"##RUN COUNT INFORMATION##\n" \
-                         f"{count}\n\n"
-
-            # write to file
-            with open(f"{name}.txt", "w") as file:
-                file.write(text_lines)
-
-            logging.info(f"Sending data request file to: {name}")
-
-            # send file to Discord in message
-            with open(f"{name}.txt", "rb") as file:
-                await ctx.author.send("Your data has arrived:", file=discord.File(file, f"{name}.txt"))
-
-            if os.path.exists(f"{name}.txt"):
-                os.remove(f"{name}.txt")
-            else:
-                logging.error(f"Unable to find created file for the user")
-
-            return
-
-        except discord.Forbidden:
-            await ctx.reply(f"For privacy reasons (not that I store anything not publicly available, but just to keep anyone's concern down) "
-                            "this function requires you to have DMs available to me, please enable DMs on this server from non-friends so "
-                            "I can send you this data.")
-        except Exception as e:
-            logging.error(f"GET ALL USER DATA COMMAND ERROR: {str(e)}")
-            raise Exception(e)
-
     # EVENTS:
 
     @commands.Cog.listener()
@@ -346,17 +250,6 @@ class Admin(commands.Cog, name="Admin"):
         except Exception as e:
             logging.error(f"Good Morning Task Error: {str(e)}")
 
-    @tasks.loop(time=scheduled_time)
-    async def update_name_mapping(self):
-        try:
-            guild = self.bot.get_guild(self.bot.config['guild'])
-            members_dict = {}
-            for member in guild.members:
-                members_dict[str(member.id)] = member.display_name
-            save_members_list(self.bot.config, members_dict)
-
-        except Exception as e:
-            logging.error(f"Members Dict Update Task Error: {str(e)}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
