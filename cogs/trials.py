@@ -688,7 +688,8 @@ class Trials(commands.Cog, name="Trials"):
                 await ctx.send(
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Count']['NoHistory'])}")
         except Exception as e:
-            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
+            await ctx.send(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
             logging.error(f"Count check error: {str(e)}")
 
     @app_commands.command(name='add', description='For Raid Leads: Manually add to roster')
