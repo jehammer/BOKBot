@@ -1,4 +1,4 @@
-from aws import Dynamo
+from bot.aws import Dynamo
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from bot.models import Roster, Count, Rank
 
