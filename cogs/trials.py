@@ -228,6 +228,68 @@ class Trials(commands.Cog, name="Trials"):
                                            roles_config=self.bot.config['raids']['ranks'],
                                            creds_config=self.bot.config['AWS'])
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        """Event listener for when someone leaves the server to remove them from all rosters they are on."""
+        private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
+        try:
+            was_on = False
+            user_id = f"{member.id}"
+            to_send = f"{member.name} - {member.display_name} has left the server\n"
+            for i in rosters:
+                is_on = False
+                channel_name = ""
+                if user_id in roster[i].dps.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    rosters[i].remove_dps(user_id)
+                    to_send += f"Traitor was removed as a DPS from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in roster[i].backup_dps.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    roster[i].remove_dps(user_id)
+                    to_send += f"Traitor was removed as a backup DPS from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in roster[i].healers.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    roster[i].remove_healer(user_id)
+                    to_send += f"Traitor was removed as a Healer from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in roster[i].backup_healers.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    roster[i].remove_healer(user_id)
+                    to_send += f"Traitor was removed as a backup Healer from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in roster[i].tanks.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    roster[i].remove_tank(user_id)
+                    to_send += f"Traitor was removed as a Tank from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in roster[i].backup_tanks.keys():
+                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    roster[i].remove_tank(user_id)
+                    to_send += f"Traitor was removed as a backup Tank from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                if is_on:
+                    logging.info(f"Updating Roster {channel_name} for member removal")
+                    Librarian.put_roster(i, rosters[i].get_roster_data(),
+                                         table_config=self.bot.config['Dynamo']["RosterDB"],
+                                         credentials=self.bot.config["AWS"])
+            if was_on:
+                to_send += f"The Traitor has been removed from all active rosters."
+            else:
+                to_send += f"The Traitor was not on any active rosters."
+
+            await private_channel.send(to_send)
+        except Exception as e:
+            logging.error(f"User Roster Exit Removal Error: {str(e)}")
+            await private_channel.send(f"Unable to remove user on exit from rosters.")
+
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
     @permissions.application_has_raid_lead()
     async def create_roster(self, interaction: Interaction) -> None:
