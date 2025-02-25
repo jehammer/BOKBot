@@ -24,7 +24,6 @@ class Fun(commands.Cog, name="Fun"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.command(name="joined")
     async def joined(self, ctx: commands.context, m: Member = None):
         """Tells you when you joined the server in M-D-Y Format"""
@@ -163,7 +162,8 @@ class Fun(commands.Cog, name="Fun"):
                                table_config=self.bot.config['Dynamo']['RankDB'],
                                credentials=self.bot.config['AWS'])
 
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Rank']['Generated'] % (member.display_name, f"{ran}{Utilities.suffix(ran)}")}")
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['Rank']['Generated'] % (member.display_name, f"{ran}{Utilities.suffix(ran)}")}")
 
         except Exception as e:
             await interaction.response.send_message(
@@ -186,7 +186,8 @@ class Fun(commands.Cog, name="Fun"):
             rank_data: Rank = Librarian.get_rank(user_id=user_id, table_config=self.bot.config['Dynamo']['RankDB'],
                                                  credentials=self.bot.config['AWS'])
             if rank_data is None:
-                await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Rank']['NoHistory']}")
+                await interaction.response.send_message(
+                    f"{self.bot.language[user_language]['replies']['Rank']['NoHistory']}")
                 return
 
             embed = EmbedFactory.create_ranking(rank=rank_data, lang=self.bot.language[user_language]['ui']['Rank'],
@@ -202,59 +203,55 @@ class Fun(commands.Cog, name="Fun"):
     async def magic_eight_ball(self, ctx: commands.context):
         """Answers a question like a magic 8-ball"""
         # responses from here: https://en.wikipedia.org/wiki/Magic_8-ball#Possible_answers
-        try:
-            ran = random.randint(1, 20)
-            response = ""
-            match ran:
-                case 1:
-                    response = "It is certain."
-                case 2:
-                    response = "It is decidedly so."
-                case 3:
-                    response = "Without a doubt."
-                case 4:
-                    response = "Yes definitely."
-                case 5:
-                    response = "You may rely on it."
-                case 6:
-                    response = "As I see it, yes."
-                case 7:
-                    response = "Most likely."
-                case 8:
-                    response = "Outlook good."
-                case 9:
-                    response = "Yes."
-                case 10:
-                    response = "Signs point to yes."
-                case 11:
-                    response = "Reply hazy, try again."
-                case 12:
-                    response = "Ask again later."
-                case 13:
-                    response = "Better not tell you now."
-                case 14:
-                    response = "Cannot predict now."
-                case 15:
-                    response = "Concentrate and ask again."
-                case 16:
-                    response = "Don't count on it."
-                case 17:
-                    response = "My reply is no."
-                case 18:
-                    response = "My sources say no."
-                case 19:
-                    response = "Outlook not so good."
-                case 20:
-                    response = "Very doubtful. "
-            if ran % 2 == 1:
-                ran = random.randint(1, 10)  # Give this a like 1 in 10 chance of showing up if the number is odd
-                if ran == 2:
-                    response = "Fuck off I am sleeping."
+        ran = random.randint(1, 20)
+        response = ""
+        match ran:
+            case 1:
+                response = "It is certain."
+            case 2:
+                response = "It is decidedly so."
+            case 3:
+                response = "Without a doubt."
+            case 4:
+                response = "Yes definitely."
+            case 5:
+                response = "You may rely on it."
+            case 6:
+                response = "As I see it, yes."
+            case 7:
+                response = "Most likely."
+            case 8:
+                response = "Outlook good."
+            case 9:
+                response = "Yes."
+            case 10:
+                response = "Signs point to yes."
+            case 11:
+                response = "Reply hazy, try again."
+            case 12:
+                response = "Ask again later."
+            case 13:
+                response = "Better not tell you now."
+            case 14:
+                response = "Cannot predict now."
+            case 15:
+                response = "Concentrate and ask again."
+            case 16:
+                response = "Don't count on it."
+            case 17:
+                response = "My reply is no."
+            case 18:
+                response = "My sources say no."
+            case 19:
+                response = "Outlook not so good."
+            case 20:
+                response = "Very doubtful. "
+        if ran % 2 == 1:
+            ran = random.randint(1, 10)  # Give this a like 1 in 10 chance of showing up if the number is odd
+            if ran == 2:
+                response = "Fuck off I am sleeping."
 
-            await ctx.reply(response)
-        except Exception as e:
-            await ctx.send("Unable to use the magic, something is blocking it!")
-            logging.error("Magic 8 Ball Error: " + str(e))
+        await ctx.reply(response)
 
     @commands.command()
     async def goodnight(self, ctx: commands.context):
