@@ -94,7 +94,8 @@ class Guides(commands.Cog, name="Guides"):
     async def send_mol_twins_gif(self, ctx: commands.Context):
         """Gif for MOL Twins"""
         try:
-            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1115423531006705664/Twins_Rotate.gif")
+            await ctx.send(
+                f"https://media.discordapp.net/attachments/911730032286785536/1115423531006705664/Twins_Rotate.gif")
         except Exception as e:
             await ctx.send("Unable to send information.")
             logging.error(f"Twins error: {str(e)}")
@@ -103,7 +104,8 @@ class Guides(commands.Cog, name="Guides"):
     async def send_dsr_twins_img(self, ctx: commands.Context):
         """Img for DSR Twins"""
         try:
-            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1115423536404770957/vDSRTwins.png")
+            await ctx.send(
+                f"https://media.discordapp.net/attachments/911730032286785536/1115423536404770957/vDSRTwins.png")
         except Exception as e:
             await ctx.send("Unable to send information.")
             logging.error(f"Twins error: {str(e)}")
@@ -112,7 +114,8 @@ class Guides(commands.Cog, name="Guides"):
     async def send_three_runners_img(self, ctx: commands.Context):
         """Img for 3 backyard runners pathing"""
         try:
-            await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1141509208639021066/mol3runner.png")
+            await ctx.send(
+                f"https://media.discordapp.net/attachments/911730032286785536/1141509208639021066/mol3runner.png")
         except Exception as e:
             await ctx.send("Unable to send information.")
             logging.error(f"3runners error: {str(e)}")
@@ -125,6 +128,7 @@ class Guides(commands.Cog, name="Guides"):
         except Exception as e:
             await ctx.send("Unable to send information.")
             logging.error(f"Lokkhm error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Guides(bot))
