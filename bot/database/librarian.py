@@ -86,27 +86,6 @@ class Librarian:
         db_instance.delete(query)
 
     @staticmethod
-    def get_roster_map(table_config, credentials):
-        db_instance = create_instance(table_config, credentials)
-        query = {'key': {'S': 'rosters'}}
-        db_data = db_instance.get(query)
-        if db_data is not None and 'Item' in db_data:
-            return deserialize(db_data['Item'])['data']
-        else:
-            return None
-
-    @staticmethod
-    def put_roster_map(data, table_config, credentials):
-        db_instance = create_instance(table_config, credentials)
-        # Dictionary that is {channel ID: channel Name} mapping
-        item = {
-            'key': {'S': 'rosters'},
-            'data': {'M': serialize(data)}
-        }
-        db_instance.put(item)
-        return
-
-    @staticmethod
     def get_default(user_id, table_config, credentials):
         db_instance = create_instance(table_config, credentials)
         query = {'userID': {'S': str(user_id)}}

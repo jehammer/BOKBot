@@ -4,11 +4,10 @@ from bot.modals import *
 
 
 class RosterSelect(ui.Select):
-    def __init__(self, interaction: Interaction, cmd_called, bot, user_language, roster_map, rosters, limits=None):
+    def __init__(self, interaction: Interaction, cmd_called, bot, user_language, rosters, limits=None):
         self.channels = {}
         self.config = bot.config
         self.cmd_called = cmd_called
-        self.roster_map = roster_map
         self.language = bot.language[user_language]['replies']
         self.ui_language = bot.language[user_language]['ui']
         self.user_language = user_language
@@ -18,14 +17,13 @@ class RosterSelect(ui.Select):
         self.limits = limits
 
         options = []
-        if roster_map is None or len(roster_map) == 0:
+        if rosters is None or len(rosters) == 0:
             options.append(SelectOption(label='N/A'))
         else:
             used = []
-            for key in roster_map:
-                label = self.roster_map[key].strip()
-                if label == '':
-                    label = key
+            for i in rosters:
+                channel = self.bot.get_channel(int(i))
+                label = channel.name if channel else f"{i}"
                 if label in used:
                     found = True
                     count = 1
@@ -33,12 +31,11 @@ class RosterSelect(ui.Select):
                         new_label = f"{label}{count}".strip()
                         if new_label not in used:
                             label = new_label
-                            self.channel_mapper[label] = key
-                            found = False
+                            self.channel_mapper[label] = i
                             break
                         count += 1
                 options.append(SelectOption(label=label))
-                self.channel_mapper[label] = key
+                self.channel_mapper[label] = i
                 used.append(label)
 
         # discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
@@ -58,11 +55,6 @@ class RosterSelect(ui.Select):
                 f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoOptionsError'])}")
             return
 
-        if self.roster_map is None:
-            await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoMapError'])}")
-            return
-
         # Fetch Key from value for channel ID
         channel_id = int(self.channel_mapper[selected])
 
@@ -71,10 +63,10 @@ class RosterSelect(ui.Select):
         if self.cmd_called == "modify":
             await interaction.response.send_modal(
                 TrialModal(roster=roster, interaction=interaction, bot=self.bot, lang=self.user_language,
-                           limits=self.limits, roster_map=self.roster_map, channel=channel_id))
+                           limits=self.limits, channel=channel_id))
         elif self.cmd_called == "close":
             await interaction.response.send_modal(CloseModal(roster=roster, interaction=interaction, bot=self.bot,
-                                                             lang=self.user_language, roster_map=self.roster_map,
+                                                             lang=self.user_language,
                                                              channel_id=channel_id))
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(
@@ -88,18 +80,17 @@ class RosterSelect(ui.Select):
 
 
 class RosterSelector(ui.View):
-    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, roster_map, rosters, limits=None, *,
+    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, rosters, limits=None, *,
                  timeout=30):
         super().__init__(timeout=timeout)
         self.caller = caller
         self.bot = bot
         self.interaction = interaction
-        self.roster_map = roster_map
         self.language = bot.language[user_language]
         self.user_language = user_language
         self.limits = limits
         self.rosters = rosters
-        self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language, roster_map, rosters, limits=limits)
+        self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language, rosters, limits=limits)
         self.add_item(self.new_roster_select)
 
     async def interaction_check(self, interaction: Interaction):

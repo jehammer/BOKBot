@@ -14,7 +14,7 @@ logging.basicConfig(
 
 
 class CloseModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, channel_id=None):
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, channel_id=None):
         self.localization = bot.language[lang]["replies"]
         self.ui_language = bot.language[lang]["ui"]
         self.bot = bot
@@ -22,7 +22,6 @@ class CloseModal(Modal):
         self.config = bot.config
         self.channel_id = channel_id
         self.roster = roster
-        self.roster_map = roster_map
         self.channel = interaction.guild.get_channel(int(self.channel_id))
         if self.channel is None:
             self.name = self.channel_id

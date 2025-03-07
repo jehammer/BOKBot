@@ -19,7 +19,6 @@ logging.basicConfig(
         logging.StreamHandler()
     ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
-roster_map = {}
 rosters = {}
 limits = []
 
@@ -32,15 +31,8 @@ class Trials(commands.Cog, name="Trials"):
 
     @commands.Cog.listener()
     async def on_load_on_ready(self, bot):
-        global roster_map
         global rosters
         global limits
-        fetched = Librarian.get_roster_map(table_config=bot.config['Dynamo']["MapDB"], credentials=bot.config["AWS"])
-        if fetched is not None:
-            roster_map = fetched
-            logging.info(f"Found and Loaded Roster Map")
-        else:
-            logging.info(f"No Roster Map Found")
         fetched = Librarian.get_all_rosters(table_config=bot.config['Dynamo']["RosterDB"],
                                             credentials=bot.config["AWS"])
         if fetched is not None:
@@ -61,10 +53,8 @@ class Trials(commands.Cog, name="Trials"):
     async def on_update_rosters_data(self, channel_id, method, channel_name=None, update_roster: Roster = None,
                                      interaction: Interaction = None, user_language=None, removed=None, people=None):
         global rosters
-        global roster_map
 
         update_roster_db = False
-        update_roster_map_db = False
         is_new_roster = False
 
         channel_id = int(channel_id)
@@ -77,10 +67,7 @@ class Trials(commands.Cog, name="Trials"):
             if channel_id not in rosters.keys():
                 rosters[channel_id] = update_roster
                 logging.info(f"Loaded New Roster Into Memory")
-                roster_map[str(channel_id)] = channel_name
-                logging.info(f"Loaded New Roster Map")
                 update_roster_db = True
-                update_roster_map_db = True
                 is_new_roster = True
 
             else:
@@ -136,15 +123,9 @@ class Trials(commands.Cog, name="Trials"):
                 rosters[channel_id].memo = update_roster.memo
                 logging.info(f"Memory Roster Values Updated")
 
-            if roster_map[str(channel_id)] != channel_name:
-                roster_map[str(channel_id)] = channel_name
-                update_roster_map_db = True
-
         elif method == "close":
-            del roster_map[str(channel_id)]
             del rosters[channel_id]
-            update_roster_map_db = True
-            logging.info(f"Roster removed from Map and Roster List.")
+            logging.info(f"Roster removed from Roster List.")
 
         elif method == "remove":
             names = ""
@@ -192,17 +173,6 @@ class Trials(commands.Cog, name="Trials"):
                         f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
                     logging.error(f"Roster Save DynamoDB Error: {str(e)}")
 
-            if update_roster_map_db:
-                try:
-                    logging.info(f"Saving DB Roster Map")
-                    Librarian.put_roster_map(data=roster_map,
-                                             table_config=self.bot.config['Dynamo']["MapDB"],
-                                             credentials=self.bot.config["AWS"])
-                    logging.info(f"Updated DB Roster Map")
-                except Exception as e:
-                    await interaction.response.send_message(
-                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['DBSaveError'])}")
-                    logging.error(f"Roster Map Save DynamoDB Error: {str(e)}")
         except Exception as e:
             logging.info(f"Error on Saving Roster to DB: {str(e)}")
             alert_channel = self.bot.get_guild(self.bot.config['guild']).get_channel(self.bot.config['private'])
@@ -237,37 +207,37 @@ class Trials(commands.Cog, name="Trials"):
                 is_on = False
                 channel_name = ""
                 if user_id in roster[i].dps.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     rosters[i].remove_dps(user_id)
                     to_send += f"Traitor was removed as a DPS from {channel_name}\n"
                     was_on = True
                     is_on = True
                 elif user_id in roster[i].backup_dps.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     roster[i].remove_dps(user_id)
                     to_send += f"Traitor was removed as a backup DPS from {channel_name}\n"
                     was_on = True
                     is_on = True
                 elif user_id in roster[i].healers.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     roster[i].remove_healer(user_id)
                     to_send += f"Traitor was removed as a Healer from {channel_name}\n"
                     was_on = True
                     is_on = True
                 elif user_id in roster[i].backup_healers.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     roster[i].remove_healer(user_id)
                     to_send += f"Traitor was removed as a backup Healer from {channel_name}\n"
                     was_on = True
                     is_on = True
                 elif user_id in roster[i].tanks.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     roster[i].remove_tank(user_id)
                     to_send += f"Traitor was removed as a Tank from {channel_name}\n"
                     was_on = True
                     is_on = True
                 elif user_id in roster[i].backup_tanks.keys():
-                    channel_name = next((k for k, v in roster_map.items() if v == i), None)
+                    channel_name = self.bot.get_channel(int(i)).name
                     roster[i].remove_tank(user_id)
                     to_send += f"Traitor was removed as a backup Tank from {channel_name}\n"
                     was_on = True
@@ -290,7 +260,7 @@ class Trials(commands.Cog, name="Trials"):
     async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
-            TrialModal(None, interaction, self.bot, user_language, roster_map, limits=limits))
+            TrialModal(roster=None, interaction=interaction, bot=self.bot, lang=user_language, limits=limits))
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
@@ -298,8 +268,8 @@ class Trials(commands.Cog, name="Trials"):
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
-            view=RosterSelector(interaction, self.bot, interaction.user, "modify",
-                                user_language, roster_map, rosters, limits=limits))
+            view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="modify",
+                                user_language=user_language, rosters=rosters, limits=limits))
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
     @permissions.application_has_raid_lead()
@@ -308,7 +278,7 @@ class Trials(commands.Cog, name="Trials"):
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="close",
-                                user_language=user_language, roster_map=roster_map, rosters=rosters))
+                                user_language=user_language, rosters=rosters))
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
@@ -324,7 +294,7 @@ class Trials(commands.Cog, name="Trials"):
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="run_count",
-                                user_language=user_language, roster_map=roster_map, rosters=rosters))
+                                user_language=user_language, rosters=rosters))
 
     @app_commands.command(name="remove", description="For Raid Leads: Remove people from a roster")
     @permissions.application_has_raid_lead()
@@ -334,7 +304,7 @@ class Trials(commands.Cog, name="Trials"):
                                                 view=RosterSelector(interaction=interaction, bot=self.bot,
                                                                     caller=interaction.user,
                                                                     cmd_called="remove", user_language=user_language,
-                                                                    roster_map=roster_map, rosters=rosters))
+                                                                    rosters=rosters))
 
     @app_commands.command(name="fill", description="For Raid Leads: Fill a roster from backup")
     @permissions.application_has_raid_lead()
@@ -343,7 +313,7 @@ class Trials(commands.Cog, name="Trials"):
         await interaction.response.send_message(
             f"{self.bot.language[user_language]['replies']['SelectRoster']['Select']}",
             view=RosterSelector(interaction=interaction, bot=self.bot, caller=interaction.user, cmd_called="fill",
-                                user_language=user_language, roster_map=roster_map, rosters=rosters))
+                                user_language=user_language, rosters=rosters))
 
     @commands.command(name='limits')
     @permissions.has_raid_lead()
@@ -809,15 +779,6 @@ class Trials(commands.Cog, name="Trials"):
         except Exception as e:
             await ctx.reply(f"Unable to complete: {str(e)}")
 
-    @commands.command(name="map")
-    @permissions.creator_only()
-    async def printout_roster_map(self, ctx: commands.Context):
-        """Printout roster map directly for any debugging needs"""
-        try:
-            await ctx.reply(f"{roster_map}")
-        except Exception as e:
-            await ctx.reply(f"Unable to complete: {str(e)}")
-
     @commands.command(name="allrosters")
     @permissions.creator_only()
     async def printout_all_rosters(self, ctx: commands.Context):
@@ -837,10 +798,7 @@ class Trials(commands.Cog, name="Trials"):
                 Librarian.put_roster(i, rosters[i].get_roster_data(),
                                      table_config=self.bot.config['Dynamo']["RosterDB"],
                                      credentials=self.bot.config["AWS"])
-            Librarian.put_roster_map(data=roster_map,
-                                     table_config=self.bot.config['Dynamo']["MapDB"],
-                                     credentials=self.bot.config["AWS"])
-            await ctx.reply(f"Rosters and Mapping saved.")
+            await ctx.reply(f"Rosters saved.")
 
         except Exception as e:
             await ctx.reply(f"Unable to complete: {str(e)}")
@@ -851,15 +809,8 @@ class Trials(commands.Cog, name="Trials"):
         """Force Reload all Roster information"""
         try:
             logging.info("Force Reload Roster Information Called")
-            global roster_map
             global rosters
-            fetched = Librarian.get_roster_map(table_config=self.bot.config['Dynamo']["MapDB"],
-                                               credentials=self.bot.config["AWS"])
-            if fetched is not None:
-                roster_map = fetched
-                logging.info(f"Found and Loaded Roster Map")
-            else:
-                logging.info(f"No Roster Map Found")
+
             fetched = Librarian.get_all_rosters(table_config=self.bot.config['Dynamo']["RosterDB"],
                                                 credentials=self.bot.config["AWS"])
             if fetched is not None:

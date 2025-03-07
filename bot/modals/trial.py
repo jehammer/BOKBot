@@ -14,7 +14,7 @@ logging.basicConfig(
 
 
 class TrialModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, roster_map, limits, channel=None):
+    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, limits, channel=None):
         self.localization = bot.language[lang]['replies']
         self.ui_localization = bot.language[lang]["ui"]
         self.config = bot.config
@@ -27,7 +27,6 @@ class TrialModal(Modal):
         self.new_roster = True
         self.new_name = f""
         self.user_language = lang
-        self.roster_map = roster_map
         self.bot = bot
         self.channel = None
         self.change_name = True
@@ -201,6 +200,7 @@ class TrialModal(Modal):
                         return
                     try:
                         self.channel = await category.create_text_channel(self.new_name)
+                        self.roster.channel = self.channel.id # Set new rosters channel to the id.
                     except Exception as e:
                         await interaction.response.send_message(
                             f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantCreate'])}")
