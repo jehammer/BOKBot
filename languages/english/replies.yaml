@@ -137,6 +137,8 @@ Fill:
 Count:
   NoHistory: "0040: You have not been counted in a Roster yet."
 
+Punish: "0041: As a Coward, you are not allowed to join any rosters without the Raid Leads approval. Reach out to them."
+
 Events:
   Vet: "Veteran"
   Norm: "Normal"

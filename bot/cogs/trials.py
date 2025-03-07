@@ -369,6 +369,12 @@ class Trials(commands.Cog, name="Trials"):
         """Signs you up to a roster | `!su [optional role] [optional message]`"""
         user_language = Utilities.get_language(ctx.author)
         try:
+
+            # Disqualifier check
+            if any(self.bot.config['raids']['punish'] in role.name for role in ctx.author.roles):
+                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Punish'])}")
+                return
+
             channel_id = ctx.message.channel.id
             try:
                 if not rosters.get(channel_id):
