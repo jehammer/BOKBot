@@ -132,16 +132,20 @@ async def on_command_error(ctx, error):
         await ctx.reply(f"{str(error)}")
     elif isinstance(error, NoRoleError):
         await ctx.reply(f"{str(error)}")
+    elif isinstance(error, NotPrivateError):
+        await ctx.reply(f"{str(error)}")
     else:
         await ctx.send("Unable to complete the command. I am not sure which error was thrown.")
         logging.error(f"Generic Error: {str(error)}")
 
 
-async def on_tree_error(interaction: Interaction, error: app_commands.AppCommandError):
+async def on_tree_error(interaction: Interaction, error):
     if isinstance(error, app_commands.MissingPermissions):
         return await interaction.response.send_message(f"You're missing permissions to use that")
     elif isinstance(error, app_commands.MissingRole):
         return await interaction.response.send_message(f"{str(error)}")
+    elif isinstance(error, NotPrivateError):
+        return await interaction.response.send_message(f"{str(error)}", ephemeral=True)
     else:
         await interaction.response.send_message(f"Some weird error is being thrown. Not sure what it is")
         logging.error(f"{str(error)}")

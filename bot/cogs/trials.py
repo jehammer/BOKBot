@@ -257,6 +257,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name='trial', description='For Raid Leads: Opens Trial Creation Modal')
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
@@ -264,6 +265,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def modify_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(
@@ -273,6 +275,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="close", description="For Raid Leads: Close out a Roster")
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def close_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(
@@ -282,6 +285,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name='prog', description='For Raid Leads: Sets Prog role information')
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def set_prog_roles(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
@@ -289,6 +293,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="runcount", description="For Raid Leads: Increases a rosters members run counts.")
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def increase_run_count(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(
@@ -298,6 +303,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="remove", description="For Raid Leads: Remove people from a roster")
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def remove_people_from_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message("Select the roster",
@@ -308,6 +314,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @app_commands.command(name="fill", description="For Raid Leads: Fill a roster from backup")
     @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
     async def fill_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_message(

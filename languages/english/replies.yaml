@@ -139,6 +139,8 @@ Count:
 
 Punish: "0041: As a Coward, you are not allowed to join any rosters without the Raid Leads approval. Reach out to them."
 
+NotPrivate: "This command can only be called from the Playground channel!"
+
 Events:
   Vet: "Veteran"
   Norm: "Normal"
