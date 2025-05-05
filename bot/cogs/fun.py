@@ -24,23 +24,6 @@ class Fun(commands.Cog, name="Fun"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="joined")
-    async def joined(self, ctx: commands.context, m: Member = None):
-        """Tells you when you joined the server in M-D-Y Format"""
-        try:
-            if m is None:
-                user = ctx.message.author
-                await ctx.reply(f"According to the records you joined {ctx.guild.name} on "
-                                f"{calendar.month_name[user.joined_at.month]} {user.joined_at.day}{Utilities.suffix(user.joined_at.day)}"
-                                f" {user.joined_at.year}")
-            else:
-                await ctx.reply(f"According to the records {m.display_name} joined {ctx.guild.name} on "
-                                f"{calendar.month_name[m.joined_at.month]} {m.joined_at.day}{Utilities.suffix(m.joined_at.day)}"
-                                f"{m.joined_at.year}")
-        except Exception as e:
-            logging.error("Joined command error: " + str(e))
-            await ctx.send("Unable to fetch joined information.")
-
     @commands.command(name="fishing")
     async def fishing(self, ctx: commands.Context):
         """Glub Glub"""
