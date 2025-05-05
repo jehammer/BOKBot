@@ -611,6 +611,7 @@ class Trials(commands.Cog, name="Trials"):
     async def set_default_role(self, ctx: commands.Context, role="check", **kwargs):
         """Set or check your default for rosters | `!default [optional: role]`"""
         # TODO: Make Role mapper for this from the supported languages to dps, healer, or tank
+        # TODO: Make it so this can be deleted with entering Clear or None as possible options
         language = kwargs.get('language')
         try:
             role = role.lower()
