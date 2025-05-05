@@ -42,7 +42,10 @@ Trials:
         long: |
           Set or Check your default for rosters, call just `!default` to check your current default, or use 
           `!default [role]` to set a default such as `!default dps`
-    Interaction: None
+      count:
+        short: "Check your raid history from rosters."
+        long: None
+    Interactions: None
   RaidLeads:
     Text:
       limits:
@@ -64,6 +67,25 @@ Trials:
       runcount:
         short: "Increase the runcount for roster members without closing"
         long: None
+      remove:
+        short: "Remove someone from a roster"
+        long: None
+      fill:
+        short: "Fill roster from backup"
+        long: None
+      limits:
+        short: "Check roster limit options"
+        long: None
+      add:
+        short: "Add someone to a roster"
+        long: None
+      grant-role:
+        short: "Grant a Prog role to someone."
+        long: None
+      remove-role:
+        short: "Remove a Prog role from someone."
+        long: None
+
   ProgLeads:
     Text: None
     Interactions:
@@ -90,4 +112,64 @@ Events:
         long: None
       zone:
         short: "Returns a random storyline zone to go to"
+        long: None
+
+Fun:
+  Everyone:
+    Text:
+      fishing:
+        short: "Glub Glub"
+        long: None
+      jabs:
+        short: "The Templars do be like that"
+        long: None
+      facepalm:
+        short: "Arma every other second"
+        long: None
+      fart:
+        short: "Explosive"
+        long: None
+      dungeons:
+        short: "DUNGEONS"
+        long: NOne
+      bokemon:
+        short: "A link to the perfect song"
+        long: None
+      thepull:
+        short: "Drak got the thing"
+        long: None
+      chainz:
+        short: "Just tell him"
+        long: None
+      logz:
+        short: "Actual gif of him"
+        long: None
+      pizza:
+        short: "Leahs favorite early morning/late night meal."
+        long: None
+      ec:
+        short: "You have it!"
+        long: None
+      noec:
+        short: "You don't have it!"
+        long: None
+      noquestionsasked:
+        short: "Absolutely none"
+        long: None
+      cover:
+        short: "Put this over your chat when streaming!"
+        long: None
+      8ball:
+        short: "It is in the name"
+        long: None
+      goodnight:
+        short: "Sleep tight!"
+        long: None
+
+    Interactions:
+      rank:
+        short: "See how much BOKBot likes you today!"
+        long: None
+      kowtow:
+        short: "Check your history of /rank"
         long: None
