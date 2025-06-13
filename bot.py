@@ -10,6 +10,7 @@ import os
 import re
 import random
 
+from bot.database import init_librarian
 # Bot-Specific Imports
 from bot.errors import *
 
@@ -163,6 +164,7 @@ async def set_playing():
 async def on_ready():
     logging.info(f"Logged in as: {main_bot.user.name}")
     await set_playing()
+    main_bot.librarian = init_librarian(main_bot.config['bot']['mongo'])
     logging.info('Bot is ready for use')
     logging.info('Sending out load_on_ready Event')
     main_bot.dispatch('load_on_ready', main_bot)

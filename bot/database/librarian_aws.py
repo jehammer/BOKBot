@@ -30,7 +30,7 @@ def deserialize(data):
     return deserialized
 
 
-class Librarian:
+class LibrarianAWS:
     """
     Utility Service Class featuring static methods to consolidate DynamoDB interactions into one class rather than
     spread out across various components.
