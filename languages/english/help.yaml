@@ -5,6 +5,7 @@
 
 
 Trials:
+  Details: "Commands related to the Roster System"
   Everyone:
     Text:
       su:
@@ -96,6 +97,7 @@ Trials:
         short: "Remove a Prog role from someone."
         long: None
 Events:
+  Details: "For PVE/PVP Type Stuff"
   Everyone:
     Text:
       ntrial:
@@ -115,6 +117,7 @@ Events:
         long: None
 
 Fun:
+  Details: "Quirky little things BOKBot does"
   Everyone:
     Text:
       fishing:
@@ -173,3 +176,17 @@ Fun:
       kowtow:
         short: "Check your history of /rank"
         long: None
+Admin:
+  Details: "For Administration of BOKBot"
+
+Shames:
+  Details: "See peoples shameful moments"
+
+Guides:
+  Details: "Helpful Guides for when in Trials"
+
+Roles:
+  Details: "Commands related to Discord Roles"
+
+Helpers:
+  Details: "Commands for Help from BOKBot"
