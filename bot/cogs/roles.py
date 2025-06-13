@@ -51,6 +51,7 @@ def save_roles_info(config):
         }
         misc.insert_one(rec)
 
+
 class Roles(commands.Cog, name="Roles"):
     """Commands related to Discord roles"""
 
@@ -62,17 +63,12 @@ class Roles(commands.Cog, name="Roles"):
         set_roles_info(bot)
         logging.info(f"Roles Cog Roles Set")
 
-
     @commands.command(name="agree")
     async def agree(self, ctx: commands.Context):
         """For agreeing with the rules of the discord | `!agree`"""
         try:
             await ctx.author.remove_roles(recruits_role)
             await ctx.author.add_roles(agree_role)
-            await ctx.author.send(self.bot.config['agree'])
-        except discord.Forbidden:
-            await ctx.reply(f"I need permission to DM you for this. Please enable DMs on this server.\n"
-                            f"I have granted you the role for now, call the command later on for me to DM you important info!")
         except Exception as e:
             await ctx.send("Unable to grant the role, please notify an Admin/Officer")
             logging.error(f"Agree Error: {str(e)}")
@@ -107,10 +103,6 @@ class Roles(commands.Cog, name="Roles"):
             await member.add_roles(discord.utils.get(guild.roles, name=role))
             if main_role is not None:
                 await member.add_roles(discord.utils.get(guild.roles, name=main_role))
-            await member.send(f"Added role: {role}")
-        except discord.Forbidden as e:
-            logging.error(
-                f"Add Role Error: Forbidden to DM {member.display_name} after adding role, Message: {str(e)}")
         except KeyError as e:
             channel = member.guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(
@@ -140,7 +132,6 @@ class Roles(commands.Cog, name="Roles"):
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
             await member.remove_roles(discord.utils.get(guild.roles, name=role))
-            await member.send(f"Removed role: {role}")
             if role_type == "misc":
                 return
             all_roles = set((self.bot.config["vanity"][role_type]).values())
@@ -161,10 +152,6 @@ class Roles(commands.Cog, name="Roles"):
                     case "stam":
                         main_role = "DPS"
                 await member.remove_roles(discord.utils.get(guild.roles, name=main_role))
-                await member.send(f"You have removed all {main_role} vanities and have been removed from the {main_role} tag")
-        except discord.Forbidden as e:
-            logging.error(
-                f"Remove Role Error: Forbidden to DM {member.display_name} after removing role, Message: {str(e)}")
         except KeyError as e:
             channel = guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(f"User: {member.display_name} attempted to remove role but I could not find that role "
