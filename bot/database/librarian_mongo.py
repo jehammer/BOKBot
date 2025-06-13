@@ -95,6 +95,10 @@ class Librarian:
             upsert=True
         )
 
+    def delete_default(self, user_id):
+        query = {"userID": user_id}
+        self._database.defaults.delete_one(query)
+
     # Count tracking
     def get_count(self, user_id):
         db_data = self._database.count.find_one({"userID": user_id})
@@ -120,6 +124,10 @@ class Librarian:
             item,
             upsert=True
         )
+
+    def delete_count(self, user_id):
+        query = {"userID": user_id}
+        self._database.count.delete_one(query)
 
     # Progs
     def get_progs(self):
@@ -162,6 +170,10 @@ class Librarian:
             },
             upsert=True
         )
+
+    def delete_rank(self, user_id):
+        query = {"userID": user_id}
+        self._database.ranks.delete_one(query)
 
     # Role channel
     def get_role_channel(self, collection_name):

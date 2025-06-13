@@ -1,4 +1,5 @@
 import discord
+from discord import Member
 from discord.ext import commands, tasks
 import logging
 import asyncio
@@ -19,19 +20,19 @@ logging.basicConfig(
 
 scheduled_time = datetime.time(13, 0, 0, 0)
 
-
-role = None
+default = None
 ranks = None
 poons = None
 other = None
 
+
 def gather_roles(guild, config):
     """Loads the starting roles for people when joining """
-    global role
+    global default
     global ranks
     global poons
     global other
-    role = discord.utils.get(guild.roles, name=config["roles"]["default"])
+    default = discord.utils.get(guild.roles, name=config["roles"]["default"])
     ranks = discord.utils.get(guild.roles, name=config["roles"]["ranks"])
     poons = discord.utils.get(guild.roles, name=config["roles"]["poons"])
     other = discord.utils.get(guild.roles, name=config["roles"]["other"])
@@ -180,9 +181,9 @@ class Admin(commands.Cog, name="Admin"):
             logging.error(f"Sync Error: {str(e)}")
             await ctx.send(f"There was an issue syncing, check the logs for more info.")
 
-
     @commands.command(name='trial',
-                      aliases=['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit', 'call', 'modify',
+                      aliases=['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit', 'call',
+                               'modify',
                                'fill', 'close', 'runcount', 'remove', 'add', 'rank', 'kowtow'],
                       hidden=True)
     async def old_commands_alert(self, ctx: commands.Context):
@@ -204,9 +205,8 @@ class Admin(commands.Cog, name="Admin"):
     async def on_member_join(self, member):
         try:
             guild = member.guild
-            base = self.bot.config["roles"]['default']
-            if base != "none":
-                await member.add_roles(role, ranks, poons, other)
+            if self.bot.config["roles"]['default'] != "none":
+                await member.add_roles(default, ranks, poons, other)
                 logging.info(
                     f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
             await guild.system_channel.send(
@@ -219,6 +219,28 @@ class Admin(commands.Cog, name="Admin"):
             private_channel = guild.get_channel(bot.config['administration']['private'])
             await private_channel.send("Unable to apply initial role and/or welcome the new user")
             logging.error(f"Member Join Error: {str(e)}")
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: Member):
+        private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
+        to_send = ''
+        try:
+            # Delete Default
+            self.bot.librarian.delete_default(member.id)
+            to_send += 'Deleted Default\n'
+
+            # Default Ranks
+            self.bot.librarian.delete_rank(member.id)
+            to_send += 'Deleted Ranks\n'
+
+            # Delete Count
+            self.bot.librarian.delete_count(member.id)
+            to_send += 'Deleted Counts\n'
+
+            await private_channel.send(to_send)
+        except Exception as e:
+            await private_channel.send("Unable to delete Member data")
+            logging.error(f"Member Remove Error: {str(e)}")
 
     # AUTOMATED TASKS
     @tasks.loop(time=scheduled_time)
@@ -235,12 +257,15 @@ class Admin(commands.Cog, name="Admin"):
                 today_day = today.day
                 today_year = today.year
                 for member in guild.members:
+                    if any(self.bot.config["roles"]['default'] in role.name for role in member.roles):
+                        continue
                     joined = member.joined_at
                     joined_month = joined.month
                     joined_day = joined.day
                     joined_year = joined.year
                     if today_month == joined_month and today_day == joined_day and today_year > joined_year:
                         await channel.send(f"{member.mention} Happy Anniversary!")
+                # TODO: Implement BOKiversary for May 4th each year and BOKBot Birthday in November checks
             except Exception as e:
                 await channel.send("Unable to get the Anniversaries.")
                 logging.error(f"Good Morning Task Anniversary Error: {str(e)}")
