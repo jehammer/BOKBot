@@ -30,9 +30,7 @@ class RunCountModal(Modal):
             inc_val = int(self.num.value)
             if inc_val > 10:
                 raise ValueError
-            RosterExtended.increase_roster_count(self.roster, inc_val,
-                                                 table_config=self.bot.config['Dynamo']["CountDB"],
-                                                 creds_config=self.bot.config["AWS"])
+            RosterExtended.increase_roster_count(self.roster, inc_val, librarian=self.bot.librarian)
         except ValueError:
             await interaction.response.send_message(
                 f"{Utilities.format_error(self.user_language, self.localization['Close']['NotNumberError'])}")

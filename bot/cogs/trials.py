@@ -9,7 +9,6 @@ from bot.errors import *
 from bot.modals import *
 from bot.models import Roster, Count
 from bot.services import Utilities, RosterExtended, EmbedFactory
-from bot.database import Librarian
 from bot.ui import RosterSelector
 
 logging.basicConfig(
@@ -33,16 +32,13 @@ class Trials(commands.Cog, name="Trials"):
     async def on_load_on_ready(self, bot):
         global rosters
         global limits
-        fetched = Librarian.get_all_rosters(table_config=bot.config['Dynamo']["RosterDB"],
-                                            credentials=bot.config["AWS"])
+        fetched = self.bot.librarian.get_all_rosters()
         if fetched is not None:
             rosters = fetched
             logging.info(f"Found and Loaded Rosters")
         else:
             logging.info(f"No Rosters Found")
-        fetched = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
-                                            roles_config=self.bot.config['raids']['ranks'],
-                                            creds_config=self.bot.config['AWS'])
+        fetched = RosterExtended.get_limits(librarian=self.bot.librarian, roles_config=self.bot.config['raids']['ranks'])
         if fetched is not None:
             limits = fetched
             logging.info(f"Found and Loaded Limits")
@@ -163,9 +159,7 @@ class Trials(commands.Cog, name="Trials"):
             if update_roster_db:
                 try:
                     logging.info(f"Saving Roster to DB")
-                    Librarian.put_roster(channel_id, rosters[channel_id].get_roster_data(),
-                                         table_config=self.bot.config['Dynamo']["RosterDB"],
-                                         credentials=self.bot.config["AWS"])
+                    self.bot.librarian.put_roster(channel_id, rosters[channel_id].get_roster_data())
                     logging.info(f"Saved Roster to DB")
 
                 except Exception as e:
@@ -191,9 +185,7 @@ class Trials(commands.Cog, name="Trials"):
     @commands.Cog.listener()
     async def on_update_limits_data(self):
         global limits
-        limits = RosterExtended.get_limits(table_config=self.bot.config['Dynamo']['ProgDB'],
-                                           roles_config=self.bot.config['raids']['ranks'],
-                                           creds_config=self.bot.config['AWS'])
+        limits = RosterExtended.get_limits(librarian=self.bot.librarian, roles_config=self.bot.config['raids']['ranks'])
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -391,8 +383,7 @@ class Trials(commands.Cog, name="Trials"):
 
             if role is None:
                 # Check for a default! If there is no default and no role specified then tell the person.
-                role = Librarian.get_default(user_id, table_config=self.bot.config['Dynamo']['DefaultDB'],
-                                             credentials=self.bot.config['AWS'])
+                role = self.bot.librarian.get_default(user_id)
                 if role is None:
                     # Role is still none, tell the user there is a problem.
                     await ctx.reply(
@@ -620,9 +611,7 @@ class Trials(commands.Cog, name="Trials"):
                 role = "healer"
             if role == "dps" or role == "healer" or role == "tank":
                 try:
-                    Librarian.put_default(user_id=user_id, default=role,
-                                          table_config=self.bot.config['Dynamo']['DefaultDB'],
-                                          credentials=self.bot.config['AWS'])
+                    self.bot.librarian.put_default(user_id=user_id, default=role)
                     await ctx.reply(
                         f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['Set'] % role}")
                 except Exception as e:
@@ -632,8 +621,7 @@ class Trials(commands.Cog, name="Trials"):
                     return
             elif role == "check":
                 try:
-                    default = Librarian.get_default(user_id, table_config=self.bot.config['Dynamo']['DefaultDB'],
-                                                    credentials=self.bot.config['AWS'])
+                    default = self.bot.librarian.get_default(user_id)
                     if default is None:
                         await ctx.reply(
                             f"{ctx.message.author.display_name}: {self.bot.language[language]['replies']['Default']['NoneSet']}")
@@ -657,8 +645,7 @@ class Trials(commands.Cog, name="Trials"):
         """A way for people to check their number of raid runs"""
         user_language = Utilities.get_language(ctx.author)
         try:
-            counts: Count = Librarian.get_count(ctx.author.id, table_config=self.bot.config['Dynamo']["CountDB"],
-                                                credentials=self.bot.config["AWS"])
+            counts: Count = self.bot.librarian.get_count(ctx.author.id)
             if counts is not None:
                 embed = EmbedFactory.create_count(counts, self.bot.language[user_language]['ui']['Count'],
                                                   ctx.author.display_name, ctx.guild.name)
@@ -803,9 +790,7 @@ class Trials(commands.Cog, name="Trials"):
         """Force Save current Roster Map and Rosters"""
         try:
             for i in rosters:
-                Librarian.put_roster(i, rosters[i].get_roster_data(),
-                                     table_config=self.bot.config['Dynamo']["RosterDB"],
-                                     credentials=self.bot.config["AWS"])
+                self.bot.librarian.put_roster(i, rosters[i].get_roster_data())
             await ctx.reply(f"Rosters saved.")
 
         except Exception as e:
@@ -819,8 +804,7 @@ class Trials(commands.Cog, name="Trials"):
             logging.info("Force Reload Roster Information Called")
             global rosters
 
-            fetched = Librarian.get_all_rosters(table_config=self.bot.config['Dynamo']["RosterDB"],
-                                                credentials=self.bot.config["AWS"])
+            fetched = self.bot.librarian.get_all_rosters()
             if fetched is not None:
                 rosters = fetched
                 logging.info(f"Found and Loaded Rosters")

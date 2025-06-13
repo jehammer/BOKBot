@@ -21,7 +21,7 @@ class ProgModal(Modal):
         self.initialize()
 
     def initialize(self):
-        roles = Librarian.get_progs(self.config['Dynamo']['ProgDB'], self.config['AWS'])
+        roles = self.bot.librarian.get_progs()
         default_vals = ""
         if roles is not None:
             for i in roles:
@@ -38,7 +38,7 @@ class ProgModal(Modal):
     async def on_submit(self, interaction: Interaction):
         role_list = self.roles_input.value.splitlines()
         logging.info(f"Updating Prog Role Data")
-        Librarian.put_progs(role_list, self.config['Dynamo']['ProgDB'], self.config['AWS'])
+        self.bot.librarian.put_progs(role_list)
         logging.info(f"Updated Prog Role Data")
         self.bot.dispatch("update_limits_data")
         await interaction.response.send_message(self.language['Prog']['Updated'])

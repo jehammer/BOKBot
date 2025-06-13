@@ -75,9 +75,7 @@ class CloseModal(Modal):
                     inc_val = 1
                 elif inc_val > 10:
                     raise ValueError
-                RosterExtended.increase_roster_count(self.roster, inc_val,
-                                                     table_config=self.bot.config['Dynamo']["CountDB"],
-                                                     creds_config=self.bot.config["AWS"])
+                RosterExtended.increase_roster_count(self.roster, inc_val, librarian=self.bot.librarian)
                 runs_increased = True
             except ValueError:
                 await interaction.response.send_message(
@@ -85,8 +83,7 @@ class CloseModal(Modal):
                 return
 
         logging.info(f"Deleting Roster {self.name}")
-        Librarian.delete_roster(self.channel_id, table_config=self.config['Dynamo']['RosterDB'],
-                                credentials=self.config['AWS'])
+        self.bot.librarian.delete_roster(self.channel_id)
         logging.info(f"Roster Deleted")
 
         self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.name,

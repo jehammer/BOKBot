@@ -1,5 +1,4 @@
 from bot.services import Utilities
-from bot.database import Librarian
 from re import sub
 import logging
 from datetime import datetime
@@ -132,7 +131,7 @@ class RosterExtended:
         return old_trial != new_trial
 
     @staticmethod
-    def get_limits(table_config, roles_config, creds_config):
+    def get_limits(librarian, roles_config):
         """Create list of roles with nested lists for 1-3 indexes"""
 
         list_roles = [
@@ -148,7 +147,7 @@ class RosterExtended:
             ]
         ]
 
-        prog_roles = Librarian.get_progs(table_config, creds_config)
+        prog_roles = librarian.get_progs()
 
         if prog_roles is not None and prog_roles[0] != "None":
             for i in prog_roles:
@@ -156,10 +155,10 @@ class RosterExtended:
         return list_roles
 
     @staticmethod
-    def increase_individual_count(user_id, trial, role, date, runs, table_config, creds_config):
+    def increase_individual_count(user_id, trial, role, date, runs, librarian):
         """Increases count of a user."""
         try:
-            count: Count = Librarian.get_count(user_id=user_id, table_config=table_config, credentials=creds_config)
+            count: Count = librarian.get_count(user_id=user_id)
 
             if role == "dps":
                 count.increase_data(runs=runs, trial=trial, date=date, dps=runs)
@@ -170,39 +169,39 @@ class RosterExtended:
             else:
                 raise Exception(f"Increase Individual Count Error: Unknown Role Input: {role}")
 
-            Librarian.put_count(user_id=user_id, count=count, table_config=table_config, credentials=creds_config)
+            librarian.put_count(user_id=user_id, count=count)
 
         except Exception as e:
             logging.error(f"Increase Individual Run Count Error: {str(e)}")
             raise e
 
     @staticmethod
-    def increase_roster_count(roster: Roster, count, table_config, creds_config):
+    def increase_roster_count(roster: Roster, count, librarian):
         """Increase run count of all users in a roster."""
         try:
             for i in roster.dps:
-                db_count = Librarian.get_count(i, table_config, creds_config)
+                db_count = librarian.get_count(i)
                 if db_count is None:
                     db_count = Count(runs=count, dps=count, trial=roster.trial, date=roster.date)
                 else:
                     db_count.increase_data(runs=count, dps=count, trial=roster.trial, date=roster.date)
-                Librarian.put_count(i, db_count, table_config, creds_config)
+                librarian.put_count(i, db_count)
 
             for i in roster.tanks:
-                db_count = Librarian.get_count(i, table_config, creds_config)
+                db_count = librarian.get_count(i)
                 if db_count is None:
                     db_count = Count(runs=count, tank=count, trial=roster.trial, date=roster.date)
                 else:
                     db_count.increase_data(runs=count, tank=count, trial=roster.trial, date=roster.date)
-                Librarian.put_count(i, db_count, table_config, creds_config)
+                librarian.put_count(i, db_count)
 
             for i in roster.healers:
-                db_count = Librarian.get_count(i, table_config, creds_config)
+                db_count = librarian.get_count(i)
                 if db_count is None:
                     db_count = Count(runs=count, healer=count, trial=roster.trial, date=roster.date)
                 else:
                     db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
-                Librarian.put_count(i, db_count, table_config, creds_config)
+                librarian.put_count(i, db_count)
 
         except Exception as e:
             logging.error(f"Increase Roster Run Count Error: {str(e)}")

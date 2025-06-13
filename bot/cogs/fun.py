@@ -8,7 +8,6 @@ from discord.ext import commands
 
 from bot.models import Rank
 from bot.services import Utilities, EmbedFactory
-from bot.database import Librarian
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -109,8 +108,7 @@ class Fun(commands.Cog, name="Fun"):
                     f"{Utilities.format_error(user_language, self.bot[user_language]['replies']['NoBots'])}")
                 return
             user_id = member.id
-            rank_data: Rank = Librarian.get_rank(user_id=user_id, table_config=self.bot.config['Dynamo']['RankDB'],
-                                                 credentials=self.bot.config['AWS'])
+            rank_data: Rank = self.bot.librarian.get_rank(user_id=user_id)
 
             if rank_data is None:
                 rank_data = Rank()
@@ -141,9 +139,7 @@ class Fun(commands.Cog, name="Fun"):
             elif len(listed) == 4 and (listed[0] + listed[1] == listed[2] + listed[3]):
                 rank_data.doubles += 1
 
-            Librarian.put_rank(user_id=user_id, rank_data=rank_data,
-                               table_config=self.bot.config['Dynamo']['RankDB'],
-                               credentials=self.bot.config['AWS'])
+            self.bot.librarian.put_rank(user_id=user_id, rank_data=rank_data)
 
             await interaction.response.send_message(
                 f"{self.bot.language[user_language]['replies']['Rank']['Generated'] % (member.display_name, f"{ran}{Utilities.suffix(ran)}")}")
@@ -166,8 +162,7 @@ class Fun(commands.Cog, name="Fun"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['NoBots'])}")
                 return
             user_id = member.id
-            rank_data: Rank = Librarian.get_rank(user_id=user_id, table_config=self.bot.config['Dynamo']['RankDB'],
-                                                 credentials=self.bot.config['AWS'])
+            rank_data: Rank = self.bot.librarian.get_rank(user_id=user_id)
             if rank_data is None:
                 await interaction.response.send_message(
                     f"{self.bot.language[user_language]['replies']['Rank']['NoHistory']}")
