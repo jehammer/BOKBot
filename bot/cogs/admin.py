@@ -240,7 +240,7 @@ class Admin(commands.Cog, name="Admin"):
             self.bot.librarian.delete_count(member.id)
             to_send += 'Deleted Counts\n'
 
-            to_send += f"{member.display_name} joined {calendar.month_name[m.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}"
+            to_send += f"{member.display_name} joined {calendar.month_name[member.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}"
 
             await private_channel.send(to_send)
         except Exception as e:
