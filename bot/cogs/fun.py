@@ -144,7 +144,7 @@ class Fun(commands.Cog, name="Fun"):
             self.bot.librarian.put_rank(user_id=user_id, rank_data=rank_data)
 
             await interaction.response.send_message(
-                f"{self.bot.language[user_language]['replies']['Rank']['Generated'] % (member.display_name, f"{ran}{Utilities.suffix(ran)}")}")
+                f"{self.bot.language[user_language]['replies']['Rank']['Generated'] % (member.display_name, f'{ran}{Utilities.suffix(ran)}')}")
 
         except Exception as e:
             await interaction.response.send_message(
