@@ -138,6 +138,8 @@ class Fun(commands.Cog, name="Fun"):
                 rank_data.samsies += 1
             elif len(listed) == 4 and (listed[0] + listed[1] == listed[2] + listed[3]):
                 rank_data.doubles += 1
+            elif len(listed) == 4 and (listed[0] == listed[3] and listed[1] == listed[2]):
+                rank_data.palindrome += 1
 
             self.bot.librarian.put_rank(user_id=user_id, rank_data=rank_data)
 

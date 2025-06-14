@@ -2,7 +2,7 @@ class Rank:
     """A class object to store and manage ranking information"""
 
     def __init__(self, count=0, last_called=None, lowest=1000000, highest=0, doubles=0,
-                 singles=0, six_nine=0, four_twenty=0, boob=0, pie=0, samsies=0):
+                 singles=0, six_nine=0, four_twenty=0, boob=0, pie=0, samsies=0, palindrome=0):
         self.count = count
         self.last_called = last_called
         self.lowest = lowest
@@ -14,6 +14,7 @@ class Rank:
         self.boob = boob
         self.pie = pie
         self.samsies = samsies
+        self.palindrome = palindrome
 
     def get_data(self):
         all_data = {
@@ -27,6 +28,7 @@ class Rank:
             "four_twenty": self.four_twenty,
             "boob": self.boob,
             "pie": self.pie,
-            "samsies": self.samsies
+            "samsies": self.samsies,
+            "palindrome": self.palindrome
         }
         return all_data
