@@ -31,7 +31,7 @@ def create_pingable_role(trial, date, tz, guild: Guild):
             second_part = f"{date} {inc if inc > 0 else ''}"
         else:
             timestamp = generate_time_from_timestamp(date, tz)
-            second_part = f"{timestamp.strftime("%a")} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
+            second_part = f"{timestamp.strftime('%a')} {timestamp.day}{Utilities.suffix(timestamp.day)} {inc if inc > 0 else ''}"
         name = f"{trial} {second_part}"
         if len(name) > 20:
             chars_to_remove = len(name) - 20
