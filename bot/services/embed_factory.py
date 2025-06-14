@@ -27,7 +27,7 @@ class EmbedFactory:
                 desc += f"\n\n{roster.memo}"
 
             embed = Embed(
-                title=f"{roster.trial.replace('_', r'\_')} {roster.date}",
+                title=f"{roster.trial.replace('_', '\\_')} {roster.date}",
                 description=desc,
                 color=Color.green()
             )
