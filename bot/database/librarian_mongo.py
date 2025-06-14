@@ -81,27 +81,27 @@ class Librarian:
 
     # Default settings
     def get_default(self, user_id):
-        db_data = self._database.defaults.find_one({"userID": user_id})
+        db_data = self._database.defaults.find_one({"userID": int(user_id)})
         return db_data["default"] if db_data else None
 
     def put_default(self, user_id, default):
         item = {
-            "userID": user_id,
+            "userID": int(user_id),
             "default": default
         }
         self._database.defaults.replace_one(
-            {"userID": user_id},
+            {"userID": int(user_id)},
             item,
             upsert=True
         )
 
     def delete_default(self, user_id):
-        query = {"userID": user_id}
+        query = {"userID": int(user_id)}
         self._database.defaults.delete_one(query)
 
     # Count tracking
     def get_count(self, user_id):
-        db_data = self._database.count.find_one({"userID": user_id})
+        db_data = self._database.count.find_one({"userID": int(user_id)})
         if db_data:
             data = db_data["data"]
             return Count(
@@ -116,17 +116,17 @@ class Librarian:
 
     def put_count(self, user_id, count):
         item = {
-            "userID": user_id,
+            "userID": int(user_id),
             "data": count.get_count_data()
         }
         self._database.count.replace_one(
-            {"userID": user_id},
+            {"userID": int(user_id)},
             item,
             upsert=True
         )
 
     def delete_count(self, user_id):
-        query = {"userID": user_id}
+        query = {"userID": int(user_id)}
         self._database.count.delete_one(query)
 
     # Progs
@@ -143,7 +143,7 @@ class Librarian:
 
     # Rank tracking
     def get_rank(self, user_id):
-        db_data = self._database.ranks.find_one({"userID": user_id})
+        db_data = self._database.ranks.find_one({"userID": int(user_id)})
         if db_data:
             data = db_data["data"]
             return Rank(
@@ -163,16 +163,16 @@ class Librarian:
 
     def put_rank(self, user_id, rank_data: Rank):
         self._database.ranks.replace_one(
-            {"userID": user_id},
+            {"userID": int(user_id)},
             {
-                "userID": user_id,
+                "userID": int(user_id),
                 "data": rank_data.get_data()
             },
             upsert=True
         )
 
     def delete_rank(self, user_id):
-        query = {"userID": user_id}
+        query = {"userID": int(user_id)}
         self._database.ranks.delete_one(query)
 
     # Role channel

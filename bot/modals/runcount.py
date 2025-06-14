@@ -5,21 +5,21 @@ from discord.ui import TextInput, Modal
 
 
 class RunCountModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, users_language):
+    def __init__(self, roster: Roster, interaction: Interaction, bot, users_language, channel_id):
         self.bot = bot
         self.language = bot.language[users_language]['replies']
         self.ui = bot.language[users_language]['ui']
-        self.channel = interaction.guild.get_channel(int(self.channel_id))
+        self.channel = interaction.guild.get_channel(int(channel_id))
         self.roster = roster
         self.user_language = users_language
-        super().__init__(title=f"{self.ui_language['RunCount']['Title'] % self.channel.name}")
+        super().__init__(title=f"{self.ui['RunCount']['Title'] % self.channel.name}")
         self.initialize()
 
     def initialize(self):
         self.num = TextInput(
-            label=f"{self.ui_language['RunCount']['Num']['Label']}",
+            label=f"{self.ui['RunCount']['Num']['Label']}",
             default="1",
-            placeholder=f"{self.ui_language['RunCount']['Num']['Placeholder']}",
+            placeholder=f"{self.ui['RunCount']['Num']['Placeholder']}",
             style=TextStyle.short,
             required=True
         )
