@@ -211,7 +211,7 @@ class Admin(commands.Cog, name="Admin"):
             if self.bot.config["roles"]['default'] != "none":
                 await member.add_roles(default, ranks, poons, other)
                 logging.info(
-                    f"Added Roles: {str(role)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
+                    f"Added Roles: {str(default)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
             await guild.system_channel.send(
                 f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
                 f"Please read the rules in <#847968244949844008> and follow the directions for "
@@ -219,7 +219,7 @@ class Admin(commands.Cog, name="Admin"):
                 f"Once you do, I will send you a little DM to help you get started!\n"
                 f"If the bot does not work just ping the Storm Bringers.")
         except Exception as e:
-            private_channel = guild.get_channel(bot.config['administration']['private'])
+            private_channel = guild.get_channel(self.bot.config['administration']['private'])
             await private_channel.send("Unable to apply initial role and/or welcome the new user")
             logging.error(f"Member Join Error: {str(e)}")
 
