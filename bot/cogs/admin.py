@@ -10,6 +10,9 @@ import re
 import yaml
 import os
 import time
+import calendar
+
+from bot.services import Utilities
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -236,6 +239,8 @@ class Admin(commands.Cog, name="Admin"):
             # Delete Count
             self.bot.librarian.delete_count(member.id)
             to_send += 'Deleted Counts\n'
+
+            to_send += f"{member.display_name} joined {calendar.month_name[m.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}"
 
             await private_channel.send(to_send)
         except Exception as e:
