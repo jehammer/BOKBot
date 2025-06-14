@@ -198,39 +198,39 @@ class Trials(commands.Cog, name="Trials"):
             for i in rosters:
                 is_on = False
                 channel_name = ""
-                if user_id in roster[i].dps.keys():
+                if user_id in rosters[i].dps.keys():
                     channel_name = self.bot.get_channel(int(i)).name
                     rosters[i].remove_dps(user_id)
                     to_send += f"Traitor was removed as a DPS from {channel_name}\n"
                     was_on = True
                     is_on = True
-                elif user_id in roster[i].backup_dps.keys():
+                elif user_id in rosters[i].backup_dps.keys():
                     channel_name = self.bot.get_channel(int(i)).name
-                    roster[i].remove_dps(user_id)
+                    rosters[i].remove_dps(user_id)
                     to_send += f"Traitor was removed as a backup DPS from {channel_name}\n"
                     was_on = True
                     is_on = True
-                elif user_id in roster[i].healers.keys():
+                elif user_id in rosters[i].healers.keys():
                     channel_name = self.bot.get_channel(int(i)).name
-                    roster[i].remove_healer(user_id)
+                    rosters[i].remove_healer(user_id)
                     to_send += f"Traitor was removed as a Healer from {channel_name}\n"
                     was_on = True
                     is_on = True
-                elif user_id in roster[i].backup_healers.keys():
+                elif user_id in rosters[i].backup_healers.keys():
                     channel_name = self.bot.get_channel(int(i)).name
-                    roster[i].remove_healer(user_id)
+                    rosters[i].remove_healer(user_id)
                     to_send += f"Traitor was removed as a backup Healer from {channel_name}\n"
                     was_on = True
                     is_on = True
-                elif user_id in roster[i].tanks.keys():
+                elif user_id in rosters[i].tanks.keys():
                     channel_name = self.bot.get_channel(int(i)).name
-                    roster[i].remove_tank(user_id)
+                    rosters[i].remove_tank(user_id)
                     to_send += f"Traitor was removed as a Tank from {channel_name}\n"
                     was_on = True
                     is_on = True
-                elif user_id in roster[i].backup_tanks.keys():
+                elif user_id in rosters[i].backup_tanks.keys():
                     channel_name = self.bot.get_channel(int(i)).name
-                    roster[i].remove_tank(user_id)
+                    rosters[i].remove_tank(user_id)
                     to_send += f"Traitor was removed as a backup Tank from {channel_name}\n"
                     was_on = True
                     is_on = True
