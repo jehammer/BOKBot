@@ -21,8 +21,7 @@ def has_officer():
                 return await original_function(*args, **kwargs)
             else:
                 lang = Utilities.get_language(ctx.author)
-                raise commands.MissingRole(
-                    f"{Utilities.format_error(lang, self.bot.config[lang]['replies']['NoPermissions'] % officer_role)}")
+                raise commands.MissingRole(str(officer_role))
 
         return wrapper_function
 
