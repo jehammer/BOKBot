@@ -190,7 +190,7 @@ class Admin(commands.Cog, name="Admin"):
                                'fill', 'close', 'runcount', 'remove', 'add', 'rank', 'kowtow'],
                       hidden=True)
     async def old_commands_alert(self, ctx: commands.Context):
-        user_language = Utilities.get_language(ctx.author, self.bot.config[languages])
+        user_language = Utilities.get_language(ctx.author)
         now_modify = ['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit']
         if ctx.invoked_with in now_modify:
             new_command = 'modify'
