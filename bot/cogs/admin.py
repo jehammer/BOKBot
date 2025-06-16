@@ -216,8 +216,8 @@ class Admin(commands.Cog, name="Admin"):
                 f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
                 f"Please read the rules in <#847968244949844008> and follow the directions for "
                 f"access to the rest of the server.\n"
-                f"Once you do, I will send you a little DM to help you get started!\n"
-                f"If the bot does not work just ping the Storm Bringers.")
+                f"Once you do be sure to check out how to get ranked in <#933821777149329468>\n"
+                f"If something seems wrong just ping the Storm Bringers.")
         except Exception as e:
             private_channel = guild.get_channel(self.bot.config['administration']['private'])
             await private_channel.send("Unable to apply initial role and/or welcome the new user")
