@@ -63,7 +63,7 @@ class RosterExtended:
     def get_channel_position(roster: Roster, tz):
         try:
             if roster.date == "ASAP":
-                weight = 50
+                weight = 10
             else:
                 formatted_time = generate_time_from_timestamp(roster.date, tz)
                 day = formatted_time.timetuple().tm_yday
