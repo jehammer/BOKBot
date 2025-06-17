@@ -74,6 +74,7 @@ class RosterExtended:
             logging.error(f"Sort Key Error: {str(e)}")
             raise Exception(e)
 
+    @staticmethod
     def sort_rosters(rosters):
         sorted_rosters = {}
         ordering = []
