@@ -7,7 +7,6 @@ from bot.models import Roster, Count
 from discord import Member, Guild
 from discord.utils import get
 
-
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
     handlers=[
@@ -74,6 +73,25 @@ class RosterExtended:
         except Exception as e:
             logging.error(f"Sort Key Error: {str(e)}")
             raise Exception(e)
+
+    def sort_rosters(rosters):
+        sorted_rosters = {}
+        ordering = []
+        date_to_roster = {}
+        for i in rosters:
+            if rosters[i].date == 'ASAP':
+                sorted_rosters[i] = 1
+            else:
+                cleaned_timestamp = int(sub('[^0-9]', '', rosters[i].date))
+                ordering.append(cleaned_timestamp)
+                date_to_roster[cleaned_timestamp] = i
+
+        ordering.sort()
+        count = 2
+        for i in ordering:
+            sorted_rosters[date_to_roster[i]] = count
+            count += 1
+        return sorted_rosters
 
     @staticmethod
     def generate_channel_name(date, raid_name, tz):

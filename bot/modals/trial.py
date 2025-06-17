@@ -244,19 +244,8 @@ class TrialModal(Modal):
 
         self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name,
                           update_roster=self.roster, method="create_update",
-                          interaction=interaction, user_language=self.user_language)
+                          interaction=interaction, user_language=self.user_language, sort=self.sort_channels)
 
-        if self.sort_channels:
-            try:
-                # Put new channel into the right position
-                position = RosterExtended.get_channel_position(self.roster, self.config["raids"]["timezone"])
-                self.channel.position = position
-                await self.channel.edit(position=self.channel.position)
-            except Exception as e:
-                logging.error(f"Position Change Error: {str(e)}")
-                await interaction.response.send_message(
-                    f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantPosition'])}")
-                return
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:

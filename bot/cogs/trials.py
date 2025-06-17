@@ -2,6 +2,7 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, utils, Member, Role
 import logging
+import time
 
 # My created imports
 from bot import decor as permissions
@@ -47,7 +48,7 @@ class Trials(commands.Cog, name="Trials"):
 
     @commands.Cog.listener()
     async def on_update_rosters_data(self, channel_id, method, channel_name=None, update_roster: Roster = None,
-                                     interaction: Interaction = None, user_language=None, removed=None, people=None):
+                                     interaction: Interaction = None, user_language=None, removed=None, people=None, sort=None):
         global rosters
 
         update_roster_db = False
@@ -175,12 +176,25 @@ class Trials(commands.Cog, name="Trials"):
         if is_new_roster:
             await interaction.response.send_message(
                 f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
-            return
 
         elif method == "create_update" and not is_new_roster:
             await interaction.response.send_message(
                 f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
-            return
+
+        if sort:
+            try:
+                # Order Channels correctly now
+                new_positions = RosterExtended.sort_rosters(rosters)
+                for i in new_positions:
+                    channel = self.bot.get_channel(i)
+                    await channel.edit(position=new_positions[i])
+                    time.sleep(2)
+            except Exception as e:
+                logging.error(f"Position Change Error: {str(e)}")
+                await interaction.followup.send(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['CantPosition'])}")
+                return
+        return
 
     @commands.Cog.listener()
     async def on_update_limits_data(self):
@@ -809,6 +823,20 @@ class Trials(commands.Cog, name="Trials"):
                 rosters = fetched
                 logging.info(f"Found and Loaded Rosters")
             await ctx.reply(f"Roster Information Reloaded.")
+        except Exception as e:
+            await ctx.reply(f"Unable to complete: {str(e)}")
+
+    @commands.command(name="resort")
+    @permissions.creator_only()
+    async def force_resort_rosters(self, ctx: commands.Context):
+        """Force Reload all Roster information"""
+        try:
+            new_positions = RosterExtended.sort_rosters(rosters)
+            for i in new_positions:
+                channel = self.bot.get_channel(i)
+                await channel.edit(position=new_positions[i])
+                time.sleep(2)
+            await ctx.reply(f"Finished Sorting!")
         except Exception as e:
             await ctx.reply(f"Unable to complete: {str(e)}")
 
