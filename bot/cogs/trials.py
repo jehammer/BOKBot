@@ -405,8 +405,8 @@ class Trials(commands.Cog, name="Trials"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['ProgRoster'])}")
                 return
 
-            primary = ['su', 'signup']
-            backup = ['bu', 'backup']
+            primary = ['su', 'signup', 'SU', 'SIGNUP']
+            backup = ['bu', 'backup', 'BU', 'BACKUP']
 
             # TODO: Update with multi-lingual support later.
             which = None
@@ -415,7 +415,7 @@ class Trials(commands.Cog, name="Trials"):
             elif ctx.invoked_with in backup:
                 which = 'bu'
             else:
-                raise UnknownError(f"Unreachable segment not sure how I got here.")
+                raise UnknownError(f"Unreachable segment not sure how I got here. SU/BU used was not a valid option!")
 
             validation = rosters[channel_id].add_member(user_id=user_id, role=role, msg=msg, which=which)
             if validation == 0:
