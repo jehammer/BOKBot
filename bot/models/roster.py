@@ -118,7 +118,7 @@ class Roster:
 
         elif user_id in self.backup_healers.keys():
             og_msg = self.backup_healers.get(user_id)
-            raid.remove_healer(user_id)
+            self.remove_healer(user_id)
             slotted = 'healer'
 
         elif user_id in self.tanks.keys():
