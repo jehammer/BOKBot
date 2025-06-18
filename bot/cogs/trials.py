@@ -431,6 +431,9 @@ class Trials(commands.Cog, name="Trials"):
             else:
                 raise UnknownError(f"Unreachable segment not sure how I got here. SU/BU used was not a valid option!")
 
+            if len(msg) > 30:
+                msg = msg[:30]
+
             validation = rosters[channel_id].add_member(user_id=user_id, role=role, msg=msg, which=which)
             if validation == 0:
                 await ctx.reply(
@@ -466,17 +469,9 @@ class Trials(commands.Cog, name="Trials"):
         user_language = Utilities.get_language(ctx.author)
         try:
             channel_id = ctx.message.channel.id
-            try:
-                if not rosters.get(channel_id):
-                    await ctx.reply(
-                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
-                    return
-
-                self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster")
-            except Exception as e:
+            if not rosters.get(channel_id):
                 await ctx.reply(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['DBConError'])}")
-                logging.error(f"SU Load Raid Error: {str(e)}")
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                 return
 
             msg = ''
