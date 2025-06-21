@@ -56,8 +56,51 @@ class Admin(commands.Cog, name="Admin"):
         if ctx.message.author.id == self.bot.config["creator"]:
             try:
                 all_servers = list(self.bot.guilds)
+                allowed_servers = self.bot.config['allowed']
                 await ctx.send(f"Connected on {str(len(all_servers))} servers:")
                 await ctx.send('\n'.join(guild.name for guild in all_servers))
+                for i in all_servers:
+                    if i.id in allowed_servers:
+                        await ctx.send(f"Server {i.name} is not allowed.")
+            except Exception as e:
+                logging.error(f"Server Check Error: {str(e)}")
+        else:
+            await ctx.send("You do not have permission to do that.")
+
+    @commands.command(name="leaveservers", hidden=True)
+    @permissions.creator_only()
+    async def leave_bad_servers(self, ctx: commands.Context):
+        """Leave false servers, Owner only"""
+        if ctx.message.author.id == self.bot.config["creator"]:
+            try:
+                all_servers = list(self.bot.guilds)
+                allowed_servers = self.bot.config['allowed']
+                message = f"<@everyone> COMMON PEASANTRY! YOUR ATTEMPTED THEFT OF ME IS NOT UNNOTICED AND WILL NOT GO UNPUNISHED!"
+                for i in all_servers:
+                    if i.id not in allowed_servers:
+                        await ctx.send(f"Leaving Server {i.name}")
+                        left = False
+                        tried_system = False
+                        while not left:
+                            if tried_system:
+                                for channel in guild.text_channels:
+                                    try:
+                                        await channel.send(message)
+                                        await i.leave()
+                                        left = True
+                                        break
+                                    except Exception as e:
+                                        logging.info(f"Leaving: {str(e)}")
+                                        continue
+                            else:
+                                try:
+                                    channel = i.system_channel
+                                    await channel.send(message)
+                                    await i.leave()
+                                    left = True
+                                except Exception as e:
+                                    logging.info(f"Leaving: {str(e)}")
+                                    tried_system = True
             except Exception as e:
                 logging.error(f"Server Check Error: {str(e)}")
         else:
