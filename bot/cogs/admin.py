@@ -60,7 +60,7 @@ class Admin(commands.Cog, name="Admin"):
                 await ctx.send(f"Connected on {str(len(all_servers))} servers:")
                 await ctx.send('\n'.join(guild.name for guild in all_servers))
                 for i in all_servers:
-                    if i.id in allowed_servers:
+                    if i.id not in allowed_servers:
                         await ctx.send(f"Server {i.name} is not allowed.")
             except Exception as e:
                 logging.error(f"Server Check Error: {str(e)}")
