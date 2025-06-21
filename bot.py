@@ -164,6 +164,9 @@ async def set_playing():
 async def on_ready():
     logging.info(f"Logged in as: {main_bot.user.name}")
     await set_playing()
+    if hasattr(main_bot, "librarian"):
+        logging.info(f"Existing Librarian instance found, closing and reopening.")
+        main_bot.librarian.close()
     main_bot.librarian = init_librarian(main_bot.config['bot']['mongo'])
     logging.info('Bot is ready for use')
     logging.info('Sending out load_on_ready Event')

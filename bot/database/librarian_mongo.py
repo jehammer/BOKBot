@@ -3,15 +3,11 @@ from bot.models import Roster, Count, Rank
 
 
 class Librarian:
-    _instance = None
 
     def __init__(self, config_uri: str):
-        if Librarian._instance is not None:
-            return  # Prevents reinitialization
 
         self._client = MongoClient(config_uri)
         self._database = self._client["bot"]
-        Librarian._instance = self
 
     # Roster methods
     def get_all_rosters(self):
@@ -181,6 +177,9 @@ class Librarian:
 
     def put_role_channel(self, data, collection_name):
         pass
+
+    def close(self):
+        self._client.close()
 
 
 # Initialize the singleton with config passed in
