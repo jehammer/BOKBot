@@ -1,4 +1,5 @@
 import discord
+from discord import Message
 from discord.ext import commands
 import logging
 from bot import decor as permissions
@@ -76,9 +77,9 @@ class Roles(commands.Cog, name="Roles"):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """Listener for reaction add"""
+        guild = self.bot.get_guild(self.bot.config["guild"])
+        member = discord.utils.get(guild.members, id=payload.user_id)
         try:
-            guild = self.bot.get_guild(self.bot.config["guild"])
-            member = discord.utils.get(guild.members, id=payload.user_id)
             if member.bot:
                 return
 
@@ -96,15 +97,22 @@ class Roles(commands.Cog, name="Roles"):
                     main_role = "Tank"
                 case "healer":
                     main_role = "Healer"
-                case "mag":
+                case "deeps":
                     main_role = "DPS"
-                case "stam":
-                    main_role = "DPS"
+            if role_type == 'icons':
+                # Check for other reactions and roles and remove them.
+                channel = self.bot.get_guild(payload.guild_id).get_channel(payload.channel_id)
+                msg: Message = await channel.fetch_message(payload.message_id)
+                for reaction in msg.reactions:
+                    if reaction.emoji != payload.emoji:
+                        members = [user async for user in reaction.users()]
+                        if member in members:
+                            await reaction.remove(member)
             await member.add_roles(discord.utils.get(guild.roles, name=role))
             if main_role is not None:
                 await member.add_roles(discord.utils.get(guild.roles, name=main_role))
         except KeyError as e:
-            channel = member.guild.get_channel(self.bot.config["administration"]["private"])
+            channel = guild.get_channel(self.bot.config["administration"]["private"])
             await channel.send(
                 f"User: {member.display_name} attempted to add a role. but I could not find that "
                 f"role in the config.")
@@ -117,9 +125,9 @@ class Roles(commands.Cog, name="Roles"):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         """Listener for reaction remove"""
+        guild = self.bot.get_guild(self.bot.config["guild"])
+        member = discord.utils.get(guild.members, id=payload.user_id)
         try:
-            guild = self.bot.get_guild(self.bot.config["guild"])
-            member = discord.utils.get(guild.members, id=payload.user_id)
             if member.bot:
                 return
 
@@ -132,24 +140,19 @@ class Roles(commands.Cog, name="Roles"):
             role_type = roles_info[str(payload.message_id)]
             role = self.bot.config["vanity"][role_type][str(payload.emoji)]
             await member.remove_roles(discord.utils.get(guild.roles, name=role))
-            if role_type == "misc":
+            if role_type == "misc" or role_type == 'icons':
                 return
             all_roles = set((self.bot.config["vanity"][role_type]).values())
-            if role_type == "mag":
-                all_roles.update(set((self.bot.config["vanity"]["stam"]).values()))
-            elif role_type == "stam":
-                all_roles.update(set((self.bot.config["vanity"]["mag"]).values()))
             all_user_roles = set([i.name for i in member.roles])
             keep_main_role = bool(all_roles.intersection(all_user_roles))
+            main_role = ''
             if not keep_main_role:
                 match role_type:
                     case "tank":
                         main_role = "Tank"
                     case "healer":
                         main_role = "Healer"
-                    case "mag":
-                        main_role = "DPS"
-                    case "stam":
+                    case "deeps":
                         main_role = "DPS"
                 await member.remove_roles(discord.utils.get(guild.roles, name=main_role))
         except KeyError as e:
@@ -178,14 +181,14 @@ class Roles(commands.Cog, name="Roles"):
                     emote = self.bot.config['raids']['healer_emoji']
                     message_color = discord.Color.fuchsia()
                     title_type = "Healer"
-                elif message_type.lower() == "mag":
+                elif message_type.lower() == "deeps":
                     emote = self.bot.config['raids']['dps_emoji']
                     message_color = discord.Color.blue()
-                    title_type = "Magicka DPS"
-                elif message_type.lower() == "stam":
-                    emote = self.bot.config['raids']['dps_emoji']
+                    title_type = "Deeps"
+                elif message_type.lower() == "icons":
+                    emote = ''
                     message_color = discord.Color.green()
-                    title_type = "Stamina DPS"
+                    title_type = "Icons"
                 else:
                     emote = ""
                     title_type = "Misc"
@@ -201,6 +204,9 @@ class Roles(commands.Cog, name="Roles"):
                     all_classes_emoji.append(key)
                 if title_type == "Misc":
                     embed.add_field(name=f"React below for all other stuff.", value=f'{all_classes}', inline=False)
+                elif title_type == 'Icons':
+                    embed.add_field(name=f"React below for what class to have displayed next to your name!",
+                                    value=f'{all_classes}', inline=False)
                 else:
                     embed.add_field(name=f"React below for what classes you play as for "
                                          f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
@@ -224,17 +230,17 @@ class Roles(commands.Cog, name="Roles"):
                 await message.add_reaction(i)
             new_roles_info[str(message.id)] = "healer"
 
-            crafted_embed, classes = embed_factory("mag")
+            crafted_embed, classes = embed_factory("deeps")
             message = await ctx.send(embed=crafted_embed)
             for i in classes:
                 await message.add_reaction(i)
-            new_roles_info[str(message.id)] = "mag"
+            new_roles_info[str(message.id)] = "deeps"
 
-            crafted_embed, classes = embed_factory("stam")
+            crafted_embed, classes = embed_factory("icons")
             message = await ctx.send(embed=crafted_embed)
             for i in classes:
                 await message.add_reaction(i)
-            new_roles_info[str(message.id)] = "stam"
+            new_roles_info[str(message.id)] = "icons"
 
             crafted_embed, classes = embed_factory("misc")
             message = await ctx.send(embed=crafted_embed)
@@ -270,14 +276,14 @@ class Roles(commands.Cog, name="Roles"):
                     emote = self.bot.config['raids']['healer_emoji']
                     message_color = discord.Color.fuchsia()
                     title_type = "Healer"
-                elif message_type.lower() == "mag":
+                elif message_type.lower() == "deeps":
                     emote = self.bot.config['raids']['dps_emoji']
                     message_color = discord.Color.blue()
-                    title_type = "Magicka DPS"
-                elif message_type.lower() == "stam":
-                    emote = self.bot.config['raids']['dps_emoji']
+                    title_type = "Deeps"
+                elif message_type.lower() == "icons":
+                    emote = ''
                     message_color = discord.Color.green()
-                    title_type = "Stamina DPS"
+                    title_type = "Icons"
                 else:
                     emote = ""
                     title_type = "Misc"
@@ -293,6 +299,9 @@ class Roles(commands.Cog, name="Roles"):
                     all_classes_emoji.append(key)
                 if title_type == "Misc":
                     embed.add_field(name=f"React below for all other stuff.", value=f'{all_classes}', inline=False)
+                elif title_type == 'Icons':
+                    embed.add_field(name=f"React below for what class to have displayed next to your name!",
+                                    value=f'{all_classes}', inline=False)
                 else:
                     embed.add_field(name=f"React below for what classes you play as for "
                                          f"{emote}{title_type}{emote}", value=f'{all_classes}', inline=False)
