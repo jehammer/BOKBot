@@ -698,10 +698,10 @@ class Trials(commands.Cog, name="Trials"):
             validation = rosters[channel_id].add_member(user_id=member.id, role=role, msg='', which='su')
             if validation == 0:
                 await interaction.response.send_message(
-                    f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
+                    f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
             elif validation == 1:
                 await interaction.response.send_message(
-                    f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+                    f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
                 return
             else:  # Unreachable
                 await interaction.response.send_message(
