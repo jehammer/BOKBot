@@ -424,9 +424,9 @@ class Trials(commands.Cog, name="Trials"):
 
             # TODO: Update with multi-lingual support later.
             which = None
-            if ctx.invoked_with in primary:
+            if ctx.invoked_with.lower() in primary:
                 which = 'su'
-            elif ctx.invoked_with in backup:
+            elif ctx.invoked_with.lower() in backup:
                 which = 'bu'
             else:
                 raise UnknownError(f"Unreachable segment not sure how I got here. SU/BU used was not a valid option!")
