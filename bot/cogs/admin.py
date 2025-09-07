@@ -270,6 +270,8 @@ class Admin(commands.Cog, name="Admin"):
     async def on_member_remove(self, member: Member):
         private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
         to_send = ''
+        rank_data = self.bot.librarian.get_rank(member.id)
+        count_data = self.bot.librarian.get_count(member.id)
         try:
             # Delete Default
             self.bot.librarian.delete_default(member.id)
@@ -283,8 +285,16 @@ class Admin(commands.Cog, name="Admin"):
             self.bot.librarian.delete_count(member.id)
             to_send += 'Deleted Counts\n'
 
-            to_send += f"{member.display_name} joined {calendar.month_name[member.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}"
-
+            to_send += f"{member.display_name} joined {calendar.month_name[member.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}\n"
+            if count_data is not None:
+                to_send += f"{member.display_name} last ran {count_data.lastTrial} on {count_data.lastDate}\n"
+            else:
+                to_send += f"{member.display_name} has no recorded runs\n"
+            if rank_data is not None:
+                to_send += f"{member.display_name} last ranked on {rank_data.last_called}\n"
+            else:
+                to_send += f"{member.display_name} has no recorded rankings\n"
+ 
             await private_channel.send(to_send)
         except Exception as e:
             await private_channel.send("Unable to delete Member data")
