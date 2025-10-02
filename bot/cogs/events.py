@@ -21,10 +21,41 @@ logging.basicConfig(
 
 rosters = {}
 limits = []
+last4z = []
+last4t = []
 
 
-class Trials(commands.Cog, name="Trials"):
-    """Commands related to Trials And Rosters"""
+#TODO: Change zone and trial to use the multi-language support by printing each after second language is added.
+
+
+# Singular function to get random zones
+def get_zone_option(cap):
+    loop = True
+    while loop:
+        ran = random.randint(1, cap)
+        if ran not in last4z:
+            loop = False
+    if len(last4z) < 4:
+        last4z.append(ran)
+    else:
+        last4z.pop(0)
+        last4z.append(ran)
+    return ran - 1
+
+
+def get_event_option():
+    options = ['SSH', 'WBC', 'PDC', 'OL']
+    ran = random.randint(1, len(options))
+    return options[ran - 1]
+
+
+# TODO:
+#   Create a command to rank someone, if they have the notification tag enabled give them the tier notification tag that they got (T1, T2, T3)
+#   And also create a temp mute command that will mute someone in VC for 30 seconds to 5 minutes based on input. Any number 10 and over is seconds otherwise minutes.
+
+
+class Events(commands.Cog, name="Events"):
+    """Commands related to Rosters for Trials, PVP, and other events"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -39,7 +70,8 @@ class Trials(commands.Cog, name="Trials"):
             logging.info(f"Found and Loaded Rosters")
         else:
             logging.info(f"No Rosters Found")
-        fetched = RosterExtended.get_limits(librarian=self.bot.librarian, roles_config=self.bot.config['raids']['ranks'])
+        fetched = RosterExtended.get_limits(librarian=self.bot.librarian,
+                                            roles_config=self.bot.config['raids']['ranks'])
         if fetched is not None:
             limits = fetched
             logging.info(f"Found and Loaded Limits")
@@ -48,7 +80,8 @@ class Trials(commands.Cog, name="Trials"):
 
     @commands.Cog.listener()
     async def on_update_rosters_data(self, channel_id, method, channel_name=None, update_roster: Roster = None,
-                                     interaction: Interaction = None, user_language=None, removed=None, people=None, sort=None):
+                                     interaction: Interaction = None, user_language=None, removed=None, people=None,
+                                     sort=None):
         global rosters
 
         update_roster_db = False
@@ -355,7 +388,8 @@ class Trials(commands.Cog, name="Trials"):
 
             # Disqualifier check
             if any(self.bot.config['raids']['punish'] in role.name for role in ctx.author.roles):
-                await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Punish'])}")
+                await ctx.reply(
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Punish'])}")
                 return
 
             channel_id = ctx.message.channel.id
@@ -772,6 +806,78 @@ class Trials(commands.Cog, name="Trials"):
             logging.error(f"Remove Role Error: {str(e)}")
             raise e
 
+    #@app_commands.command(name='rank', description='For Officers: Ranks users')
+    #@app_commands.describe(role='Healer, Tanks, or DPS')
+    #@app_commands.describe(tier='Number based on which tier they qualify for')
+    #@app_commands.describe(member='The Member')
+    #@permissions.has_officer()
+    #async def add_new_rank(self, interaction: Interaction, role: str, member: Member):
+    #    user_language = Utilities.get_language(interaction.user)
+    #    try:
+    #        pass
+    #        # TODO: Fetch the correct rank through the config and apply it to the person. Remove higher ranks if needed.
+    #        #   If they have the ping tag, apply the appropriate pings.
+    #    except Exception as e:
+    #        await interaction.response.send_message(
+    #            f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+    #        logging.error(f"Add To Roster Error: {str(e)}")
+
+    @commands.command(name="event")
+    async def random_event(self, ctx: commands.Context):
+        """Gives you a random event and zone to do"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Zones']
+            ran = get_zone_option(len(options))
+            event = get_event_option()
+            await ctx.send(f"{self.bot.language[user_language]['replies']['Events'][event]} {options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Get Event Error: {str(e)}")
+
+    @commands.command(name="zone")
+    async def random_zone(self, ctx: commands.Context):
+        """Gives you a random zone to do for your event"""
+        """Gives you a random normal trial to do"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Zones']
+            ran = get_zone_option(len(options))
+            await ctx.send(f"{options[ran]}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Get Zone Error: {str(e)}")
+
+    # Get a trial randomly chosen
+    @commands.command(name="ntrial", aliases=['vtrial', 'hmtrial'])
+    async def generate_trial_to_run(self, ctx: commands.Context):
+        """Gives you a random trial to do"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            options = self.bot.language[user_language]['replies']['Trials']
+            loop = True
+            ran = 0
+            while loop:
+                ran = random.randint(1, cap)
+                if ran not in last4t:
+                    loop = False
+            if len(last4t) < 4:
+                last4t.append(ran)
+            else:
+                last4t.pop(0)
+                last4t.append(ran)
+            ran = ran-1
+            if ctx.invoked_with == 'ntrial':
+                await ctx.send(f"{self.bot.language[user_language]['replies']['Events']['Norm']} {options[ran]}")
+            elif ctx.invoked_with == 'vtrial':
+                await ctx.send(f"{self.bot.language[user_language]['replies']['Events']['Vet']} {options[ran]}")
+            elif ctx.invoked_with == 'hmtrial':
+                await ctx.send(
+                    f"{self.bot.language[user_language]['replies']['Events']['Vet']} {options[ran]} {self.bot.language[user_language]['replies']['Events']['HM']}")
+        except Exception as e:
+            await ctx.reply(f"{self.bot.language[user_language]['replies']['Unknown']}")
+            logging.error(f"Generate Random Trial Error: {str(e)}")
+
     # Creator-Only commands
 
     @commands.command(name="roster")
@@ -824,7 +930,7 @@ class Trials(commands.Cog, name="Trials"):
     @commands.command(name="resort")
     @permissions.creator_only()
     async def force_resort_rosters(self, ctx: commands.Context):
-        """Force Reload all Roster information"""
+        """Force all Rosters to be sorted again."""
         try:
             new_positions = RosterExtended.sort_rosters(rosters)
             for i in new_positions:
@@ -837,4 +943,4 @@ class Trials(commands.Cog, name="Trials"):
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Trials(bot))
+    await bot.add_cog(Events(bot))
