@@ -1,0 +1,29 @@
+class EventRoster:
+    def __init__(self, event, date, leader, memo, pingable, members={}):
+        self.event = event
+        self.date = date
+        self.leader = leader
+        self.memo = memo
+        self.pingable = pingable
+        self.members = members
+
+    def get_roster_data(self):
+        all_data = {
+            "event": self.event,
+            "date": self.date,
+            "leader": self.leader,
+            "memo": self.memo,
+            "pingable": self.pingable,
+            "members": self.members,
+        }
+        return all_data
+
+    def add_member(self, user_id, msg=''):
+        self.members[user_id] = msg
+
+    def remove_member(self, user_id):
+        del self.members[user_id]
+
+    def update_message(self, user_id, msg):
+        self.members[user_id] = msg
+
