@@ -168,6 +168,7 @@ async def on_ready():
         logging.info(f"Existing Librarian instance found, closing and reopening.")
         main_bot.librarian.close()
     main_bot.librarian = init_librarian(main_bot.config['bot']['mongo'])
+    main_bot.private_channel = main_bot.get_guild(main_bot.config['guild']).get_channel(main_bot.config['administration']['private'])
     logging.info('Bot is ready for use')
     logging.info('Sending out load_on_ready Event')
     main_bot.dispatch('load_on_ready', main_bot)
