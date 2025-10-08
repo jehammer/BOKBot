@@ -1,5 +1,5 @@
 from .roster import Roster
 from .count import Count
 from .rank import Rank
-
-__all__ = ['Roster', 'Count', 'Rank']
+from .event_roster import EventRoster
+__all__ = ['Roster', 'Count', 'Rank', 'EventRoster']
