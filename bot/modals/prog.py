@@ -2,6 +2,7 @@ from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle
 from bot.database import Librarian
 import logging
+from bot.services import RosterExtended
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -40,7 +41,7 @@ class ProgModal(Modal):
         logging.info(f"Updating Prog Role Data")
         self.bot.librarian.put_progs(role_list)
         logging.info(f"Updated Prog Role Data")
-        self.bot.dispatch("update_limits_data")
+        self.bot.limits = RosterExtended.get_limits(librarian=self.bot.librarian, roles_config=self.bot.config['raids']['ranks'])
         await interaction.response.send_message(self.language['Prog']['Updated'])
         return
 
