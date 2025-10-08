@@ -55,6 +55,30 @@ class Librarian:
             upsert=True
         )
 
+    def put_trial_roster(self, channel_id, data):
+        item = {
+            "channelID": str(channel_id),
+            "type": "Trial",
+            "data": data
+        }
+        self._database.raids.replace_one(
+            {"channelID": str(channel_id)},
+            item,
+            upsert=True
+        )
+
+    def put_event_roster(self, channel_id, data):
+        item = {
+            "channelID": str(channel_id),
+            "type": "Event",
+            "data": data
+        }
+        self._database.raids.replace_one(
+            {"channelID": str(channel_id)},
+            item,
+            upsert=True
+        )
+
     def delete_roster(self, channel_id):
         query = {"channelID": str(channel_id)}
         self._database.raids.delete_one(query)
