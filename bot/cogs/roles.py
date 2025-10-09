@@ -279,7 +279,7 @@ class Roles(commands.Cog, name="Roles"):
                 elif message_type.lower() == "deeps":
                     emote = self.bot.config['raids']['dps_emoji']
                     message_color = discord.Color.blue()
-                    title_type = "Deeps"
+                    title_type = "DPS"
                 elif message_type.lower() == "icons":
                     emote = ''
                     message_color = discord.Color.green()
