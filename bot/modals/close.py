@@ -14,14 +14,13 @@ logging.basicConfig(
 
 
 class CloseModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, channel_id=None):
+    def __init__(self, interaction: Interaction, bot, lang, channel_id):
         self.localization = bot.language[lang]["replies"]
         self.ui_language = bot.language[lang]["ui"]
         self.bot = bot
         self.user_language = lang
         self.config = bot.config
         self.channel_id = channel_id
-        self.roster = roster
         self.channel = interaction.guild.get_channel(int(self.channel_id))
         if self.channel is None:
             self.name = self.channel_id
@@ -75,7 +74,7 @@ class CloseModal(Modal):
                     inc_val = 1
                 elif inc_val > 10:
                     raise ValueError
-                RosterExtended.increase_roster_count(self.roster, inc_val, librarian=self.bot.librarian)
+                RosterExtended.increase_roster_count(self.bot.rosters[self.channel_id], inc_val, librarian=self.bot.librarian)
                 runs_increased = True
             except ValueError:
                 await interaction.response.send_message(
@@ -83,12 +82,10 @@ class CloseModal(Modal):
                 return
 
         logging.info(f"Deleting Roster {self.name}")
+        await interaction.guild.get_role(self.bot.rosters[self.channel_id].pingable).delete()
         self.bot.librarian.delete_roster(self.channel_id)
+        del self.bot.rosters[self.channel_id]
         logging.info(f"Roster Deleted")
-
-        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.name,
-                          update_roster=self.roster, method="close", interaction=interaction,
-                          user_language=self.user_language)
 
         if self.channel is not None:
             await self.channel.delete()
@@ -98,7 +95,6 @@ class CloseModal(Modal):
         else:
             await interaction.response.send_message(f"{self.localization['Close']['NoIncrease'] % self.name}")
 
-        await interaction.guild.get_role(self.roster.pingable).delete()
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:

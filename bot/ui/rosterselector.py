@@ -4,7 +4,7 @@ from bot.modals import *
 
 
 class RosterSelect(ui.Select):
-    def __init__(self, interaction: Interaction, cmd_called, bot, user_language, rosters, limits=None):
+    def __init__(self, interaction: Interaction, cmd_called, bot, user_language):
         self.channels = {}
         self.config = bot.config
         self.cmd_called = cmd_called
@@ -12,9 +12,9 @@ class RosterSelect(ui.Select):
         self.ui_language = bot.language[user_language]['ui']
         self.user_language = user_language
         self.bot = bot
-        self.rosters = rosters
+        self.rosters = bot.rosters
         self.channel_mapper = {}
-        self.limits = limits
+        self.limits = bot.limits
 
         options = []
         if rosters is None or len(rosters) == 0:
@@ -62,25 +62,24 @@ class RosterSelect(ui.Select):
 
         if self.cmd_called == "modify":
             await interaction.response.send_modal(
-                TrialModal(roster=roster, interaction=interaction, bot=self.bot, lang=self.user_language,
-                           limits=self.limits, channel=channel_id))
+                TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel=channel_id))
         elif self.cmd_called == "close":
             await interaction.response.send_modal(CloseModal(roster=roster, interaction=interaction, bot=self.bot,
                                                              lang=self.user_language,
                                                              channel_id=channel_id))
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(
-                RemoveModal(roster=roster, interaction=interaction, bot=self.bot, user_lang=self.user_language, channel_id=channel_id))
+                RemoveModal(interaction=interaction, bot=self.bot, user_lang=self.user_language, channel_id=channel_id))
         elif self.cmd_called == "run_count":
             await interaction.response.send_modal(
-                RunCountModal(roster=roster, interaction=interaction, bot=self.bot, users_language=self.user_language, channel_id=channel_id))
+                RunCountModal(interaction=interaction, bot=self.bot, users_language=self.user_language, channel_id=channel_id))
         elif self.cmd_called == "fill":
             await interaction.response.send_modal(
-                FillModal(roster=roster, interaction=interaction, bot=self.bot, user_language=self.user_language, channel_id=channel_id))
+                FillModal(interaction=interaction, bot=self.bot, user_language=self.user_language, channel_id=channel_id))
 
 
 class RosterSelector(ui.View):
-    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, rosters, limits=None, *,
+    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, *,
                  timeout=30):
         super().__init__(timeout=timeout)
         self.caller = caller
@@ -88,9 +87,7 @@ class RosterSelector(ui.View):
         self.interaction = interaction
         self.language = bot.language[user_language]
         self.user_language = user_language
-        self.limits = limits
-        self.rosters = rosters
-        self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language, rosters, limits=limits)
+        self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language)
         self.add_item(self.new_roster_select)
 
     async def interaction_check(self, interaction: Interaction):
