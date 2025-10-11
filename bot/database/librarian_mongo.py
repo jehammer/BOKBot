@@ -17,16 +17,21 @@ class Librarian:
 
         all_rosters = {}
         for i in db_data:
-            data = i["data"]
-            channel_id = i["channelID"]
-            all_rosters[int(channel_id)] = Roster(
-                data["trial"], data["date"], data["leader"], data["dps"],
-                data["healers"], data["tanks"], data["backup_dps"],
-                data["backup_healers"], data["backup_tanks"],
-                int(data["dps_limit"]), int(data["healer_limit"]),
-                int(data["tank_limit"]), int(data["role_limit"]),
-                data["memo"], data["pingable"]
-            )
+            channel_id = i['channelID']
+            if i['type'] is 'Trial':
+                data = i['data']
+                all_rosters[int(channel_id)] = Roster(
+                    data['trial'], data['date'], data['leader'], data['dps'],
+                    data['healers'], data['tanks'], data['backup_dps'],
+                    data['backup_healers'], data['backup_tanks'],
+                    int(data['dps_limit']), int(data['healer_limit']),
+                    int(data['tank_limit']), int(data['role_limit']),
+                    data['memo'], data['pingable']
+                )
+            elif i['type'] is 'Event':
+                data = i['data']
+                all_rosters[int(channel_id)] = EventRoster(event=data['event'], date=data['date'],leader=data['leader'],
+                                                           memo=data['memo'], pingable=data['pingable'], members=data['members'])
         return all_rosters
 
     def get_roster(self, channel_id):
