@@ -38,7 +38,7 @@ class FillModal(Modal):
         if result:
             await interaction.response.send_message(f"{self.bot.language[self.user_language]['replies']['Fill']['Filled']
                                                        % self.channel_name}")
-            self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[channel_id])
+            self.bot.librarian.put_trial_roster(self.channel_id, self.bot.rosters[channel_id])
         else:
             await interaction.response.send_message(
                 f"{Utilities.format_error(user_language, self.bot.language[self.user_language]['replies']['Fill']['NotFilled'])}")

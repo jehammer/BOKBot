@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from bot.models import Roster, Count, Rank
+from bot.models import Roster, Count, Rank, EventRoster
 
 
 class Librarian:
@@ -44,10 +44,10 @@ class Librarian:
             )
         return None
 
-    def put_roster(self, channel_id, data):
+    def put_roster(self, channel_id, data: Roster):
         item = {
             "channelID": str(channel_id),
-            "data": data
+            "data": data.get_roster_data()
         }
         self._database.raids.replace_one(
             {"channelID": str(channel_id)},
@@ -55,11 +55,11 @@ class Librarian:
             upsert=True
         )
 
-    def put_trial_roster(self, channel_id, data):
+    def put_trial_roster(self, channel_id, data: Roster):
         item = {
             "channelID": str(channel_id),
             "type": "Trial",
-            "data": data
+            "data": data.get_roster_data()
         }
         self._database.raids.replace_one(
             {"channelID": str(channel_id)},
@@ -67,11 +67,11 @@ class Librarian:
             upsert=True
         )
 
-    def put_event_roster(self, channel_id, data):
+    def put_event_roster(self, channel_id, data: EventRoster):
         item = {
             "channelID": str(channel_id),
             "type": "Event",
-            "data": data
+            "data": data.get_roster_data()
         }
         self._database.raids.replace_one(
             {"channelID": str(channel_id)},
@@ -82,22 +82,6 @@ class Librarian:
     def delete_roster(self, channel_id):
         query = {"channelID": str(channel_id)}
         self._database.raids.delete_one(query)
-
-    # Roster map
-    def get_roster_map(self):
-        db_data = self._database.misc.find_one({"key": "rosters"})
-        return db_data["data"] if db_data else None
-
-    def put_roster_map(self, data):
-        item = {
-            "key": "rosters",
-            "data": data
-        }
-        self._database.misc.replace_one(
-            {"key": "rosters"},
-            item,
-            upsert=True
-        )
 
     # Default settings
     def get_default(self, user_id):

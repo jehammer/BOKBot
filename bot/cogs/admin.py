@@ -28,6 +28,9 @@ ranks = None
 poons = None
 other = None
 
+#alert_channel = self.bot.get_guild(self.bot.config['guild']).get_channel(self.bot.config['private'])
+#await alert_channel.send(f"Saving Roster or Map error encountered: {str(e)}")
+
 
 def gather_roles(guild, config):
     """Loads the starting roles for people when joining """
@@ -273,6 +276,55 @@ class Admin(commands.Cog, name="Admin"):
         rank_data = self.bot.librarian.get_rank(member.id)
         count_data = self.bot.librarian.get_count(member.id)
         try:
+            was_on = False
+            user_id = f"{member.id}"
+            to_send = f"{member.name} - {member.display_name} has left the server\n"
+            for i in self.bot.rosters:
+                is_on = False
+                channel_name = ""
+                if user_id in self.bot.rosters[i].dps.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_dps(user_id)
+                    to_send += f"Traitor was removed as a DPS from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in self.bot.rosters[i].backup_dps.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_dps(user_id)
+                    to_send += f"Traitor was removed as a backup DPS from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in self.bot.rosters[i].healers.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_healer(user_id)
+                    to_send += f"Traitor was removed as a Healer from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in self.bot.rosters[i].backup_healers.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_healer(user_id)
+                    to_send += f"Traitor was removed as a backup Healer from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in self.bot.rosters[i].tanks.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_tank(user_id)
+                    to_send += f"Traitor was removed as a Tank from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                elif user_id in self.bot.rosters[i].backup_tanks.keys():
+                    channel_name = self.bot.get_channel(int(i)).name
+                    self.bot.rosters[i].remove_tank(user_id)
+                    to_send += f"Traitor was removed as a backup Tank from {channel_name}\n"
+                    was_on = True
+                    is_on = True
+                if is_on:
+                    logging.info(f"Updating Roster {channel_name} for member removal")
+                    self.bot.librarian.update_roster(i, self.bot.rosters[i])
+            if was_on:
+                to_send += f"The Traitor has been removed from all active rosters.\n"
+            else:
+                to_send += f"The Traitor was not on any active rosters.\n"
             # Delete Default
             self.bot.librarian.delete_default(member.id)
             to_send += 'Deleted Default\n'
@@ -294,7 +346,7 @@ class Admin(commands.Cog, name="Admin"):
                 to_send += f"{member.display_name} last ranked on {rank_data.last_called}\n"
             else:
                 to_send += f"{member.display_name} has no recorded rankings\n"
- 
+
             await private_channel.send(to_send)
         except Exception as e:
             await private_channel.send("Unable to delete Member data")

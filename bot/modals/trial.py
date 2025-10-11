@@ -14,11 +14,11 @@ logging.basicConfig(
 
 
 class TrialModal(Modal):
-    def __init__(self, roster: Roster, interaction: Interaction, bot, lang, limits, channel=None):
+    def __init__(self, interaction: Interaction, bot, lang, channel_id=None):
         self.localization = bot.language[lang]['replies']
         self.ui_localization = bot.language[lang]["ui"]
         self.config = bot.config
-        self.limits = limits
+        self.limits = bot.limits
         self.leader_trial_val = None
         self.date_val = None
         self.limit_val = None
@@ -32,15 +32,15 @@ class TrialModal(Modal):
         self.change_name = True
         self.sort_channels = True
         self.roster = None
-        if roster is not None:
-            self.channel_id = channel
+        if channel is not None:
+            self.channel_id = channel_id
             self.new_roster = False
-            self.roster = roster
-            self.leader_trial_val = f"{roster.leader},{roster.trial}"
-            self.date_val = f"{roster.date}"
-            self.limit_val = f"{roster.role_limit}"
-            self.role_nums_val = f"{roster.dps_limit},{roster.healer_limit},{roster.tank_limit}"
-            self.memo_val = f"{roster.memo}"
+            self.old_roster = self.bot.self.bot.rosters[self.channel_id]
+            self.leader_trial_val = f"{old_roster.leader},{old_roster.trial}"
+            self.date_val = f"{old_roster.date}"
+            self.limit_val = f"{old_roster.role_limit}"
+            self.role_nums_val = f"{old_roster.dps_limit},{old_roster.healer_limit},{old_roster.tank_limit}"
+            self.memo_val = f"{old_roster.memo}"
         super().__init__(title=self.ui_localization['TrialModify']['Title'])
         self.initialize()
 
@@ -133,7 +133,7 @@ class TrialModal(Modal):
             formatted_date = RosterExtended.format_date(self.date.value)
             category = interaction.guild.get_channel(self.config["raids"]["category"])
 
-            if self.new_roster is False:
+            if not self.new_roster:
                 old_date = self.roster.date
                 old_trial = self.roster.trial
                 # Update all values then update the DB
@@ -147,6 +147,44 @@ class TrialModal(Modal):
                 self.roster.role_limit = role_limit
 
                 self.channel = interaction.guild.get_channel(int(self.channel_id))
+
+
+                # Account for role changes where there is overflow
+                if self.bot.rosters[self.channel_id].dps_limit > self.old_roster.dps_limit:
+                    to_remove = self.bot.rosters[self.channel_id].dps_limit - old_roster.dps_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(self.bot.rosters[self.channel_id].dps.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del self.bot.rosters[self.channel_id].dps[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        self.bot.rosters[self.channel_id].backup_dps.update({user_id: msg})
+                    logging.info(f"Moved overflow DPS to backup")
+
+                if self.bot.rosters[self.channel_id].healer_limit > old_roster.healer_limit:
+                    to_remove = self.bot.rosters[self.channel_id].healer_limit - old_roster.healer_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(self.bot.rosters[self.channel_id].healers.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del self.bot.rosters[self.channel_id].healers[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        self.bot.rosters[self.channel_id].backup_healers.update({user_id: msg})
+                    logging.info(f"Moved overflow Healers to backup")
+
+                if self.bot.rosters[self.channel_id].tank_limit > old_roster.tank_limit:
+                    to_remove = self.bot.rosters[self.channel_id].tank_limit - old_roster.tank_limit
+                    # Get the last n items from the main roster
+                    reversed_roster = list(self.bot.rosters[self.channel_id].tanks.items())[-to_remove:]
+                    # Remove these items from the main roster
+                    for user_id, _ in reversed_roster:
+                        del self.bot.rosters[self.channel_id].tanks[user_id]
+                    # Insert these items at the beginning of the backup roster
+                    for user_id, msg in reversed(reversed_roster):
+                        self.bot.rosters[self.channel_id].backup_tanks.update({user_id: msg})
+                    logging.info(f"Moved overflow Tanks to backup")
 
                 try:
 
@@ -176,7 +214,7 @@ class TrialModal(Modal):
                     logging.info(f"New Name Value Error Existing Roster: {e}")
                     return
 
-            elif self.new_roster is True:
+            elif self.new_roster:
                 try:
                     self.roster = RosterExtended.factory(leader, trial, formatted_date, dps_limit, healer_limit,
                                                          tank_limit, role_limit, self.memo.value, self.config)
@@ -227,6 +265,7 @@ class TrialModal(Modal):
 
                     logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                     self.channel_id = self.channel.id
+
                 except Exception as e:
                     await interaction.response.send_message(
                         f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantEmbed'])}")
@@ -242,9 +281,17 @@ class TrialModal(Modal):
                 f"{Utilities.format_error(self.user_language, self.localization['Unreachable'])}")
             return
 
-        self.bot.dispatch("update_rosters_data", channel_id=self.channel_id, channel_name=self.channel.name,
-                          update_roster=self.roster, method="create_update",
-                          interaction=interaction, user_language=self.user_language, sort=self.sort_channels)
+        self.bot.rosters[channel_id] = self.roster
+        self.bot.librarian.put_trial_roster(self.channel_id, self.roster)
+        self.bot.dispatch('sort_rosters')
+
+        if self.new_roster:
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
+
+        elif not self.new_roster:
+            await interaction.response.send_message(
+                f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
 
         return
 
