@@ -49,33 +49,16 @@ class Librarian:
             )
         return None
 
-    def put_roster(self, channel_id, data: Roster):
+    def put_roster(self, channel_id, data: Roster | EventRoster):
+        roster_type = ''
+        if isinstance(data, Roster):
+            roster_type = 'Trial'
+        elif isinstance(data, EventRoster):
+            roster_type = 'Event'
+            
         item = {
             "channelID": str(channel_id),
-            "data": data.get_roster_data()
-        }
-        self._database.raids.replace_one(
-            {"channelID": str(channel_id)},
-            item,
-            upsert=True
-        )
-
-    def put_trial_roster(self, channel_id, data: Roster):
-        item = {
-            "channelID": str(channel_id),
-            "type": "Trial",
-            "data": data.get_roster_data()
-        }
-        self._database.raids.replace_one(
-            {"channelID": str(channel_id)},
-            item,
-            upsert=True
-        )
-
-    def put_event_roster(self, channel_id, data: EventRoster):
-        item = {
-            "channelID": str(channel_id),
-            "type": "Event",
+            'type': roster_type,
             "data": data.get_roster_data()
         }
         self._database.raids.replace_one(

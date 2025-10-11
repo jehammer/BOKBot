@@ -78,10 +78,7 @@ class RemoveModal(Modal):
                     self.bot.rosters[self.channel_id].remove_tank(people[i])
                     names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
 
-            if isinstance(self.bot.roster[self.channel_id], Roster):
-                self.bot.librarian.put_trial_roster(self.channel_id, self.bot.roster[self.channel_id])
-            elif isinstance(self.bot.roster[self.channel_id], EventRoster):
-                self.bot.librarian.put_event_roster(self.channel_id, self.bot.roster[self.channel_id])
+            self.bot.librarian.put_roster(self.channel_id, self.bot.roster[self.channel_id])
 
             await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Remove']['Removed']
                                                        % (channel_name, names)}")

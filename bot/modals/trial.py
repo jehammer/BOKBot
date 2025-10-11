@@ -282,7 +282,7 @@ class TrialModal(Modal):
             return
 
         self.bot.rosters[channel_id] = self.roster
-        self.bot.librarian.put_trial_roster(self.channel_id, self.roster)
+        self.bot.librarian.put_roster(self.channel_id, self.roster)
         self.bot.dispatch('sort_rosters')
 
         if self.new_roster:
