@@ -4,6 +4,7 @@ from discord import Interaction, TextStyle, Role
 from discord.utils import get
 from bot.services import Utilities, RosterExtended, EmbedFactory
 import logging
+import copy
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -31,16 +32,16 @@ class TrialModal(Modal):
         self.channel = None
         self.change_name = True
         self.sort_channels = True
-        self.roster = None
-        if channel is not None:
+        self.channel_id = channel_id
+        if self.channel_id is not None:
             self.channel_id = channel_id
             self.new_roster = False
-            self.old_roster = self.bot.self.bot.rosters[self.channel_id]
-            self.leader_trial_val = f"{old_roster.leader},{old_roster.trial}"
-            self.date_val = f"{old_roster.date}"
-            self.limit_val = f"{old_roster.role_limit}"
-            self.role_nums_val = f"{old_roster.dps_limit},{old_roster.healer_limit},{old_roster.tank_limit}"
-            self.memo_val = f"{old_roster.memo}"
+            self.old_roster = copy.copy(self.bot.rosters[self.channel_id])
+            self.leader_trial_val = f"{self.old_roster.leader},{self.old_roster.trial}"
+            self.date_val = f"{self.old_roster.date}"
+            self.limit_val = f"{self.old_roster.role_limit}"
+            self.role_nums_val = f"{self.old_roster.dps_limit},{self.old_roster.healer_limit},{self.old_roster.tank_limit}"
+            self.memo_val = f"{self.old_roster.memo}"
         super().__init__(title=self.ui_localization['TrialModify']['Title'])
         self.initialize()
 
@@ -134,24 +135,21 @@ class TrialModal(Modal):
             category = interaction.guild.get_channel(self.config["raids"]["category"])
 
             if not self.new_roster:
-                old_date = self.roster.date
-                old_trial = self.roster.trial
                 # Update all values then update the DB
-                self.roster.trial = trial
-                self.roster.leader = leader
-                self.roster.dps_limit = dps_limit
-                self.roster.healer_limit = healer_limit
-                self.roster.tank_limit = tank_limit
-                self.roster.date = formatted_date
-                self.roster.memo = self.memo.value
-                self.roster.role_limit = role_limit
+                self.bot.rosters[self.channel_id].trial = trial
+                self.bot.rosters[self.channel_id].leader = leader
+                self.bot.rosters[self.channel_id].dps_limit = dps_limit
+                self.bot.rosters[self.channel_id].healer_limit = healer_limit
+                self.bot.rosters[self.channel_id].tank_limit = tank_limit
+                self.bot.rosters[self.channel_id].date = formatted_date
+                self.bot.rosters[self.channel_id].memo = self.memo.value
+                self.bot.rosters[self.channel_id].role_limit = role_limit
 
                 self.channel = interaction.guild.get_channel(int(self.channel_id))
 
-
                 # Account for role changes where there is overflow
-                if self.bot.rosters[self.channel_id].dps_limit > self.old_roster.dps_limit:
-                    to_remove = self.bot.rosters[self.channel_id].dps_limit - old_roster.dps_limit
+                if self.bot.rosters[self.channel_id].dps_limit < self.old_roster.dps_limit:
+                    to_remove = self.old_roster.dps_limit - self.bot.rosters[self.channel_id].dps_limit
                     # Get the last n items from the main roster
                     reversed_roster = list(self.bot.rosters[self.channel_id].dps.items())[-to_remove:]
                     # Remove these items from the main roster
@@ -162,8 +160,8 @@ class TrialModal(Modal):
                         self.bot.rosters[self.channel_id].backup_dps.update({user_id: msg})
                     logging.info(f"Moved overflow DPS to backup")
 
-                if self.bot.rosters[self.channel_id].healer_limit > old_roster.healer_limit:
-                    to_remove = self.bot.rosters[self.channel_id].healer_limit - old_roster.healer_limit
+                if self.bot.rosters[self.channel_id].healer_limit < self.old_roster.healer_limit:
+                    to_remove = self.old_roster.healer_limit - self.bot.rosters[self.channel_id].healer_limit
                     # Get the last n items from the main roster
                     reversed_roster = list(self.bot.rosters[self.channel_id].healers.items())[-to_remove:]
                     # Remove these items from the main roster
@@ -174,8 +172,8 @@ class TrialModal(Modal):
                         self.bot.rosters[self.channel_id].backup_healers.update({user_id: msg})
                     logging.info(f"Moved overflow Healers to backup")
 
-                if self.bot.rosters[self.channel_id].tank_limit > old_roster.tank_limit:
-                    to_remove = self.bot.rosters[self.channel_id].tank_limit - old_roster.tank_limit
+                if self.bot.rosters[self.channel_id].tank_limit < self.old_roster.tank_limit:
+                    to_remove = self.old_roster.tank_limit - self.bot.rosters[self.channel_id].tank_limit
                     # Get the last n items from the main roster
                     reversed_roster = list(self.bot.rosters[self.channel_id].tanks.items())[-to_remove:]
                     # Remove these items from the main roster
@@ -188,9 +186,9 @@ class TrialModal(Modal):
 
                 try:
 
-                    day_change = RosterExtended.did_day_change(old_date, self.roster.date,
+                    day_change = RosterExtended.did_day_change(self.old_roster.date, self.bot.rosters[self.channel_id].date,
                                                                self.config["raids"]["timezone"])
-                    trial_change = RosterExtended.did_trial_change(old_trial, self.roster.trial)
+                    trial_change = RosterExtended.did_trial_change(self.old_roster.trial, self.bot.rosters[self.channel_id].trial)
                     if not day_change:
                         self.sort_channels = False
 
@@ -203,10 +201,11 @@ class TrialModal(Modal):
                         await self.channel.edit(name=self.new_name)
 
                     if day_change or trial_change:
-                        name = RosterExtended.create_pingable_role_name(trial=self.roster.trial, date=self.roster.date,
+                        name = RosterExtended.create_pingable_role_name(trial=self.bot.rosters[self.channel_id].trial,
+                                                                        date=self.bot.rosters[self.channel_id].date,
                                                                         tz=self.config['raids']['timezone'],
                                                                         guild=interaction.guild)
-                        await interaction.guild.get_role(self.roster.pingable).edit(name=name)
+                        await interaction.guild.get_role(self.bot.rosters[self.channel_id].pingable).edit(name=name)
 
                 except ValueError as e:
                     await interaction.response.send_message(
@@ -216,20 +215,22 @@ class TrialModal(Modal):
 
             elif self.new_roster:
                 try:
-                    self.roster = RosterExtended.factory(leader, trial, formatted_date, dps_limit, healer_limit,
-                                                         tank_limit, role_limit, self.memo.value, self.config)
+                    self.bot.rosters[self.channel_id] = RosterExtended.factory(leader, trial, formatted_date, dps_limit,
+                                                                               healer_limit,
+                                                                               tank_limit, role_limit, self.memo.value,
+                                                                               self.config)
 
-                    group_role = RosterExtended.create_pingable_role_name(trial=self.roster.trial,
-                                                                          date=self.roster.date,
+                    group_role = RosterExtended.create_pingable_role_name(trial=self.bot.rosters[self.channel_id].trial,
+                                                                          date=self.bot.rosters[self.channel_id].date,
                                                                           tz=self.config['raids']['timezone'],
                                                                           guild=interaction.guild)
 
                     role: Role = await interaction.guild.create_role(name=group_role, mentionable=True)
-                    self.roster.pingable = role.id
+                    self.bot.rosters[self.channel_id].pingable = role.id
 
                     logging.info(f"Creating new channel.")
                     try:
-                        self.new_name = RosterExtended.generate_channel_name(self.roster.date, self.roster.trial,
+                        self.new_name = RosterExtended.generate_channel_name(self.bot.rosters[self.channel_id].date, self.bot.rosters[self.channel_id].trial,
                                                                              self.config["raids"]["timezone"])
                     except ValueError as e:
                         await interaction.response.send_message(
@@ -238,7 +239,7 @@ class TrialModal(Modal):
                         return
                     try:
                         self.channel = await category.create_text_channel(self.new_name)
-                        self.roster.channel = self.channel.id # Set new rosters channel to the id.
+                        self.bot.rosters[self.channel_id].channel = self.channel.id  # Set new rosters channel to the id.
                     except Exception as e:
                         await interaction.response.send_message(
                             f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantCreate'])}")
@@ -258,9 +259,9 @@ class TrialModal(Modal):
                         limiter = get(interaction.guild.roles, name=roles[role_limit])
                         roles_req += f"{limiter.mention}"
 
-                    embed = EmbedFactory.create_new_roster(trial=self.roster.trial, date=self.roster.date,
-                                                           roles_req=roles_req, leader=self.roster.leader,
-                                                           memo=self.roster.memo, pingable=self.roster.pingable)
+                    embed = EmbedFactory.create_new_roster(trial=self.bot.rosters[self.channel_id].trial, date=self.bot.rosters[self.channel_id].date,
+                                                           roles_req=roles_req, leader=self.bot.rosters[self.channel_id].leader,
+                                                           memo=self.bot.rosters[self.channel_id].memo, pingable=self.bot.rosters[self.channel_id].pingable)
                     await self.channel.send(embed=embed)
 
                     logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
@@ -281,17 +282,16 @@ class TrialModal(Modal):
                 f"{Utilities.format_error(self.user_language, self.localization['Unreachable'])}")
             return
 
-        self.bot.rosters[channel_id] = self.roster
-        self.bot.librarian.put_roster(self.channel_id, self.roster)
+        self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
         self.bot.dispatch('sort_rosters')
 
         if self.new_roster:
             await interaction.response.send_message(
-                f"{self.bot.language[user_language]['replies']['TrialModify']['NewRosterCreated'] % channel_name}")
+                f"{self.bot.language[self.user_language]['replies']['TrialModify']['NewRosterCreated'] % self.new_name}")
 
         elif not self.new_roster:
             await interaction.response.send_message(
-                f"{self.bot.language[user_language]['replies']['TrialModify']['ExistingUpdated'] % channel_name}")
+                f"{self.bot.language[self.user_language]['replies']['TrialModify']['ExistingUpdated'] % self.new_name}")
 
         return
 

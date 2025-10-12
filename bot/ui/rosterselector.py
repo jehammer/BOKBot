@@ -17,11 +17,11 @@ class RosterSelect(ui.Select):
         self.limits = bot.limits
 
         options = []
-        if rosters is None or len(rosters) == 0:
+        if self.rosters is None or len(self.rosters) == 0:
             options.append(SelectOption(label='N/A'))
         else:
             used = []
-            for i in rosters:
+            for i in self.rosters:
                 channel = self.bot.get_channel(int(i))
                 label = channel.name if channel else f"{i}"
                 if label in used:
@@ -62,9 +62,9 @@ class RosterSelect(ui.Select):
 
         if self.cmd_called == "modify":
             await interaction.response.send_modal(
-                TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel=channel_id))
+                TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
         elif self.cmd_called == "close":
-            await interaction.response.send_modal(CloseModal(roster=roster, interaction=interaction, bot=self.bot,
+            await interaction.response.send_modal(CloseModal(interaction=interaction, bot=self.bot,
                                                              lang=self.user_language,
                                                              channel_id=channel_id))
         elif self.cmd_called == "remove":

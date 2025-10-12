@@ -1,5 +1,13 @@
 from pymongo import MongoClient
 from bot.models import Roster, Count, Rank, EventRoster
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format='%(asctime)s: %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='a'),
+        logging.StreamHandler()
+    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class Librarian:
@@ -18,7 +26,7 @@ class Librarian:
         all_rosters = {}
         for i in db_data:
             channel_id = i['channelID']
-            if i['type'] is 'Trial':
+            if i['type'] == 'Trial':
                 data = i['data']
                 all_rosters[int(channel_id)] = Roster(
                     data['trial'], data['date'], data['leader'], data['dps'],
@@ -28,9 +36,9 @@ class Librarian:
                     int(data['tank_limit']), int(data['role_limit']),
                     data['memo'], data['pingable']
                 )
-            elif i['type'] is 'Event':
+            elif i['type'] == 'Event':
                 data = i['data']
-                all_rosters[int(channel_id)] = EventRoster(event=data['event'], date=data['date'],leader=data['leader'],
+                all_rosters[int(channel_id)] = EventRoster(event=data['event'], date=data['date'], leader=data['leader'],
                                                            memo=data['memo'], pingable=data['pingable'], members=data['members'])
         return all_rosters
 
@@ -61,6 +69,8 @@ class Librarian:
             'type': roster_type,
             "data": data.get_roster_data()
         }
+
+        logging.info(f"Saving roster {roster_type} channel: {channel_id}")
         self._database.raids.replace_one(
             {"channelID": str(channel_id)},
             item,
@@ -149,8 +159,8 @@ class Librarian:
                 four_twenty=int(data["four_twenty"]),
                 boob=int(data["boob"]),
                 pie=int(data["pie"]),
-                samsies=int(data["samsies"])
-            )
+                samsies=int(data["samsies"]),
+                palindrome=int(data['palindrome']))
         return None
 
     def put_rank(self, user_id, rank_data: Rank):
