@@ -14,3 +14,4 @@ bot/cogs/_scratchwork.py
 bot/cogs/scratchwork.py
 config/roles.yaml
 config/roster.yaml
+voice.mp3
