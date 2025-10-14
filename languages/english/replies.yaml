@@ -46,7 +46,7 @@ Roster:
   Backup: "Added as backup %s"
   NotInRoster: "0036: You are not signed up for this roster"
   MsgUpdated: "Message Updated!"
-  MsgLength: "0035: Max Message Length is 30 characters (including whitespace)."
+  MsgLength: "0035: Max Message Length is 50 characters (including whitespace)."
   AddBad: "0037: Unknown Role, please specify DPS, Healer, or Tank."
 
 Default:

@@ -19,6 +19,22 @@ class EventsSys(commands.Cog, name="EventsSys"):
         self.bot = bot
 
     @commands.Cog.listener()
+    async def on_load_on_ready(self, bot):
+        fetched = self.bot.librarian.get_all_rosters()
+        if fetched is not None:
+            self.bot.rosters = fetched
+            logging.info(f"Found and Loaded Rosters")
+        else:
+            logging.info(f"No Rosters Found")
+        fetched = RosterExtended.get_limits(librarian=self.bot.librarian,
+                                            roles_config=self.bot.config['raids']['ranks'])
+        if fetched is not None:
+            self.bot.limits = fetched
+            logging.info(f"Found and Loaded Limits")
+        else:
+            logging.info(f"No Limits Found")
+
+    @commands.Cog.listener()
     async def on_sort_rosters(self):
         try:
             # Order Channels correctly now
@@ -49,8 +65,8 @@ class EventsSys(commands.Cog, name="EventsSys"):
     async def printout_all_rosters(self, ctx: commands.Context):
         """Printout all rosters directly for any debugging needs"""
         try:
-            for i in rosters:
-                await ctx.reply(rosters[i].get_roster_data())
+            for i in self.bot.rosters:
+                await ctx.reply(self.bot.rosters[i].get_roster_data())
         except Exception as e:
             await ctx.reply(f"Unable to complete: {str(e)}")
 

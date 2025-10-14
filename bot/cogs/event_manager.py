@@ -48,7 +48,7 @@ class EventManager(commands.Cog, name="EventsManager"):
     async def create_roster(self, interaction: Interaction) -> None:
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
-            TrialModal(interaction=interaction, bot=self.bot, lang=user_language, limits=limits))
+            TrialModal(interaction=interaction, bot=self.bot, lang=user_language))
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
