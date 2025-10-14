@@ -3,7 +3,7 @@ from re import sub
 import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from bot.models import Roster, Count
+from bot.models import Roster, Count, EventRoster
 from discord import Member, Guild
 from discord.utils import get
 
@@ -195,32 +195,35 @@ class RosterExtended:
             raise e
 
     @staticmethod
-    def increase_roster_count(roster: Roster, count, librarian):
+    def increase_roster_count(roster: Roster | EventRoster, count, librarian):
         """Increase run count of all users in a roster."""
         try:
-            for i in roster.dps:
-                db_count = librarian.get_count(i)
-                if db_count is None:
-                    db_count = Count(runs=count, dps=count, trial=roster.trial, date=roster.date)
-                else:
-                    db_count.increase_data(runs=count, dps=count, trial=roster.trial, date=roster.date)
-                librarian.put_count(i, db_count)
+            if isinstance(roster, Roster):
+                for i in roster.dps:
+                    db_count = librarian.get_count(i)
+                    if db_count is None:
+                        db_count = Count(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                    else:
+                        db_count.increase_data(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                    librarian.put_count(i, db_count)
 
-            for i in roster.tanks:
-                db_count = librarian.get_count(i)
-                if db_count is None:
-                    db_count = Count(runs=count, tank=count, trial=roster.trial, date=roster.date)
-                else:
-                    db_count.increase_data(runs=count, tank=count, trial=roster.trial, date=roster.date)
-                librarian.put_count(i, db_count)
+                for i in roster.tanks:
+                    db_count = librarian.get_count(i)
+                    if db_count is None:
+                        db_count = Count(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                    else:
+                        db_count.increase_data(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                    librarian.put_count(i, db_count)
 
-            for i in roster.healers:
-                db_count = librarian.get_count(i)
-                if db_count is None:
-                    db_count = Count(runs=count, healer=count, trial=roster.trial, date=roster.date)
-                else:
-                    db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
-                librarian.put_count(i, db_count)
+                for i in roster.healers:
+                    db_count = librarian.get_count(i)
+                    if db_count is None:
+                        db_count = Count(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                    else:
+                        db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                    librarian.put_count(i, db_count)
+            elif isinstance(roster, EventRoster):
+                pass
 
         except Exception as e:
             logging.error(f"Increase Roster Run Count Error: {str(e)}")
