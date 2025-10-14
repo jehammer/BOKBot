@@ -1,8 +1,11 @@
 import discord
-from discord import Member
+from discord import Member, FFmpegPCMAudio
 from discord.ext import commands, tasks
 import logging
 import asyncio
+
+from gtts import gTTS
+
 from bot import decor as permissions
 import datetime
 import shutil
@@ -165,6 +168,28 @@ class Admin(commands.Cog, name="Admin"):
             await channel.send(msg[2])
         except Exception as e:
             await ctx.send("Unable to send the message")
+            logging.error(f"sr error: {str(e)}")
+
+    @commands.command(name="vr", hidden=True)
+    @permissions.creator_only()
+    async def send_voice_into_vc(self, ctx: commands.Context):
+        """Just a fun little thing for voice"""
+        try:
+            msg = ctx.message.content
+            msg = msg.split(" ", 2)
+            guild = self.bot.get_guild(self.bot.config['guild'])
+            channel = guild.get_channel(int(msg[1]))
+            tts = gTTS(msg[2], lang='en')
+            tts.save('voice.mp3')
+            voice = await channel.connect()
+            source = FFmpegPCMAudio('voice.mp3')
+            voice.play(source)
+            while voice.is_playing():
+                await asyncio.sleep(2)
+            await voice.disconnect()
+
+        except Exception as e:
+            await ctx.send("Unable to complete")
             logging.error(f"sr error: {str(e)}")
 
     @commands.command(name="cogreload", aliases=["reload", "reloadcog"])
