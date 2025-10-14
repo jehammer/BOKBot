@@ -9,7 +9,7 @@ class RemoveModal(Modal):
     def __init__(self, interaction: Interaction, bot, user_lang, channel_id):
         self.channel_id = channel_id
         self.channel = interaction.guild.get_channel(int(self.channel_id))
-        self.roster = self.bot.rosters[channel_id]
+        self.roster = bot.rosters[channel_id]
         self.people = {}
         self.bot = bot
         self.ui = bot.language[user_lang]['ui']['Remove']
@@ -65,23 +65,24 @@ class RemoveModal(Modal):
     async def on_submit(self, interaction: Interaction):
         try:
             removed = [int(i) for i in self.options.value.split(',')]
+            names = ''
             for i in removed:
-                if people[i] in self.bot.rosters[self.channel_id].dps.keys() or people[i] in self.bot.rosters[self.channel_id].backup_dps.keys():
-                    self.bot.rosters[self.channel_id].remove_dps(people[i])
-                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
-                elif (people[i] in self.bot.rosters[self.channel_id].healers.keys() or people[i] in
+                if self.people[i] in self.bot.rosters[self.channel_id].dps.keys() or self.people[i] in self.bot.rosters[self.channel_id].backup_dps.keys():
+                    self.bot.rosters[self.channel_id].remove_dps(self.people[i])
+                    names += f"{interaction.guild.get_member(int(self.people[i])).display_name}\n"
+                elif (self.people[i] in self.bot.rosters[self.channel_id].healers.keys() or self.people[i] in
                       self.bot.rosters[self.channel_id].backup_healers.keys()):
-                    self.bot.rosters[self.channel_id].remove_healer(people[i])
-                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
-                elif (people[i] in self.bot.rosters[self.channel_id].tanks.keys() or people[i] in
+                    self.bot.rosters[self.channel_id].remove_healer(self.people[i])
+                    names += f"{interaction.guild.get_member(int(self.people[i])).display_name}\n"
+                elif (self.people[i] in self.bot.rosters[self.channel_id].tanks.keys() or self.people[i] in
                       self.bot.rosters[self.channel_id].backup_tanks.keys()):
-                    self.bot.rosters[self.channel_id].remove_tank(people[i])
-                    names += f"{interaction.guild.get_member(int(people[i])).display_name}\n"
+                    self.bot.rosters[self.channel_id].remove_tank(self.people[i])
+                    names += f"{interaction.guild.get_member(int(self.people[i])).display_name}\n"
 
-            self.bot.librarian.put_roster(self.channel_id, self.bot.roster[self.channel_id])
+            self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
 
-            await interaction.response.send_message(f"{self.bot.language[user_language]['replies']['Remove']['Removed']
-                                                       % (channel_name, names)}")
+            await interaction.response.send_message(f"{self.language['Remove']['Removed']
+                                                       % (self.channel.name, names)}")
             return
         except ValueError:
             await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.language['Remove']['NumbersOnly'])}")
