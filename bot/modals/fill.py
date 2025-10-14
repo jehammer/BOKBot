@@ -34,16 +34,16 @@ class FillModal(Modal):
             await interaction.response.send_message(f"{self.lang['Fill']['NInput']}")
             return
 
-        result = self.bot.rosters[channel_id].fill_spots()
+        result = self.bot.rosters[self.channel_id].fill_spots()
         if result:
+            self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
             await interaction.response.send_message(f"{self.bot.language[self.user_language]['replies']['Fill']['Filled']
-                                                       % self.channel_name}")
-            self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[channel_id])
+                                                       % self.channel.name}")
         else:
             await interaction.response.send_message(
                 f"{Utilities.format_error(user_language, self.bot.language[self.user_language]['replies']['Fill']['NotFilled'])}")
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
-        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.bot.language['Unknown'])}")
+        await interaction.response.send_message(f"{Utilities.format_error(self.user_language, self.bot.language[self.user_language]['replies']['Unknown'])}")
         logging.error(f"Roster Fill Error: {str(error)}")
         return
