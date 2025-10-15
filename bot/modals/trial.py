@@ -215,6 +215,17 @@ class TrialModal(Modal):
 
             elif self.new_roster:
                 try:
+                    logging.info(f"Creating new channel.")
+                    try:
+                        new_name = RosterExtended.generate_channel_name(formatted_date, trial, self.config["raids"]["timezone"])
+                        self.channel = await category.create_text_channel(new_name)
+                        self.channel_id = self.channel.id
+                    except Exception as e:
+                        await interaction.response.send_message(
+                            f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantCreate'])}")
+                        logging.error(f"Unable To Create New Roster Channel: {str(e)}")
+                        return
+
                     self.bot.rosters[self.channel_id] = RosterExtended.factory(leader, trial, formatted_date, dps_limit,
                                                                                healer_limit,
                                                                                tank_limit, role_limit, self.memo.value,
@@ -227,24 +238,6 @@ class TrialModal(Modal):
 
                     role: Role = await interaction.guild.create_role(name=group_role, mentionable=True)
                     self.bot.rosters[self.channel_id].pingable = role.id
-
-                    logging.info(f"Creating new channel.")
-                    try:
-                        self.new_name = RosterExtended.generate_channel_name(self.bot.rosters[self.channel_id].date, self.bot.rosters[self.channel_id].trial,
-                                                                             self.config["raids"]["timezone"])
-                    except ValueError as e:
-                        await interaction.response.send_message(
-                            f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['NewNameErr'])}")
-                        logging.info(f"New Name Value Error New Roster: {e}")
-                        return
-                    try:
-                        self.channel = await category.create_text_channel(self.new_name)
-                        self.bot.rosters[self.channel_id].channel = self.channel.id  # Set new rosters channel to the id.
-                    except Exception as e:
-                        await interaction.response.send_message(
-                            f"{Utilities.format_error(self.user_language, self.localization['TrialModify']['CantCreate'])}")
-                        logging.error(f"Unable To Create New Roster Channel: {str(e)}")
-                        return
                     roles_req = ""
                     if isinstance(roles[role_limit], list):
                         # Need to work with 3 roles to check, dps | tank | healer order
