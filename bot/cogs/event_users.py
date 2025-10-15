@@ -38,6 +38,9 @@ class Events(commands.Cog, name="Events"):
     async def add_user_to_roster(self, ctx: commands.Context):
         """Signs you up to a roster | `!su [optional role] [optional message]`"""
         user_language = Utilities.get_language(ctx.author)
+        primary = ['su', 'signup', 'SU', 'SIGNUP']
+        backup = ['bu', 'backup', 'BU', 'BACKUP']
+
         try:
 
             channel_id = ctx.message.channel.id
@@ -53,6 +56,10 @@ class Events(commands.Cog, name="Events"):
                 return
 
             if isinstance(self.bot.rosters[channel_id], EventRoster):
+                if ctx.invoked_with.lower() in backup:
+                    await ctx.reply(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['EventRoster']['NoBackup'])}")
+                    return
                 # check for a message
                 msg = ''
                 cmd_vals = ctx.message.content.split(" ", 1)
@@ -61,7 +68,7 @@ class Events(commands.Cog, name="Events"):
                 self.bot.rosters[channel_id].add_member(user_id=ctx.author.id, msg=msg)
                 self.bot.librarian.put_roster(channel_id, self.bot.rosters[channel_id])
 
-                #TODO: add new ADDED message here
+                await ctx.reply(f"{self.bot.language[user_language]['replies']['EventRoster']['Added']}")
                 return
 
             # Disqualifier check
@@ -118,9 +125,6 @@ class Events(commands.Cog, name="Events"):
                 await ctx.reply(
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['ProgRoster'])}")
                 return
-
-            primary = ['su', 'signup', 'SU', 'SIGNUP']
-            backup = ['bu', 'backup', 'BU', 'BACKUP']
 
             # TODO: Update with multi-lingual support later.
             which = None
@@ -245,6 +249,8 @@ class Events(commands.Cog, name="Events"):
     async def send_status_embed(self, ctx: commands.Context):
         """Posts the current roster information"""
         user_language = Utilities.get_language(ctx.author)
+        guild = ctx.message.author.guild
+        ui_lang = self.bot.language[user_language]["ui"]
         try:
             channel_id = ctx.message.channel.id
 
@@ -254,13 +260,12 @@ class Events(commands.Cog, name="Events"):
                 return
 
             if isinstance(self.bot.rosters[channel_id], EventRoster):
-                # TODO: New event roster printing goes here
+                embed = EmbedFactory.create_event_roster(roster=self.bot.rosters[channel_id], bot=self.bot, language=ui_lang['EventStatus'],
+                                                         guild=guild)
+                await ctx.send(embed=embed)
                 return
 
             roster_data: Roster = self.bot.rosters.get(channel_id)
-
-            guild = ctx.message.author.guild
-            ui_lang = self.bot.language[user_language]["ui"]
 
             if isinstance(self.bot.limits[roster_data.role_limit], list):
                 # Need to work with 3 roles to check, dps | tank | healer order

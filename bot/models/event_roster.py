@@ -22,7 +22,10 @@ class EventRoster:
         self.members[user_id] = msg
 
     def remove_member(self, user_id):
-        del self.members[user_id]
+        if user_id in self.members:
+            del self.members[user_id]
+            return True
+        return False
 
     def update_message(self, user_id, msg):
         self.members[user_id] = msg

@@ -1,6 +1,6 @@
 from discord import Embed, Color
 import logging
-from bot.models import Roster, Rank, Count
+from bot.models import Roster, Rank, Count, EventRoster
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -41,7 +41,9 @@ class EmbedFactory:
                 for i in tanks:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.tanks[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.tanks[i] != "":
+                            names += f"{roster.tanks[i].replace("_", r"\_")}\n"
                         tank_count += 1
 
             embed.add_field(name=f"{language['Tanks']} {tank_count}/{roster.tank_limit}", value=names, inline=True)
@@ -52,7 +54,9 @@ class EmbedFactory:
                 for i in roster.healers:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.healers[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.healers[i] != "":
+                            names += f"{roster.healers[i].replace("_", r"\_")}\n"
                         healer_count += 1
 
             embed.add_field(name=f"{language['Healers']} {healer_count}/{roster.healer_limit}", value=names,
@@ -65,7 +69,9 @@ class EmbedFactory:
                 for i in dps:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.dps[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.dps[i] != "":
+                            names += f"{roster.dps[i].replace("_", r"\_")}\n"
                         dps_count += 1
 
             embed.add_field(name=f"{language['DPS']} {dps_count}/{roster.dps_limit}", value=names, inline=True)
@@ -82,7 +88,9 @@ class EmbedFactory:
                 for i in tanks:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.backup_tanks[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.backup_tanks[i] != "":
+                            names += f"{roster.backup_tanks[i].replace("_", r"\_")}\n"
                         tank_count += 1
 
             if tank_count > 0:
@@ -95,7 +103,9 @@ class EmbedFactory:
                 for i in backup_healers:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.backup_healers[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.backup_healers[i] != "":
+                            names += f"{roster.backup_healers[i].replace("_", r"\_")}\n"
                         healer_count += 1
 
             if healer_count > 0:
@@ -108,7 +118,9 @@ class EmbedFactory:
                 for i in dps:
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n{roster.backup_dps[i].replace("_", r"\_")}\n"
+                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
+                        if roster.backup_dps[i] != "":
+                            names += f"{roster.backup_dps[i].replace("_", r"\_")}\n"
                         dps_count += 1
 
             if dps_count > 0:
@@ -182,3 +194,62 @@ class EmbedFactory:
         embed.add_field(name=f"{lang['Healer']}", value=count.healerRuns, inline=True)
         return embed
 
+    @staticmethod
+    def create_new_event_roster(pingable, memo, leader, event, date):
+        desc = f"Group: <@&{pingable}>"
+
+        if memo != "None":
+            desc += f"\n\n{memo}"
+
+        desc += f"\n\nI hope people sign up for this."
+
+        embed = Embed(
+            title=f"{event} {date}",
+            description=desc,
+            color=Color.blue()
+        )
+        embed.set_footer(text="Remember to spay or neuter your mounts!")
+        embed.set_author(name="Leader: " + leader)
+        embed.add_field(name="Calling Guildies!", value='To Come Do The Thing!', inline=False)
+
+        return embed
+
+    @staticmethod
+    def create_event_roster(roster: EventRoster, language, bot, guild):
+        try:
+            count = 0
+
+            desc = f"{language['Pingable']} <@&{roster.pingable}>"
+
+            if roster.memo != "None":
+                desc += f"\n\n{roster.memo}"
+
+            embed = Embed(
+                title=f"{roster.trial.replace('_', r'\_')} {roster.date}",
+                description=desc,
+                color=Color.green()
+            )
+            embed.set_footer(text=f"{language['Footer']}")
+            embed.set_author(name=f"{language['Author']} {roster.leader.replace("_", r"\_")}")
+
+            count = 0
+            names = ""
+            if not len(roster.members) == 0:
+                for i in roster.members:
+                    if count == 12:
+                        embed.add_field(name=f"{language['Members']}", value=names, inline=False)
+                        names = ""
+                        count = 0
+                    member_name = guild.get_member(int(i))
+                    if member_name is not None:
+                        names += f"{bot.config['raids']['event_emoji']}{member_name.display_name.replace("_", r"\_")}"
+                        if roster.members[i] != "":
+                            names += f"\n{roster.members[i].replace("_", r"\_")}\n"
+                        count += 1
+
+            embed.add_field(name=f"{language['Members']}", value=names, inline=False)
+
+            return embed
+        except Exception as e:
+            logging.error(f"Status Embed Create Error: {e}")
+            raise e

@@ -15,6 +15,21 @@ TrialModify:
     Label: "Memo"
     Placeholder: "Type None if you do not want a memo."
 
+EventRoster:
+  Title: "Event Manager"
+  Leader:
+    Label: "Event Leader"
+    Placeholder: "Leader"
+  Date:
+    Label: "Date"
+    Placeholder: "Put Timestamp here"
+  Event:
+    Label: "Event"
+    Placeholder: "What we running?"
+  Memo:
+    Label: "Memo"
+    Placeholder: "Type None if you do not want a memo."
+
 Prog:
   Title: "Prog Roles"
   RolesInput:
@@ -53,6 +68,12 @@ Status:
   Backup_DPS: "Backup DPS"
   Backup_Healers: "Backup Healers"
   Backup_Tanks: "Backup Tanks"
+  Pingable: "Group:"
+
+EventStatus:
+  Author: "Raid Lead:"
+  Members: "Members"
+  Footer: "Remember to spay or neuter your mounts!"
   Pingable: "Group:"
 
 Remove:

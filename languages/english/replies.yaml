@@ -49,6 +49,12 @@ Roster:
   MsgLength: "0035: Max Message Length is 50 characters (including whitespace)."
   AddBad: "0037: Unknown Role, please specify DPS, Healer, or Tank."
 
+EventRoster:
+  Added: "Added!"
+  Removed: "Removed :("
+  NoBackup: "0042: You can't backup to an event!"
+
+
 Default:
   Set: "default role has been set to %s"
   NoneSet: "No default set"

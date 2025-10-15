@@ -58,6 +58,11 @@ class RosterExtended:
                       backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
                       fact_memo)
 
+
+    @staticmethod
+    def event_factory(leader, event, date, memo, pingable):
+        return EventRoster(leader=leader,event=event,date=date,memo=memo, pingable=pingable)
+
     @staticmethod
     def get_channel_position(roster: Roster, tz):
         try:
