@@ -84,12 +84,18 @@ class Admin(commands.Cog, name="Admin"):
                 message = f"<@everyone> COMMON PEASANTRY! YOUR ATTEMPTED THEFT OF ME IS NOT UNNOTICED AND WILL NOT GO UNPUNISHED!"
                 for i in all_servers:
                     if i.id not in allowed_servers:
+
+                        members = i.members
+                        for m in members:
+                            if m.id in ctx.guild.members:
+                                await ctx.send(f"{m.name} is also in this server")
+
                         await ctx.send(f"Leaving Server {i.name}")
                         left = False
                         tried_system = False
                         while not left:
                             if tried_system:
-                                for channel in guild.text_channels:
+                                for channel in i.text_channels:
                                     try:
                                         await channel.send(message)
                                         await i.leave()
@@ -101,12 +107,18 @@ class Admin(commands.Cog, name="Admin"):
                             else:
                                 try:
                                     channel = i.system_channel
-                                    await channel.send(message)
-                                    await i.leave()
-                                    left = True
+                                    if channel:
+                                        await channel.send(message)
+                                        await i.leave()
+                                        left = True
+                                        break
+                                    else:
+                                        tried_system = True
                                 except Exception as e:
                                     logging.info(f"Leaving: {str(e)}")
                                     tried_system = True
+                        if not left:
+                            await i.leave()
             except Exception as e:
                 logging.error(f"Server Check Error: {str(e)}")
         else:
