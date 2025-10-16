@@ -160,7 +160,7 @@ class EventManager(commands.Cog, name="EventsManager"):
         user_language = Utilities.get_language(interaction.user)
         try:
             channel_id = interaction.channel_id
-            if not rosters.get(channel_id):
+            if not self.bot.rosters.get(channel_id):
                 await interaction.response.send_message(
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['WrongChannel'])}")
                 return
