@@ -1,7 +1,7 @@
 from bot.services import Utilities
 from re import sub
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from bot.models import Roster, Count, EventRoster
 from discord import Member, Guild
@@ -203,6 +203,10 @@ class RosterExtended:
     def increase_roster_count(roster: Roster | EventRoster, count, librarian):
         """Increase run count of all users in a roster."""
         try:
+            if roster.date == 'ASAP':
+                roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
+                roster.trial = f"{roster.trial} ASAP"
+
             if isinstance(roster, Roster):
                 for i in roster.dps:
                     db_count = librarian.get_count(i)
