@@ -203,11 +203,10 @@ class RosterExtended:
     def increase_roster_count(roster: Roster | EventRoster, count, librarian):
         """Increase run count of all users in a roster."""
         try:
-            if roster.date == 'ASAP':
-                roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
-                roster.trial = f"{roster.trial} ASAP"
-
             if isinstance(roster, Roster):
+                if roster.date == 'ASAP':
+                    roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
+                    roster.trial = f"{roster.trial} ASAP"
                 for i in roster.dps:
                     db_count = librarian.get_count(i)
                     if db_count is None:
@@ -232,7 +231,9 @@ class RosterExtended:
                         db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
                     librarian.put_count(i, db_count)
             elif isinstance(roster, EventRoster):
-                pass
+                if roster.date == 'ASAP':
+                    roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
+                    roster.event = f"{roster.event} ASAP"
 
         except Exception as e:
             logging.error(f"Increase Roster Run Count Error: {str(e)}")
