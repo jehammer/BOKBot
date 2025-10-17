@@ -4,12 +4,12 @@
 [![Stack](https://skillicons.dev/icons?i=python,discord,bots,mongodb)](https://skillicons.dev)
 
 <img src="https://img.shields.io/badge/Discord-py-blue?style=flat&logo=discord" alt="discord.py">
-<img src="https://img.shields.io/badge/Python-3.10%2b-blue?style=flat&logo=Python&logoColor=green">
+<img src="https://img.shields.io/badge/Python-3.13%2b-blue?style=flat&logo=Python&logoColor=green">
 </div>
 
 # Overview
 
-A Discord bot written using Discord.py, requires at least Python 3.10 to work.
+A Discord bot written using Discord.py, requires at least Python 3.13 to work.
 
 BOKBot is a self-hosted bot designed for use in one guild at a time. Future expansion for support
 of several guilds at a time is planned for the future.
