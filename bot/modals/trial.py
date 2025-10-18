@@ -280,11 +280,11 @@ class TrialModal(Modal):
 
         if self.new_roster:
             await interaction.response.send_message(
-                f"{self.bot.language[self.user_language]['replies']['TrialModify']['NewRosterCreated'] % self.new_name}")
+                f"{self.bot.language[self.user_language]['replies']['TrialModify']['NewRosterCreated'] % self.channel.name}")
 
         elif not self.new_roster:
             await interaction.response.send_message(
-                f"{self.bot.language[self.user_language]['replies']['TrialModify']['ExistingUpdated'] % self.new_name}")
+                f"{self.bot.language[self.user_language]['replies']['TrialModify']['ExistingUpdated'] % self.channel.name}")
 
         return
 
