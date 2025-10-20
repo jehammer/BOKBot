@@ -89,6 +89,10 @@ TrialModify:
   NewRosterCreated: "Created Roster and Channel %s"
   CantPosition: "0020: Error in adjusting Channel Position. Everything is otherwise ready to go."
 
+EventModify:
+  ExistingUpdated: "Event Roster %s and Channel updated."
+  NewRosterCreated: "Created Event Roster and Channel %s"
+
 SelectRoster:
   Select: "Select the roster"
   NoMapError: "0021: No Roster Map ID:Channels can be found."

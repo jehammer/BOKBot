@@ -7,7 +7,7 @@ import time
 from bot import decor as permissions
 from bot.errors import *
 from bot.modals import *
-from bot.models import Roster, Count
+from bot.models import Roster, Count, EventRoster
 from bot.services import Utilities, RosterExtended, EmbedFactory
 from bot.ui import RosterSelector
 
@@ -49,6 +49,14 @@ class EventManager(commands.Cog, name="EventsManager"):
         user_language = Utilities.get_language(interaction.user)
         await interaction.response.send_modal(
             TrialModal(interaction=interaction, bot=self.bot, lang=user_language))
+
+    @app_commands.command(name='event', description='For Raid Leads: Opens Event Creation Modal')
+    @permissions.application_has_raid_lead()
+    @permissions.private_channel_only()
+    async def create_event_roster(self, interaction: Interaction) -> None:
+        user_language = Utilities.get_language(interaction.user)
+        await interaction.response.send_modal(
+            EventModal(interaction=interaction, bot=self.bot, lang=user_language, channel_id=None))
 
     @app_commands.command(name="modify", description="For Raid Leads: Modify your Trial Roster Details")
     @permissions.application_has_raid_lead()
@@ -328,7 +336,6 @@ class EventManager(commands.Cog, name="EventsManager"):
     #        await interaction.response.send_message(
     #            f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
     #        logging.error(f"Add To Roster Error: {str(e)}")
-
 
 
 async def setup(bot: commands.Bot):

@@ -1,4 +1,5 @@
-from bot.models.event_roster import EventRoser
+from bot.models import roster
+from bot.models.event_roster import EventRoster
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Role
 from discord.utils import get
@@ -15,28 +16,32 @@ logging.basicConfig(
 
 
 class EventModal(Modal):
-    def __init__(self, interaction: Interaction, bot, lang, channel=None):
+    def __init__(self, interaction: Interaction, bot, lang, channel_id=None):
         self.localization = bot.language[lang]['replies']
         self.ui_localization = bot.language[lang]["ui"]
         self.user_language = lang
         self.bot = bot
         self.config = bot.config
-        self.leader_trial_val = None
+        self.leader = None
         self.date_val = None
         self.memo_val = "None"
         self.new_roster = True
         self.new_name = f""
-        self.channel = None
+        self.channel_id = None
         self.change_name = True
         self.sort_channels = True
+        self.event = f""
         self.event_roster = None
-        if channel is not None:
-            self.channel_id = channel
+        self.channel = None
+        if channel_id is not None:
+            self.channel_id = channel_id
+            self.old_roster = copy.copy(self.bot.rosters[self.channel_id])
             self.new_roster = False
-            self.leader = f"{roster.leader}"
-            self.event = f"{roster.event}"
-            self.date_val = f"{roster.date}"
-            self.memo_val = f"{roster.memo}"
+            self.leader = f"{self.old_roster.leader}"
+            self.event = f"{self.old_roster.event}"
+            self.date_val = f"{self.old_roster.date}"
+            self.memo_val = f"{self.old_roster.memo}"
+            self.channel = interaction.guild.get_channel(int(self.channel_id))
         super().__init__(title=self.ui_localization['EventRoster']['Title'])
         self.initialize()
 
@@ -49,7 +54,8 @@ class EventModal(Modal):
             required=True
         )
         self.event_box = TextInput(
-            label=self.ui_localization["EventRoster"]["Event"]["Event"],
+            label=self.ui_localization["EventRoster"]["Event"]["Label"],
+            placeholder=self.ui_localization["EventRoster"]["Event"]["Placeholder"],
             default=self.event,
             required=True
         )
@@ -82,9 +88,8 @@ class EventModal(Modal):
             category = interaction.guild.get_channel(self.config["raids"]["category"])
 
             if not self.new_roster:
-                old_roster = copy.copy(self.bot.rosters[self.channel_id])
-                old_date = old_roster.date
-                old_event = old_roster.event
+                old_date = self.old_roster.date
+                old_event = self.old_roster.event
                 # Update all values then update the DB
                 self.bot.rosters[self.channel_id].event = event
                 self.bot.rosters[self.channel_id].leader = leader
@@ -126,9 +131,8 @@ class EventModal(Modal):
                 try:
                     try:
                         logging.info(f"Creating new channel.")
-                        new_name = RosterExtended.generate_channel_name(self.bot.rosters[self.channel_id].date,
-                                                                        self.bot.rosters[self.channel_id].event,
-                                                                        self.config["raids"]["timezone"])
+                        new_name = RosterExtended.generate_channel_name(formatted_date, event, self.config["raids"]["timezone"])
+                        category = interaction.guild.get_channel(self.config["raids"]["category"])
                         self.channel = await category.create_text_channel(new_name)
                         logging.info(f"Roster Channel: channelID: {str(self.channel.id)}")
                         self.channel_id = self.channel.id  # Set new rosters channel to the id.
@@ -165,7 +169,14 @@ class EventModal(Modal):
                 f"{Utilities.format_error(self.user_language, self.localization['Unreachable'])}")
             return
 
-        self.bot.libarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
+        self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
+        if self.new_roster:
+            await interaction.response.send_message(
+                f"{self.bot.language[self.user_language]['replies']['EventModify']['NewRosterCreated'] % self.channel.name}")
+
+        elif not self.new_roster:
+            await interaction.response.send_message(
+                f"{self.bot.language[self.user_language]['replies']['EventModify']['ExistingUpdated'] % self.channel.name}")
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:

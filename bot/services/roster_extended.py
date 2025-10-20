@@ -234,6 +234,13 @@ class RosterExtended:
                 if roster.date == 'ASAP':
                     roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
                     roster.event = f"{roster.event} ASAP"
+                for i in roster.members:
+                    db_count = librarian.get_count(i)
+                    if db_count is None:
+                        db_count = Count(runs=count, event=count, trial=roster.event, date=roster.date)
+                    else:
+                        db_count.increase_data(runs=count, event=count, trial=roster.event, date=roster.date)
+                    librarian.put_count(i, db_count)
 
         except Exception as e:
             logging.error(f"Increase Roster Run Count Error: {str(e)}")

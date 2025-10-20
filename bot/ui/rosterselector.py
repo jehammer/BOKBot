@@ -1,6 +1,7 @@
 from discord import ui, SelectOption, Interaction
 from bot.services import Utilities
 from bot.modals import *
+from bot.models import Roster, EventRoster
 
 
 class RosterSelect(ui.Select):
@@ -61,8 +62,12 @@ class RosterSelect(ui.Select):
         roster = self.rosters[channel_id]
 
         if self.cmd_called == "modify":
-            await interaction.response.send_modal(
-                TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
+            if isinstance(self.bot.rosters[channel_id], Roster):
+                await interaction.response.send_modal(
+                    TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
+            elif isinstance(self.bot.rosters[channel_id], EventRoster):
+                await interaction.response.send_modal(
+                    EventModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
         elif self.cmd_called == "close":
             await interaction.response.send_modal(CloseModal(interaction=interaction, bot=self.bot,
                                                              lang=self.user_language,

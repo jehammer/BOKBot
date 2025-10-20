@@ -192,6 +192,8 @@ class EmbedFactory:
         embed.add_field(name=f"{lang['DPS']}", value=count.dpsRuns, inline=True)
         embed.add_field(name=f"{lang['Tank']}", value=count.tankRuns, inline=True)
         embed.add_field(name=f"{lang['Healer']}", value=count.healerRuns, inline=True)
+        embed.add_field(name=f"{lang['Other']}", value=f"{lang['OtherRuns']}", inline=False)
+        embed.add_field(name=f"{lang['Event']}", value=count.eventRuns, inline=True)
         return embed
 
     @staticmethod
@@ -225,7 +227,7 @@ class EmbedFactory:
                 desc += f"\n\n{roster.memo}"
 
             embed = Embed(
-                title=f"{roster.trial.replace('_', r'\_')} {roster.date}",
+                title=f"{roster.event.replace('_', r'\_')} {roster.date}",
                 description=desc,
                 color=Color.green()
             )
@@ -233,13 +235,15 @@ class EmbedFactory:
             embed.set_author(name=f"{language['Author']} {roster.leader.replace("_", r"\_")}")
 
             count = 0
+            group_count = 1
             names = ""
             if not len(roster.members) == 0:
                 for i in roster.members:
                     if count == 12:
-                        embed.add_field(name=f"{language['Members']}", value=names, inline=False)
+                        embed.add_field(name=f"{language['Members']} {group_count}", value=names, inline=True)
                         names = ""
                         count = 0
+                        group_count += 1
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
                         names += f"{bot.config['raids']['event_emoji']}{member_name.display_name.replace("_", r"\_")}"
@@ -247,7 +251,7 @@ class EmbedFactory:
                             names += f"\n{roster.members[i].replace("_", r"\_")}\n"
                         count += 1
 
-            embed.add_field(name=f"{language['Members']}", value=names, inline=False)
+            embed.add_field(name=f"{language['Members']} {group_count}", value=names, inline=True)
 
             return embed
         except Exception as e:

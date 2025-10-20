@@ -40,6 +40,7 @@ class Events(commands.Cog, name="Events"):
         user_language = Utilities.get_language(ctx.author)
         primary = ['su', 'signup', 'SU', 'SIGNUP']
         backup = ['bu', 'backup', 'BU', 'BACKUP']
+        user_id = f"{ctx.author.id}"
 
         try:
 
@@ -65,7 +66,7 @@ class Events(commands.Cog, name="Events"):
                 cmd_vals = ctx.message.content.split(" ", 1)
                 if len(cmd_vals) > 1:
                     msg = cmd_vals[1]
-                self.bot.rosters[channel_id].add_member(user_id=ctx.author.id, msg=msg)
+                self.bot.rosters[channel_id].add_member(user_id=user_id, msg=msg)
                 self.bot.librarian.put_roster(channel_id, self.bot.rosters[channel_id])
 
                 await ctx.reply(f"{self.bot.language[user_language]['replies']['EventRoster']['Added']}")
@@ -89,7 +90,6 @@ class Events(commands.Cog, name="Events"):
 
             msg = ''
             role = None
-            user_id = f"{ctx.author.id}"
 
             cmd_vals = ctx.message.content.split(" ", 2)
             if len(cmd_vals) > 1 and cmd_vals[1].lower() in acceptable_roles:

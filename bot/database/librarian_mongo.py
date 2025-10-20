@@ -112,7 +112,8 @@ class Librarian:
                 date=data["lastDate"],
                 dps=int(data["dpsRuns"]),
                 tank=int(data["tankRuns"]),
-                healer=int(data["healerRuns"])
+                healer=int(data["healerRuns"]),
+                event=int(data.get('eventRuns', 0)),
             )
         return None
 

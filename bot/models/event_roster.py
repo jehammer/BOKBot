@@ -27,6 +27,9 @@ class EventRoster:
             return True
         return False
 
-    def update_message(self, user_id, msg):
-        self.members[user_id] = msg
+    def update_message(self, user_id, new_message):
+        if user_id in self.members.keys():
+            self.members[user_id] = new_message
+            return True
+        return False
 

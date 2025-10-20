@@ -71,8 +71,8 @@ Status:
   Pingable: "Group:"
 
 EventStatus:
-  Author: "Raid Lead:"
-  Members: "Members"
+  Author: "Event Lead:"
+  Members: "Group"
   Footer: "Remember to spay or neuter your mounts!"
   Pingable: "Group:"
 
@@ -112,3 +112,6 @@ Count:
   DPS: "DPS Runs:"
   Tank: "Tank Runs:"
   Healer: "Healer Runs:"
+  Other: "Other"
+  OtherRuns: "Other Runs"
+  Event: "Event Runs:"
