@@ -10,6 +10,7 @@ from bot.modals import *
 from bot.models import Roster, Count, EventRoster
 from bot.services import Utilities, RosterExtended, EmbedFactory
 from bot.ui import RosterSelector
+from random import random
 
 last4z = []
 last4t = []
