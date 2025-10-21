@@ -246,9 +246,9 @@ class EmbedFactory:
                         group_count += 1
                     member_name = guild.get_member(int(i))
                     if member_name is not None:
-                        names += f"{bot.config['raids']['event_emoji']}{member_name.display_name.replace("_", r"\_")}"
+                        names += f"{bot.config['raids']['event_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
                         if roster.members[i] != "":
-                            names += f"\n{roster.members[i].replace("_", r"\_")}\n"
+                            names += f"{roster.members[i].replace("_", r"\_")}\n"
                         count += 1
 
             embed.add_field(name=f"{language['Members']} {group_count}", value=names, inline=True)
