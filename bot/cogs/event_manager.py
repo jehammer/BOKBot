@@ -302,7 +302,7 @@ class EventManager(commands.Cog, name="EventsManager"):
             loop = True
             ran = 0
             while loop:
-                ran = random.randint(1, cap)
+                ran = random.randint(1, len(options))
                 if ran not in last4t:
                     loop = False
             if len(last4t) < 4:
