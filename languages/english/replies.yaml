@@ -137,7 +137,7 @@ Rank:
   NoHistory: "You have not been ranked before."
 
 Remove:
-  Removed: "User(s) have been removed from roster %s\n %s"
+  Removed: "User(s) have been removed from roster %s\n%s"
   NumbersOnly: "0038: Numbers Only. ex: `1,2,3,4`"
 
 Fill:

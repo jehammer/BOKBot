@@ -78,8 +78,9 @@ EventStatus:
 
 Remove:
   Title: "Remove From Roster"
-  Placeholder: "Enter your choices as a comma for multiple ex: 1,5,12"
-  Label: "Input"
+  Placeholder: "Select as many as you want!"
+  Label: "Select the people"
+  Description: "or dont idc"
 
 Fill:
   Title: "Fill Roster"
