@@ -168,6 +168,7 @@ class EventManager(commands.Cog, name="EventsManager"):
     async def add_to_roster(self, interaction: Interaction, role: str, member: Member):
         user_language = Utilities.get_language(interaction.user)
         try:
+
             channel_id = interaction.channel_id
             if not self.bot.rosters.get(channel_id):
                 await interaction.response.send_message(
@@ -178,32 +179,37 @@ class EventManager(commands.Cog, name="EventsManager"):
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['ProgLeadRole']['NoBots'])}")
                 return
 
-            # Validate the role input
-            acceptable_roles = ['dps', 'tank', 'healer']  # TODO: Update with multi-lingual later.
-            role = role.lower()
-
-            if role not in acceptable_roles:
+            if isinstance(self.bot.rosters[channel_id], EventRoster):
+                self.bot.rosters[channel_id].add_member(user_id=member.id, msg='')
                 await interaction.response.send_message(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['AddBad'])}")
-                return
+                    f"{member.display_name}: {self.bot.language[user_language]['replies']['EventRoster']['Added']}")
 
-            logging.info(f"Add called by {interaction.user.display_name} to add {member.display_name} as {role}")
+            elif isinstance(self.bot.roster[channel_id], Roster):
+                # Validate the role input
+                acceptable_roles = ['dps', 'tank', 'healer']  # TODO: Update with multi-lingual later.
+                role = role.lower()
 
-            validation = self.bot.rosters[channel_id].add_member(user_id=member.id, role=role, msg='', which='su')
-            if validation == 0:
-                await interaction.response.send_message(
-                    f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
-            elif validation == 1:
-                await interaction.response.send_message(
-                    f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
-                return
-            else:  # Unreachable
-                await interaction.response.send_message(
-                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
-                return
+                if role not in acceptable_roles:
+                    await interaction.response.send_message(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['AddBad'])}")
+                    return
 
-            self.bot.dispatch("update_rosters_data", channel_id=channel_id, method="save_roster",
-                              user_language=user_language)
+                logging.info(f"Add called by {interaction.user.display_name} to add {member.display_name} as {role}")
+
+                validation = self.bot.rosters[channel_id].add_member(user_id=member.id, role=role, msg='', which='su')
+                if validation == 0:
+                    await interaction.response.send_message(
+                        f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
+                elif validation == 1:
+                    await interaction.response.send_message(
+                        f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+                    return
+                else:  # Unreachable
+                    await interaction.response.send_message(
+                        f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+                    return
+
+            self.bot.librarian.put_roster(channel_id, self.bot.rosters[channel_id])
 
         except Exception as e:
             await interaction.response.send_message(

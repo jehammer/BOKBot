@@ -71,18 +71,21 @@ class RemoveModal(Modal):
             removed = self.users.component.values
             names = ''
             for i in removed:
-                if (i in self.bot.rosters[self.channel_id].dps.keys() or i in
-                        self.bot.rosters[self.channel_id].backup_dps.keys()):
-                    self.bot.rosters[self.channel_id].remove_dps(i)
-                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-                elif (i in self.bot.rosters[self.channel_id].healers.keys() or i in
-                      self.bot.rosters[self.channel_id].backup_healers.keys()):
-                    self.bot.rosters[self.channel_id].remove_healer(i)
-                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-                elif (i in self.bot.rosters[self.channel_id].tanks.keys() or i in
-                      self.bot.rosters[self.channel_id].backup_tanks.keys()):
-                    self.bot.rosters[self.channel_id].remove_tank(i)
-                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                if isinstance(self.roster, Roster):
+                    if (i in self.bot.rosters[self.channel_id].dps.keys() or i in
+                            self.bot.rosters[self.channel_id].backup_dps.keys()):
+                        self.bot.rosters[self.channel_id].remove_dps(i)
+                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                    elif (i in self.bot.rosters[self.channel_id].healers.keys() or i in
+                          self.bot.rosters[self.channel_id].backup_healers.keys()):
+                        self.bot.rosters[self.channel_id].remove_healer(i)
+                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                    elif (i in self.bot.rosters[self.channel_id].tanks.keys() or i in
+                          self.bot.rosters[self.channel_id].backup_tanks.keys()):
+                        self.bot.rosters[self.channel_id].remove_tank(i)
+                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                elif isinstance(self.roster, EventRoster):
+                    self.bot.rosters[self.channel_id].remove_member(i)
 
             self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
 
