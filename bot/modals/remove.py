@@ -21,30 +21,36 @@ class RemoveModal(Modal):
         counter = 0
         total = []
         # Print out everyone and put them in a list to get from
-        for i in self.roster.dps.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
-        for i in self.roster.healers.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
-        for i in self.roster.tanks.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
-        for i in self.roster.backup_dps.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
-        for i in self.roster.backup_healers.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
-        for i in self.roster.backup_tanks.keys():
-            guildie = interaction.guild.get_member(int(i))
-            total.append(SelectOption(label=guildie.display_name, value=i))
-            counter += 1
+        if isinstance(self.roster, Roster):
+            for i in self.roster.dps.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+            for i in self.roster.healers.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+            for i in self.roster.tanks.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+            for i in self.roster.backup_dps.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+            for i in self.roster.backup_healers.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+            for i in self.roster.backup_tanks.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
+        elif isinstance(self.roster, EventRoster):
+            for i in self.roster.members.keys():
+                guildie = interaction.guild.get_member(int(i))
+                total.append(SelectOption(label=guildie.display_name, value=i))
+                counter += 1
 
         self.users = Label(
             text=f"{self.ui['Label']}",
