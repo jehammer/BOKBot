@@ -168,7 +168,7 @@ class EventManager(commands.Cog, name="EventsManager"):
     async def add_to_roster(self, interaction: Interaction, role: str, member: Member):
         user_language = Utilities.get_language(interaction.user)
         try:
-
+            user_id = f"{member.id}"
             channel_id = interaction.channel_id
             if not self.bot.rosters.get(channel_id):
                 await interaction.response.send_message(
@@ -180,7 +180,7 @@ class EventManager(commands.Cog, name="EventsManager"):
                 return
 
             if isinstance(self.bot.rosters[channel_id], EventRoster):
-                self.bot.rosters[channel_id].add_member(user_id=member.id, msg='')
+                self.bot.rosters[channel_id].add_member(user_id=user_id, msg='')
                 await interaction.response.send_message(
                     f"{member.display_name}: {self.bot.language[user_language]['replies']['EventRoster']['Added']}")
 
@@ -196,7 +196,7 @@ class EventManager(commands.Cog, name="EventsManager"):
 
                 logging.info(f"Add called by {interaction.user.display_name} to add {member.display_name} as {role}")
 
-                validation = self.bot.rosters[channel_id].add_member(user_id=member.id, role=role, msg='', which='su')
+                validation = self.bot.rosters[channel_id].add_member(user_id=user_id, role=role, msg='', which='su')
                 if validation == 0:
                     await interaction.response.send_message(
                         f"{member.display_name}: {self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
@@ -212,9 +212,9 @@ class EventManager(commands.Cog, name="EventsManager"):
             self.bot.librarian.put_roster(channel_id, self.bot.rosters[channel_id])
 
         except Exception as e:
+            logging.error(f"Add To Roster Error: {str(e)}")
             await interaction.response.send_message(
                 f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
-            logging.error(f"Add To Roster Error: {str(e)}")
 
     @app_commands.command(name="grant-role", description="For Leads: Gives mentioned user a prog role.")
     @app_commands.describe(member="Discord user to grant role to.")
