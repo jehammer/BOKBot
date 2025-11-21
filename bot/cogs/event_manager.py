@@ -184,7 +184,7 @@ class EventManager(commands.Cog, name="EventsManager"):
                 await interaction.response.send_message(
                     f"{member.display_name}: {self.bot.language[user_language]['replies']['EventRoster']['Added']}")
 
-            elif isinstance(self.bot.roster[channel_id], Roster):
+            elif isinstance(self.bot.rosters[channel_id], Roster):
                 # Validate the role input
                 acceptable_roles = ['dps', 'tank', 'healer']  # TODO: Update with multi-lingual later.
                 role = role.lower()
