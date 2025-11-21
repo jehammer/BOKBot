@@ -86,6 +86,7 @@ class RemoveModal(Modal):
                         names += f"{interaction.guild.get_member(int(i)).display_name}\n"
                 elif isinstance(self.roster, EventRoster):
                     self.bot.rosters[self.channel_id].remove_member(i)
+                    names += f"{interaction.guild.get_member(int(i)).display_name}\n"
 
             self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
 
