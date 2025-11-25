@@ -267,9 +267,9 @@ class Events(commands.Cog, name="Events"):
 
             if isinstance(self.bot.limits[self.bot.rosters[channel_id].role_limit], list):
                 # Need to work with 3 roles to check, dps | tank | healer order
-                limiter_dps = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit][0])
-                limiter_tank = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit][1])
-                limiter_healer = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit][2])
+                limiter_dps = utils.get(guild.roles, name=self.bot.limits[self.bot.rosters[channel_id].role_limit][0])
+                limiter_tank = utils.get(guild.roles, name=self.bot.limits[self.bot.rosters[channel_id].role_limit][1])
+                limiter_healer = utils.get(guild.roles, name=self.bot.limits[self.bot.rosters[channel_id].role_limit][2])
 
                 roles_req = f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
             else:
