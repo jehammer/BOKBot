@@ -36,7 +36,7 @@ class TrialModal(Modal):
         if self.channel_id is not None:
             self.channel_id = channel_id
             self.new_roster = False
-            self.old_roster = copy.copy(self.bot.rosters[self.channel_id])
+            self.old_roster = copy.deepcopy(self.bot.rosters[self.channel_id])
             self.leader_trial_val = f"{self.old_roster.leader},{self.old_roster.trial}"
             self.date_val = f"{self.old_roster.date}"
             self.limit_val = f"{self.old_roster.role_limit}"
@@ -148,41 +148,7 @@ class TrialModal(Modal):
                 self.channel = interaction.guild.get_channel(int(self.channel_id))
 
                 # Account for role changes where there is overflow
-                if self.bot.rosters[self.channel_id].dps_limit < self.old_roster.dps_limit:
-                    to_remove = self.old_roster.dps_limit - self.bot.rosters[self.channel_id].dps_limit
-                    # Get the last n items from the main roster
-                    reversed_roster = list(self.bot.rosters[self.channel_id].dps.items())[-to_remove:]
-                    # Remove these items from the main roster
-                    for user_id, _ in reversed_roster:
-                        del self.bot.rosters[self.channel_id].dps[user_id]
-                    # Insert these items at the beginning of the backup roster
-                    for user_id, msg in reversed(reversed_roster):
-                        self.bot.rosters[self.channel_id].backup_dps.update({user_id: msg})
-                    logging.info(f"Moved overflow DPS to backup")
-
-                if self.bot.rosters[self.channel_id].healer_limit < self.old_roster.healer_limit:
-                    to_remove = self.old_roster.healer_limit - self.bot.rosters[self.channel_id].healer_limit
-                    # Get the last n items from the main roster
-                    reversed_roster = list(self.bot.rosters[self.channel_id].healers.items())[-to_remove:]
-                    # Remove these items from the main roster
-                    for user_id, _ in reversed_roster:
-                        del self.bot.rosters[self.channel_id].healers[user_id]
-                    # Insert these items at the beginning of the backup roster
-                    for user_id, msg in reversed(reversed_roster):
-                        self.bot.rosters[self.channel_id].backup_healers.update({user_id: msg})
-                    logging.info(f"Moved overflow Healers to backup")
-
-                if self.bot.rosters[self.channel_id].tank_limit < self.old_roster.tank_limit:
-                    to_remove = self.old_roster.tank_limit - self.bot.rosters[self.channel_id].tank_limit
-                    # Get the last n items from the main roster
-                    reversed_roster = list(self.bot.rosters[self.channel_id].tanks.items())[-to_remove:]
-                    # Remove these items from the main roster
-                    for user_id, _ in reversed_roster:
-                        del self.bot.rosters[self.channel_id].tanks[user_id]
-                    # Insert these items at the beginning of the backup roster
-                    for user_id, msg in reversed(reversed_roster):
-                        self.bot.rosters[self.channel_id].backup_tanks.update({user_id: msg})
-                    logging.info(f"Moved overflow Tanks to backup")
+                self.bot.rosters[self.channel_id].push_excess_to_overflow()
 
                 try:
 

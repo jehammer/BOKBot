@@ -22,30 +22,33 @@ class RemoveModal(Modal):
         total = []
         # Print out everyone and put them in a list to get from
         if isinstance(self.roster, Roster):
-            for i in self.roster.dps.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
-            for i in self.roster.healers.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
-            for i in self.roster.tanks.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
-            for i in self.roster.backup_dps.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
-            for i in self.roster.backup_healers.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
-            for i in self.roster.backup_tanks.keys():
-                guildie = interaction.guild.get_member(int(i))
-                total.append(SelectOption(label=guildie.display_name, value=i))
-                counter += 1
+            display_roles = ["tank", "healer", "dps"]
+            bucket_order = [0, 1, 2]  # main, backup, overflow for ordering.
+
+            for role in display_roles:
+                if role not in self.roster.role_map:
+                    continue
+
+                main_bucket_name, backup_bucket_name, overflow_bucket_name = self.roster.role_map[role]
+                buckets = [main_bucket_name, backup_bucket_name, overflow_bucket_name]
+
+                for index in bucket_order:
+                    bucket_name = buckets[index]
+                    bucket = getattr(self.roster, bucket_name, {})
+
+                    for user_id in bucket.keys():
+                        guildie = interaction.guild.get_member(int(user_id))
+                        if guildie is None:
+                            continue
+
+                        total.append(
+                            SelectOption(
+                                label=guildie.display_name,
+                                value=user_id,
+                                description=["Main", "Backup", "Overflow"][index]
+                            )
+                        )
+                        counter += 1
         elif isinstance(self.roster, EventRoster):
             for i in self.roster.members.keys():
                 guildie = interaction.guild.get_member(int(i))
@@ -72,26 +75,28 @@ class RemoveModal(Modal):
             names = ''
             for i in removed:
                 if isinstance(self.roster, Roster):
-                    if (i in self.bot.rosters[self.channel_id].dps.keys() or i in
-                            self.bot.rosters[self.channel_id].backup_dps.keys()):
-                        self.bot.rosters[self.channel_id].remove_dps(i)
-                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-                    elif (i in self.bot.rosters[self.channel_id].healers.keys() or i in
-                          self.bot.rosters[self.channel_id].backup_healers.keys()):
-                        self.bot.rosters[self.channel_id].remove_healer(i)
-                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
-                    elif (i in self.bot.rosters[self.channel_id].tanks.keys() or i in
-                          self.bot.rosters[self.channel_id].backup_tanks.keys()):
-                        self.bot.rosters[self.channel_id].remove_tank(i)
-                        names += f"{interaction.guild.get_member(int(i)).display_name}\n"
+                    found = False
+                    # Check main, backup, and overflow for each role
+                    for role, (main, backup, overflow) in self.bot.rosters[self.channel_id].role_map.items():
+                        for j in (main, backup, overflow):
+                            bucket = getattr(self.bot.rosters[self.channel_id], j)
+                            if i in bucket:
+                                self.bot.rosters[self.channel_id].remove_member(i)
+                                member = interaction.guild.get_member(int(i))
+                                if member:
+                                    names += f"{member.display_name}\n"
+
+                                found = True
+                                break
+                        if found:
+                            break
                 elif isinstance(self.roster, EventRoster):
                     self.bot.rosters[self.channel_id].remove_member(i)
                     names += f"{interaction.guild.get_member(int(i)).display_name}\n"
 
             self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
 
-            await interaction.response.send_message(f"{self.language['Remove']['Removed']
-                                                       % (self.channel.name, names)}")
+            await interaction.response.send_message(self.language["Remove"]["Removed"] % (self.channel.name, names))
             return
         except ValueError:
             await interaction.response.send_message(

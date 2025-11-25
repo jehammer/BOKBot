@@ -17,12 +17,7 @@ class EmbedFactory:
     def create_status(roster: Roster, language, bot, roles_req, guild):
         try:
 
-            dps_count = 0
-            healer_count = 0
-            tank_count = 0
-
-            desc = f"{language['Rank']} {roles_req}\n{language['Pingable']} <@&{roster.pingable}>"
-
+            desc = f"{language.get('Rank')} {roles_req}\n{language.get('Pingable')} <@&{roster.pingable}>"
             if roster.memo != "None":
                 desc += f"\n\n{roster.memo}"
 
@@ -31,102 +26,66 @@ class EmbedFactory:
                 description=desc,
                 color=Color.green()
             )
-            embed.set_footer(text=f"{language['Footer']}")
-            embed.set_author(name=f"{language['Author']} {roster.leader.replace("_", r"\_")}")
+            embed.set_footer(text=language.get('Footer'))
+            embed.set_author(name=f"{language.get('Author')} {roster.leader.replace('_', r'\\_')}")
 
-            names = ""
-            # TANKS
-            if not len(roster.tanks) == 0:
-                tanks = roster.tanks
-                for i in tanks:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.tanks[i] != "":
-                            names += f"{roster.tanks[i].replace("_", r"\_")}\n"
-                        tank_count += 1
+            # Helper to build a field for a given bucket
+            def build_field(field_bucket, emoji_key):
+                field_names = ""
+                count = 0
+                for user_id, msg in field_bucket.items():
+                    member = guild.get_member(int(user_id))
+                    if member:
+                        field_names += f"{bot.config['raids'][emoji_key]}{member.display_name.replace('_', r'\\_')}\n"
+                        if msg:
+                            field_names += f"{msg.replace('_', r'\\_')}\n"
+                        count += 1
+                return field_names, count
 
-            embed.add_field(name=f"{language['Tanks']} {tank_count}/{roster.tank_limit}", value=names, inline=True)
+            display_order = ["tank", "healer", "dps"]
 
-            names = ""
-            # HEALERS
-            if not len(roster.healers) == 0:
-                for i in roster.healers:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.healers[i] != "":
-                            names += f"{roster.healers[i].replace("_", r"\_")}\n"
-                        healer_count += 1
+            # Main
+            for role in display_order:
+                main, _, _ = roster.role_map[role]
+                limit = getattr(roster, f"{role}_limit")
+                role_label = "DPS" if role == "dps" else role.capitalize()
 
-            embed.add_field(name=f"{language['Healers']} {healer_count}/{roster.healer_limit}", value=names,
-                            inline=True)
+                bucket = getattr(roster, main)
+                names, main_count = build_field(bucket, f"{role}_emoji")
+                embed.add_field(
+                    name=f"{language.get(role_label+'s')} {main_count}/{limit}" if role != "dps" else f"{language.get(role_label)} {main_count}/{limit}",
+                    value=names if names else "\u200b",
+                    inline=True
+                )
+            # Overflow
+            for role in display_order:
+                _, _, overflow = roster.role_map[role]
+                role_label = "DPS" if role == "dps" else role.capitalize()
+                # Overflow bucket
+                bucket = getattr(roster, overflow)
+                names, overflow_count = build_field(bucket, f"{role}_emoji")
+                if overflow_count > 0:
+                    embed.add_field(
+                        name=language.get(f"Overflow {role_label}"),
+                        value=names,
+                        inline=True
+                    )
 
-            names = ""
-            # DPS
-            if not len(roster.dps) == 0:
-                dps = roster.dps
-                for i in dps:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.dps[i] != "":
-                            names += f"{roster.dps[i].replace("_", r"\_")}\n"
-                        dps_count += 1
-
-            embed.add_field(name=f"{language['DPS']} {dps_count}/{roster.dps_limit}", value=names, inline=True)
-
-            # Show Backup/Overflow Roster
-            dps_count = 0
-            healer_count = 0
-            tank_count = 0
-
-            names = ""
-            # BACKUP TANKS
-            if not len(roster.backup_tanks) == 0:
-                tanks = roster.backup_tanks
-                for i in tanks:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['tank_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.backup_tanks[i] != "":
-                            names += f"{roster.backup_tanks[i].replace("_", r"\_")}\n"
-                        tank_count += 1
-
-            if tank_count > 0:
-                embed.add_field(name=f"{language['Backup_Tanks']} {tank_count}", value=names, inline=True)
-
-            names = ""
-            # BACKUP HEALERS
-            if not len(roster.backup_healers) == 0:
-                backup_healers = roster.backup_healers
-                for i in backup_healers:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['healer_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.backup_healers[i] != "":
-                            names += f"{roster.backup_healers[i].replace("_", r"\_")}\n"
-                        healer_count += 1
-
-            if healer_count > 0:
-                embed.add_field(name=f"{language['Backup_Healers']} {healer_count}", value=names, inline=True)
-
-            names = ""
-            # BACKUP DPS
-            if not len(roster.backup_dps) == 0:
-                dps = roster.backup_dps
-                for i in dps:
-                    member_name = guild.get_member(int(i))
-                    if member_name is not None:
-                        names += f"{bot.config['raids']['dps_emoji']}{member_name.display_name.replace("_", r"\_")}\n"
-                        if roster.backup_dps[i] != "":
-                            names += f"{roster.backup_dps[i].replace("_", r"\_")}\n"
-                        dps_count += 1
-
-            if dps_count > 0:
-                embed.add_field(name=f"{language['Backup_DPS']} {dps_count}", value=names, inline=True)
+            # Backup
+            for role in display_order:
+                _, backup, _ = roster.role_map[role]
+                role_label = "DPS" if role == "dps" else role.capitalize()
+                bucket = getattr(roster, backup)
+                names, backup_count = build_field(bucket, f"{role}_emoji")
+                if backup_count > 0:
+                    embed.add_field(
+                        name=language.get(f"Backup {role_label}"),
+                        value=names,
+                        inline=True
+                    )
 
             return embed
+
         except Exception as e:
             logging.error(f"Status Embed Create Error: {e}")
             raise e

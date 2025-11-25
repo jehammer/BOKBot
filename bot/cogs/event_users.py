@@ -144,10 +144,10 @@ class Events(commands.Cog, name="Events"):
                     f"{self.bot.language[user_language]['replies']['Roster']['Added'] % role}")  # Added into roster
             elif validation == 1 and ctx.invoked_with in primary:
                 await ctx.reply(
-                    f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as backup
+                    f"{self.bot.language[user_language]['replies']['Roster']['Full'] % role}")  # Slots full, added as overflow
             elif validation == 1 and ctx.invoked_with in backup:
                 await ctx.reply(
-                    f"{self.bot.language[user_language]['replies']['Roster']['Backup'] % role}")  # Slots full, added as backup
+                    f"{self.bot.language[user_language]['replies']['Roster']['Backup'] % role}")  # Specifically chose Backup
             elif validation == 2:  # Unable to find role
                 await ctx.reply(
                     f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Roster']['NoDefault'] % ctx.invoked_with)}")
@@ -265,9 +265,7 @@ class Events(commands.Cog, name="Events"):
                 await ctx.send(embed=embed)
                 return
 
-            roster_data: Roster = self.bot.rosters.get(channel_id)
-
-            if isinstance(self.bot.limits[roster_data.role_limit], list):
+            if isinstance(self.bot.limits[self.bot.rosters[channel_id].role_limit], list):
                 # Need to work with 3 roles to check, dps | tank | healer order
                 limiter_dps = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit][0])
                 limiter_tank = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit][1])
@@ -275,10 +273,10 @@ class Events(commands.Cog, name="Events"):
 
                 roles_req = f"{limiter_dps.mention} {limiter_tank.mention} {limiter_healer.mention}"
             else:
-                limiter = utils.get(guild.roles, name=self.bot.limits[roster_data.role_limit])
+                limiter = utils.get(guild.roles, name=self.bot.limits[self.bot.rosters[channel_id].role_limit])
                 roles_req = f"{limiter.mention}"
 
-            embed = EmbedFactory.create_status(roster=roster_data, bot=self.bot, language=ui_lang['Status'],
+            embed = EmbedFactory.create_status(roster=self.bot.rosters[channel_id], bot=self.bot, language=ui_lang['Status'],
                                                roles_req=roles_req, guild=guild)
 
             await ctx.send(embed=embed)

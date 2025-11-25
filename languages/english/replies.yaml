@@ -35,7 +35,7 @@ Unreachable: "0001: Hey uh, you reached an unreachable part of the code lol."
 Roster:
   Added: "Added as %s"
   Removed: "Removed :("
-  Full: "%s spots full, slotted for Backup"
+  Full: "%s spots full, slotted for Overflow"
   NoDefault: >
     0002: You have no default set, please specify a role (ex: `!%s dps`) or set a default 
     (ex: `!default dps`) then try again.
