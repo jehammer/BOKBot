@@ -68,6 +68,9 @@ Status:
   Backup_DPS: "Backup DPS"
   Backup_Healers: "Backup Healers"
   Backup_Tanks: "Backup Tanks"
+  Overflow_DPS: "Overflow DPS"
+  Overflow_Healers: "Overflow Healers"
+  Overflow_Tanks: "Overflow Tanks"
   Pingable: "Group:"
 
 EventStatus:

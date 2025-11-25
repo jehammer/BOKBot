@@ -60,13 +60,13 @@ class EmbedFactory:
             # Overflow
             for role in display_order:
                 _, _, overflow = roster.role_map[role]
-                role_label = "DPS" if role == "dps" else role.capitalize()
+                role_label = "DPS" if role == "dps" else role.capitalize()+'s'
                 # Overflow bucket
                 bucket = getattr(roster, overflow)
                 names, overflow_count = build_field(bucket, f"{role}_emoji")
                 if overflow_count > 0:
                     embed.add_field(
-                        name=language.get(f"Overflow {role_label}"),
+                        name=language.get(f"Overflow_{role_label}"),
                         value=names,
                         inline=True
                     )
@@ -74,12 +74,12 @@ class EmbedFactory:
             # Backup
             for role in display_order:
                 _, backup, _ = roster.role_map[role]
-                role_label = "DPS" if role == "dps" else role.capitalize()
+                role_label = "DPS" if role == "dps" else role.capitalize()+'s'
                 bucket = getattr(roster, backup)
                 names, backup_count = build_field(bucket, f"{role}_emoji")
                 if backup_count > 0:
                     embed.add_field(
-                        name=language.get(f"Backup {role_label}"),
+                        name=language.get(f"Backup_{role_label}"),
                         value=names,
                         inline=True
                     )
