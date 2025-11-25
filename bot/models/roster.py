@@ -1,26 +1,198 @@
+import logging
+
+
 class Roster:
     """Class for handling roster and related information"""
 
-    def __init__(self, trial, date, leader, dps={}, healers={}, tanks={}, backup_dps={}, backup_healers={},
-                 backup_tanks={}, dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0, memo="delete", pingable="None"):
+    def __init__(self, trial, date, leader,
+                 dps=None, healers=None, tanks=None,
+                 backup_dps=None, backup_healers=None, backup_tanks=None,
+                 overflow_dps=None, overflow_healers=None, overflow_tanks=None,
+                 dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0,
+                 memo="delete", pingable="None"):
         self.trial = trial
         self.date = date
         self.leader = leader
-        self.dps = dps
-        self.tanks = tanks
-        self.healers = healers
-        self.backup_dps = backup_dps
-        self.backup_tanks = backup_tanks
-        self.backup_healers = backup_healers
+
+        self.dps = dps or {}
+        self.healers = healers or {}
+        self.tanks = tanks or {}
+
+        self.backup_dps = backup_dps or {}
+        self.backup_healers = backup_healers or {}
+        self.backup_tanks = backup_tanks or {}
+
+        self.overflow_dps = overflow_dps or {}
+        self.overflow_healers = overflow_healers or {}
+        self.overflow_tanks = overflow_tanks or {}
+
         self.dps_limit = dps_limit
-        self.tank_limit = tank_limit
         self.healer_limit = healer_limit
+        self.tank_limit = tank_limit
         self.role_limit = role_limit
         self.memo = memo
         self.pingable = pingable
 
+        self.role_map = {
+            "dps": ("dps", "backup_dps", "overflow_dps"),
+            "healer": ("healers", "backup_healers", "overflow_healers"),
+            "tank": ("tanks", "backup_tanks", "overflow_tanks"),
+        }
+
+    def _find_user(self, user_id):
+        """Return (bucket_name, msg) for any user in the roster."""
+        uid = str(user_id)
+        for attr in [
+            "dps", "backup_dps", "overflow_dps",
+            "healers", "backup_healers", "overflow_healers",
+            "tanks", "backup_tanks", "overflow_tanks"
+        ]:
+            bucket = getattr(self, attr)
+            if uid in bucket:
+                return attr, bucket[uid]
+        return None, None
+
+    def _remove_from_bucket(self, bucket_name, user_id):
+        del getattr(self, bucket_name)[str(user_id)]
+
+    def add_member(self, user_id, role, which, msg=""):
+        """
+        which: "su" (main) or "bu" (backup)
+        :return
+            0 = added to main
+            1 = added to backup or overflow
+            2 = invalid role
+        """
+        user_id = str(user_id)
+        if role not in self.role_map:
+            return 2
+
+        main_attr, backup_attr, overflow_attr = self.role_map[role]
+        limit = getattr(self, f"{role}_limit")  # dynamic limit
+
+        old_msg, old_role = self.remove_member(user_id, need_vals=True)
+        if msg == "" and old_msg != "" and old_role == role:
+            msg = old_msg
+
+        main_bucket = getattr(self, main_attr)
+        backup_bucket = getattr(self, backup_attr)
+        overflow_bucket = getattr(self, overflow_attr)
+
+        if which == "su":
+            if len(main_bucket) < limit:
+                main_bucket[user_id] = msg
+                return 0
+            else:
+                overflow_bucket[user_id] = msg
+                return 1
+
+        backup_bucket[user_id] = msg
+        return 1
+
+    def remove_member(self, user_id, need_vals=False):
+        """Wrapper that finds the member, removes them correctly, and returns info."""
+        user_id = str(user_id)
+        bucket_name, msg = self._find_user(user_id)
+
+        if bucket_name is None:
+            return False if not need_vals else ("", "")
+
+        # Identify role
+        if bucket_name in ["dps", "backup_dps", "overflow_dps"]:
+            role = "dps"
+        elif bucket_name in ["healers", "backup_healers", "overflow_healers"]:
+            role = "healer"
+        else:
+            role = "tank"
+
+        # Only fill overflow if removing from main
+        main_attr, _, _ = self.role_map[role]
+        if bucket_name == main_attr:
+            self._remove_from_bucket(bucket_name, user_id)
+            self.overflow_fill(role)
+        else:
+            self._remove_from_bucket(bucket_name, user_id)
+
+        if need_vals:
+            return msg, role
+        return True
+
+    def update_message(self, user_id, new_message):
+        uid = str(user_id)
+        bucket_name, _ = self._find_user(uid)
+        if bucket_name is None:
+            return False
+        getattr(self, bucket_name)[uid] = new_message
+        return True
+
+    def swap_people(self, user_id_1, user_id_2):
+        user_id_1 = str(user_id_1)
+        user_id_2 = str(user_id_2)
+
+        b1, msg1 = self._find_user(user_id_1)
+        if b1 is None:
+            return False  # user 1 must exist
+
+        b2, msg2 = self._find_user(user_id_2)
+
+        # Remove user 1
+        del getattr(self, b1)[user_id_1]
+
+        if b2 is None:
+            # User 2 not found: just remove user 1 as they are swapping out
+            return True
+
+        # Swap between two in a roster.
+        del getattr(self, b2)[user_id_2]
+        getattr(self, b1)[user_id_2] = msg2
+        getattr(self, b2)[user_id_1] = msg1
+        return True
+
+    def fill_spots(self):
+        try:
+            for role, (main_attr, backup_attr, overflow_attr) in self.role_map.items():
+                main = getattr(self, main_attr)
+                backup = getattr(self, backup_attr)
+                overflow = getattr(self, overflow_attr)
+                limit = getattr(self, f"{role}_limit")
+
+                while True:
+                    if len(main) < limit and overflow:
+                        first = next(iter(overflow))
+                        main[first] = overflow[first]
+                        del overflow[first]
+                    elif len(main) < limit and not overflow and backup:
+                        first = next(iter(backup))
+                        main[first] = backup[first]
+                        del backup[first]
+                    else:
+                        break
+            return True
+        except Exception as e:
+            logging.error(f"Fill Spots error: {str(e)}")
+            return False
+
+    def overflow_fill(self, role):
+        if role not in self.role_map:
+            return
+        main_attr, _, overflow_attr = self.role_map[role]
+        main = getattr(self, main_attr)
+        overflow = getattr(self, overflow_attr)
+        limit = getattr(self, f"{role}_limit")
+
+        while len(main) < limit and overflow:
+            first = next(iter(overflow))
+            main[first] = overflow[first]
+            del overflow[first]
+
+    def did_values_change(self, old_roster):
+        for key, value in vars(self).items():
+            if value != getattr(old_roster, key, None):
+                return True
+        return False
+
     def get_roster_data(self):
-        all_data = {
+        data = {
             "trial": self.trial,
             "date": self.date,
             "leader": self.leader,
@@ -30,6 +202,9 @@ class Roster:
             "backup_dps": self.backup_dps,
             "backup_healers": self.backup_healers,
             "backup_tanks": self.backup_tanks,
+            "overflow_dps": self.overflow_dps,
+            "overflow_healers": self.overflow_healers,
+            "overflow_tanks": self.overflow_tanks,
             "dps_limit": self.dps_limit,
             "healer_limit": self.healer_limit,
             "tank_limit": self.tank_limit,
@@ -37,196 +212,4 @@ class Roster:
             "memo": self.memo,
             "pingable": self.pingable
         }
-        return all_data
-
-    # Add people into the right spots
-    # True for Main, False of Backup
-    def add_dps(self, user_id, msg=""):
-        if len(self.dps) < self.dps_limit:
-            self.dps[user_id] = msg
-            return True
-        else:
-            self.backup_dps[user_id] = msg
-            return False
-
-    def add_healer(self, user_id, msg=""):
-        if len(self.healers) < self.healer_limit:
-            self.healers[user_id] = msg
-            return True
-        else:
-            self.backup_healers[user_id] = msg
-            return False
-
-    def add_tank(self, user_id, msg=""):
-        if len(self.tanks) < self.tank_limit:
-            self.tanks[user_id] = msg
-            return True
-        else:
-            self.backup_tanks[user_id] = msg
-            return False
-
-    def add_backup_dps(self, user_id, msg=""):
-        self.backup_dps[user_id] = msg
-        return False
-
-    def add_backup_healer(self, user_id, msg=""):
-        self.backup_healers[user_id] = msg
-        return False
-
-    def add_backup_tank(self, user_id, msg=""):
-        self.backup_tanks[user_id] = msg
-        return False
-
-    # remove people from right spots
-    def remove_dps(self, user_id):
-        if user_id in self.dps:
-            del self.dps[user_id]
-        else:
-            del self.backup_dps[user_id]
-
-    def remove_healer(self, user_id):
-        if user_id in self.healers:
-            del self.healers[user_id]
-        else:
-            del self.backup_healers[user_id]
-
-    def remove_tank(self, user_id):
-        if user_id in self.tanks:
-            del self.tanks[user_id]
-        else:
-            del self.backup_tanks[user_id]
-
-    def remove_member(self, user_id, need_vals=False):
-        check = True  # If True, user was found and removed. If False, they were not found in the roster.
-        og_msg = ''
-        slotted = ''
-        user_id = str(user_id)
-        if user_id in self.dps.keys():
-            og_msg = self.dps.get(user_id)
-            slotted = 'dps'
-            self.remove_dps(user_id)
-
-        elif user_id in self.backup_dps.keys():
-            og_msg = self.backup_dps.get(user_id)
-            self.remove_dps(user_id)
-            slotted = 'dps'
-
-        elif user_id in self.healers.keys():
-            og_msg = self.healers.get(user_id)
-            self.remove_healer(user_id)
-            slotted = 'healer'
-
-        elif user_id in self.backup_healers.keys():
-            og_msg = self.backup_healers.get(user_id)
-            self.remove_healer(user_id)
-            slotted = 'healer'
-
-        elif user_id in self.tanks.keys():
-            og_msg = self.tanks.get(user_id)
-            self.remove_tank(user_id)
-            slotted = 'tank'
-
-        elif user_id in self.backup_tanks.keys():
-            og_msg = self.backup_tanks.get(user_id)
-            self.remove_tank(user_id)
-            slotted = 'tank'
-        else:
-            check = False
-
-        # need_vals is true: add_member called this function so return og_msg and slotted, otherwise if found or not.
-        if need_vals:
-            return og_msg, slotted
-        return check
-
-    def add_member(self, user_id, role, which, msg=''):
-        check = None
-        user_id = str(user_id)
-        og_msg, slotted = self.remove_member(user_id, need_vals=True)
-
-        if slotted == role:  # If they are swapping to the same role, copy the message between rosters.
-            if msg == '' and og_msg != '':
-                msg = og_msg
-
-        # return code: 0 = added in slot, 1 = added in backup, 2 = unable to find role.
-
-        if role == 'dps':
-            if which == 'su':
-                check = self.add_dps(user_id, msg)
-            else:
-                check = self.add_backup_dps(user_id, msg)
-        elif role == 'tank':
-            if which == 'su':
-                check = self.add_tank(user_id, msg)
-            else:
-                check = self.add_backup_tank(user_id, msg)
-        elif role == 'healer':
-            if which == 'su':
-                check = self.add_healer(user_id, msg)
-            else:
-                check = self.add_backup_healer(user_id, msg)
-        else:
-            return 2
-        if check:
-            return 0
-        return 1
-
-    def update_message(self, user_id, new_message):
-        check = True
-        if user_id in self.dps.keys():
-            self.dps[user_id] = new_message
-
-        elif user_id in self.backup_dps.keys():
-            self.backup_dps[user_id] = new_message
-
-        elif user_id in self.healers.keys():
-            self.healers[user_id] = new_message
-
-        elif user_id in self.backup_healers.keys():
-            self.backup_healers[user_id] = new_message
-
-        elif user_id in self.tanks.keys():
-            self.tanks[user_id] = new_message
-
-        elif user_id in self.backup_tanks.keys():
-            self.backup_tanks[user_id] = new_message
-        else:
-            check = False
-
-        return check
-
-    def fill_spots(self):
-        try:
-            loop = True
-            while loop:
-                if len(self.dps) < self.dps_limit and len(self.backup_dps) > 0:
-                    first = list(self.backup_dps.keys())[0]
-                    self.dps[first] = self.backup_dps.get(first)
-                    del self.backup_dps[first]
-                else:
-                    loop = False
-            loop = True
-            while loop:
-                if len(self.healers) < self.healer_limit and len(self.backup_healers) > 0:
-                    first = list(self.backup_healers.keys())[0]
-                    self.healers[first] = self.backup_healers.get(first)
-                    del self.backup_healers[first]
-                else:
-                    loop = False
-            loop = True
-            while loop:
-                if len(self.tanks) < self.tank_limit and len(self.backup_tanks) > 0:
-                    first = list(self.backup_tanks.keys())[0]
-                    self.tanks[first] = self.backup_tanks.get(first)
-                    del self.backup_tanks[first]
-                else:
-                    loop = False
-            return True
-        except Exception as e:
-            logging.error(f"Fill Spots error: {str(e)}")
-            return False
-
-    def did_values_change(self, old_roster):
-        for key, value in vars(self).items():
-            if value != getattr(old_roster, key, None):
-                return True
-        return False
+        return data
