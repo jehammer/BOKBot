@@ -153,6 +153,8 @@ Punish: "0041: As a Coward, you are not allowed to join any rosters without the 
 
 NotPrivate: "This command can only be called from the Playground channel!"
 
+BadNumber: "0043: The number you selected is not a valid option."
+
 Events:
   Vet: "Veteran"
   Norm: "Normal"

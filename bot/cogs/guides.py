@@ -48,14 +48,6 @@ class Guides(commands.Cog, name="Guides"):
         await ctx.send(
             "https://cdn.discordapp.com/attachments/911730032286785536/1060064086416691200/vMoL-Zhaj-Positioning.png")
 
-    @commands.command(name="mol", aliases=["nmol", "vmol"])
-    async def send_mol_images(self, ctx: commands.Context):
-        """Both MOL guide images"""
-        await ctx.send(
-            "https://cdn.discordapp.com/attachments/911730032286785536/1060064086416691200/vMoL-Zhaj-Positioning.png")
-        await ctx.send(
-            "https://media.discordapp.net/attachments/911730032286785536/1060063970284818452/Running_Gif.gif")
-
     @commands.command(name="twins")
     async def send_twins_commands(self, ctx: commands.Context):
         """Tells you the two twin commands, just in case"""
@@ -83,6 +75,11 @@ class Guides(commands.Cog, name="Guides"):
     async def send_lokk_hm_img(self, ctx: commands.Context):
         """vSS Lokk HM Guide Image"""
         await ctx.send(f"https://cdn.discordapp.com/attachments/911730032286785536/1154973061133631629/lokkhm.png")
+
+    @commands.command(name="lunar")
+    async def send_lunar_gif(self, ctx: commands.Context):
+        """MOL Lunar Phase Gif"""
+        await ctx.send(f"https://media.discordapp.net/attachments/911730032286785536/1249062115596308612/Lunar_Phase.gif")
 
 
 async def setup(bot: commands.Bot):

@@ -273,6 +273,27 @@ Goodnight BOK
 """
         await ctx.send(message)
 
+    @commands.command(name='otter')
+    async def otter(self, ctx: commands.context):
+        """An Otterful Greeting!"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1443359030868447232/otterful.gif ')
+        except Exception as e:
+            await ctx.send(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            logging.error(f"Otter Error: {str(e)}")
+
+    @commands.command(name="oops")
+    async def armas_oops(self, ctx: commands.Context):
+        """Self-explanatory"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1443375553167228989/Oops.png')
+        except Exception as e:
+            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            logging.error(f"Oops error: {str(e)}")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))

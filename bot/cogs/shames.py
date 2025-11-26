@@ -3,6 +3,7 @@ from discord.ext import commands
 import logging
 import asyncio
 import random
+from bot.services import Utilities
 
 logging.basicConfig(
     level=logging.INFO, format='%(asctime)s: %(message)s',
@@ -33,25 +34,41 @@ class Shames(commands.Cog, name="Shames"):
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/975825818506903562/Lost_died.gif')
 
     @commands.command(name="arma")
-    async def get_arma_moment(self, ctx: commands.Context):
+    async def get_arma_moment(self, ctx: commands.Context, choice=None):
         """Arma Moments"""
+        user_language = Utilities.get_language(ctx.author)
         try:
-            ran = random.randint(1, 2)
+            ran = int(choice) if choice is not None else random.randint(1, 3)
             match ran:
                 case 1:
                     await ctx.send(
                         'https://media.discordapp.net/attachments/911730032286785536/911730134044794930/Arma.gif')
                 case 2:
                     await ctx.send('https://youtu.be/NdySJq7lG44')
+                case 3:
+                    await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1443376086405615668/ByeByeTZC.png')
+                case _:
+                    await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['BadNumber'])}")
         except Exception as e:
             await ctx.send("Unable to send image")
             logging.error("Arma error: " + str(e))
 
     @commands.command(name="drak")
-    async def get_drak_moment(self, ctx: commands.Context):
+    async def get_drak_moment(self, ctx: commands.Context, choice=None):
         """Drak Moment"""
+        user_language = Utilities.get_language(ctx.author)
         try:
-            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
+            ran = int(choice) if choice is not None else random.randint(1, 3)
+            match ran:
+                case 1:
+                    await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730136628461589/Drak.gif')
+                case 2:
+                    await ctx.send('https://youtu.be/jv2HiOn7C5A')
+                case 3:
+                    await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1245114737939841024/must_grow.png')
+                case _:
+                    await ctx.reply(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['BadNumber'])}")
+
         except Exception as e:
             await ctx.send("Unable to send gif")
             logging.error("Drak error: " + str(e))
@@ -78,6 +95,15 @@ class Shames(commands.Cog, name="Shames"):
     async def rng(self, ctx: commands.Context):
         """RNG In vAA HM"""
         await ctx.send('https://media.discordapp.net/attachments/911730032286785536/911730139770019921/RNG.gif')
+
+    @commands.command(name="kiwa")
+    async def kiwa_moment(self, ctx: commands.Context):
+        """Yee'd Her Haw"""
+        try:
+            await ctx.send('https://cdn.discordapp.com/attachments/911730032286785536/1443374376631275521/Kiwa.png')
+        except Exception as e:
+            await ctx.send('Unable to send the image')
+            logging.error(f"Kiwa error: {str(e)}")
 
 
 async def setup(bot: commands.Bot):
