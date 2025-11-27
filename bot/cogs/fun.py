@@ -105,7 +105,7 @@ class Fun(commands.Cog, name="Fun"):
                 member = interaction.user
             elif member.bot:
                 await interaction.response.send_message(
-                    f"{Utilities.format_error(user_language, self.bot[user_language]['replies']['NoBots'])}")
+                    f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['NoBots'])}")
                 return
             user_id = member.id
             rank_data: Rank = self.bot.librarian.get_rank(user_id=user_id)
