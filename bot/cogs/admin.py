@@ -261,7 +261,7 @@ class Admin(commands.Cog, name="Admin"):
     async def sync_application_commands(self, ctx: commands.Context):
         """Owner Only: Force Syncs Application Commands"""
         try:
-            synced = await self.bot.tree.sync(guild=ctx.guild)
+            synced = await self.bot.tree.sync()
             logging.info(f"Synced {len(synced)} command(s)")
             await ctx.send(f"Sync Complete. Synced {len(synced)} Application Commands.")
         except Exception as e:

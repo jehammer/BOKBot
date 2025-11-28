@@ -27,7 +27,7 @@ class EmbedFactory:
                 color=Color.green()
             )
             embed.set_footer(text=language.get('Footer'))
-            embed.set_author(name=f"{language.get('Author')} {roster.leader.replace('_', r'\\_')}")
+            embed.set_author(name=f"{language.get('Author')} {roster.leader.replace('_', r'_')}")
 
             # Helper to build a field for a given bucket
             def build_field(field_bucket, emoji_key):
@@ -36,9 +36,9 @@ class EmbedFactory:
                 for user_id, msg in field_bucket.items():
                     member = guild.get_member(int(user_id))
                     if member:
-                        field_names += f"{bot.config['raids'][emoji_key]}{member.display_name.replace('_', r'\\_')}\n"
+                        field_names += f"{bot.config['raids'][emoji_key]}{member.display_name.replace('_', r'\_')}\n"
                         if msg:
-                            field_names += f"{msg.replace('_', r'\\_')}\n"
+                            field_names += f"{msg.replace('_', r'\_')}\n"
                         count += 1
                 return field_names, count
 
