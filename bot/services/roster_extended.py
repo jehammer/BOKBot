@@ -53,11 +53,9 @@ class RosterExtended:
             fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
             fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
             fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
-        dps, healers, tanks, backup_dps, backup_healers, backup_tanks = {}, {}, {}, {}, {}, {}
-        return Roster(fact_raid, fact_date, fact_leader, dps, healers, tanks, backup_dps, backup_healers,
-                      backup_tanks, fact_dps_limit, fact_healer_limit, fact_tank_limit, fact_role_limit,
-                      fact_memo)
-
+        return Roster(trial=fact_raid, date=fact_date, leader=fact_leader, dps_limit=fact_dps_limit,
+                      healer_limit=fact_healer_limit, tank_limit=fact_tank_limit, role_limit=fact_role_limit,
+                      memo=fact_memo)
 
     @staticmethod
     def event_factory(leader, event, date, memo, pingable):
