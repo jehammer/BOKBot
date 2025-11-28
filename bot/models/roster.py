@@ -191,6 +191,42 @@ class Roster:
                 return True
         return False
 
+    def push_excess_to_overflow(self):
+        """
+        Move members from main roster to overflow if the main roster exceeds its role limit.
+        Preserves the original order of members.
+        """
+        role_attrs = {
+            "dps": ("dps", "overflow_dps"),
+            "healer": ("healers", "overflow_healers"),
+            "tank": ("tanks", "overflow_tanks")
+        }
+
+        moved_summary = {}
+
+        for role, (main_attr, overflow_attr) in role_attrs.items():
+            main_bucket = getattr(self, main_attr)
+            overflow_bucket = getattr(self, overflow_attr)
+            limit = getattr(self, f"{role}_limit")
+
+            to_remove = max(len(main_bucket) - limit, 0)
+
+            if to_remove > 0:
+                # Take last n members that are now over limit
+                last_members = list(main_bucket.items())[-to_remove:]
+
+                # Remove from main
+                for user_id, _ in last_members:
+                    del main_bucket[user_id]
+
+                # Add to start of overflow to preserve order
+                for user_id, msg in reversed(last_members):
+                    overflow_bucket.update({user_id: msg})
+
+                moved_summary[role] = [user_id for user_id, _ in last_members]
+
+        return moved_summary
+
     def get_roster_data(self):
         data = {
             "trial": self.trial,
