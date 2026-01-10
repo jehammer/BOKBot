@@ -134,6 +134,7 @@ class EmbedFactory:
         embed.add_field(name=f"{lang['FourTwenty'] % rank.four_twenty}", value=" ", inline=False)
         embed.add_field(name=f"{lang['Boob'] % rank.boob}", value=" ", inline=False)
         embed.add_field(name=f"{lang['Pie'] % rank.pie}", value=" ", inline=False)
+        embed.add_field(name=f"{lang['Palindrome'] % rank.palindrome}", value=" ", inline=False)
         return embed
 
     @staticmethod
