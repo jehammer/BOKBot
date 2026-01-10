@@ -104,6 +104,7 @@ Rank:
   FourTwenty: "420 Count: %s"
   Boob: "Boob Count: %s"
   Pie: "Pie Count: %s"
+  Palindrome: "Palindrome Count: %s"
 
 Count:
   Author: "Runs with %s"
