@@ -70,7 +70,7 @@ class Roster:
         main_attr, backup_attr, overflow_attr = self.role_map[role]
         limit = getattr(self, f"{role}_limit")  # dynamic limit
 
-        old_msg, old_role = self.remove_member(user_id, need_vals=True)
+        old_msg, old_role, _ = self.remove_member(user_id, need_vals=True)
         if msg == "" and old_msg != "" and old_role == role:
             msg = old_msg
 
@@ -95,7 +95,7 @@ class Roster:
         bucket_name, msg = self._find_user(user_id)
 
         if bucket_name is None:
-            return False if not need_vals else ("", "")
+            return False if not need_vals else ("", "", False)
 
         # Identify role
         if bucket_name in ["dps", "backup_dps", "overflow_dps"]:
@@ -114,7 +114,7 @@ class Roster:
             self._remove_from_bucket(bucket_name, user_id)
 
         if need_vals:
-            return msg, role
+            return msg, role, True
         return True
 
     def update_message(self, user_id, new_message):

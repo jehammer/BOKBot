@@ -320,46 +320,12 @@ class Admin(commands.Cog, name="Admin"):
             to_send += f"{member.name} - {member.display_name} has left the server\n"
             for i in self.bot.rosters:
                 if isinstance(i, Roster):
-                    is_on = False
-                    if user_id in self.bot.rosters[i].dps.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_dps(user_id)
-                        to_send += f"Traitor was removed as a DPS from {channel_name}\n"
-                        was_on = True
-                        is_on = True
-                    elif user_id in self.bot.rosters[i].backup_dps.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_dps(user_id)
-                        to_send += f"Traitor was removed as a backup DPS from {channel_name}\n"
-                        was_on = True
-                        is_on = True
-                    elif user_id in self.bot.rosters[i].healers.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_healer(user_id)
-                        to_send += f"Traitor was removed as a Healer from {channel_name}\n"
-                        was_on = True
-                        is_on = True
-                    elif user_id in self.bot.rosters[i].backup_healers.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_healer(user_id)
-                        to_send += f"Traitor was removed as a backup Healer from {channel_name}\n"
-                        was_on = True
-                        is_on = True
-                    elif user_id in self.bot.rosters[i].tanks.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_tank(user_id)
-                        to_send += f"Traitor was removed as a Tank from {channel_name}\n"
-                        was_on = True
-                        is_on = True
-                    elif user_id in self.bot.rosters[i].backup_tanks.keys():
-                        channel_name = self.bot.get_channel(int(i)).name
-                        self.bot.rosters[i].remove_tank(user_id)
-                        to_send += f"Traitor was removed as a backup Tank from {channel_name}\n"
-                        was_on = True
-                        is_on = True
+                    _, role, is_on = i.remove_member(user_id, True)
                     if is_on:
+                        was_on = True
                         logging.info(f"Updating Roster {channel_name} for member removal")
                         self.bot.librarian.update_roster(i, self.bot.rosters[i])
+                        to_send += f"Traitor was removed as a {role.capitalize()} from {channel_name}\n"
                 elif isinstance(i, EventRoster):
                     if user_id in self.bot.rosters[i].members.keys():
                         channel_name = self.bot.get_channel(int(i)).name
