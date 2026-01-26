@@ -294,6 +294,17 @@ Goodnight BOK
             await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
             logging.error(f"Oops error: {str(e)}")
 
+    @commands.command(name='lily')
+    async def lily_uwu(self, ctx: commands.Context):
+        """Basically an anime girl"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            await ctx.send('https://media.discordapp.net/attachments/911730032286785536/1464875517672161474/Lily.png')
+        except Exception as e:
+            await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
+            logging.error(f"Lily error: {str(e)}")
+
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))
