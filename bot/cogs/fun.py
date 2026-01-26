@@ -294,7 +294,7 @@ Goodnight BOK
             await ctx.send(f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}")
             logging.error(f"Oops error: {str(e)}")
 
-    @commands.command(name='lily')
+    @commands.command(name='uwu')
     async def lily_uwu(self, ctx: commands.Context):
         """Basically an anime girl"""
         user_language = Utilities.get_language(ctx.author)
