@@ -46,9 +46,6 @@ class EventsSys(commands.Cog, name="EventsSys"):
                 time.sleep(2)
         except Exception as e:
             logging.error(f"Position Change Error: {str(e)}")
-            await interaction.followup.send(
-                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['CantPosition'])}"
-            )
             return
 
     # Creator-Only commands
