@@ -19,11 +19,10 @@ from bot.models import Roster, EventRoster
 from bot.services import Utilities
 
 logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s: %(message)s',
-    handlers=[
-        logging.FileHandler('log.log', mode='a'),
-        logging.StreamHandler()
-    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+    level=logging.INFO,
+    format="%(asctime)s: %(message)s",
+    handlers=[logging.FileHandler("log.log", mode="a"), logging.StreamHandler()],
+)  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 scheduled_time = datetime.time(13, 0, 0, 0)
 
@@ -32,12 +31,12 @@ ranks = None
 poons = None
 other = None
 
-#alert_channel = self.bot.get_guild(self.bot.config['guild']).get_channel(self.bot.config['private'])
-#await alert_channel.send(f"Saving Roster or Map error encountered: {str(e)}")
+# alert_channel = self.bot.get_guild(self.bot.config['guild']).get_channel(self.bot.config['private'])
+# await alert_channel.send(f"Saving Roster or Map error encountered: {str(e)}")
 
 
 def gather_roles(guild, config):
-    """Loads the starting roles for people when joining """
+    """Loads the starting roles for people when joining"""
     global default
     global ranks
     global poons
@@ -63,9 +62,9 @@ class Admin(commands.Cog, name="Admin"):
         if ctx.message.author.id == self.bot.config["creator"]:
             try:
                 all_servers = list(self.bot.guilds)
-                allowed_servers = self.bot.config['allowed']
+                allowed_servers = self.bot.config["allowed"]
                 await ctx.send(f"Connected on {str(len(all_servers))} servers:")
-                await ctx.send('\n'.join(guild.name for guild in all_servers))
+                await ctx.send("\n".join(guild.name for guild in all_servers))
                 for i in all_servers:
                     if i.id not in allowed_servers:
                         await ctx.send(f"Server {i.name} is not allowed.")
@@ -81,7 +80,7 @@ class Admin(commands.Cog, name="Admin"):
         if ctx.message.author.id == self.bot.config["creator"]:
             try:
                 all_servers = list(self.bot.guilds)
-                allowed_servers = self.bot.config['allowed']
+                allowed_servers = self.bot.config["allowed"]
                 message = f"<@everyone> COMMON PEASANTRY! YOUR ATTEMPTED THEFT OF ME IS NOT UNNOTICED AND WILL NOT GO UNPUNISHED!"
                 for i in all_servers:
                     if i.id not in allowed_servers:
@@ -142,7 +141,7 @@ class Admin(commands.Cog, name="Admin"):
                 version = 1
                 while os.path.exists(os.path.join("logs", file_name)):
                     base_name, extension = os.path.splitext(file_name)
-                    base_name = re.sub(r'\(\d{1,2}\)', '', base_name)
+                    base_name = re.sub(r"\(\d{1,2}\)", "", base_name)
                     file_name = f"{base_name}({version}){extension}"
                     version += 1
                 path = os.path.join("logs", file_name)
@@ -161,7 +160,7 @@ class Admin(commands.Cog, name="Admin"):
                 for i in range(4):
                     await arma.send("It is time for your regularly scheduled event")
                     await ctx.send(arma.mention + " it is time for you to get on!")
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(0.5)
 
             else:
                 await ctx.send("Cannot find Arma")
@@ -190,12 +189,12 @@ class Admin(commands.Cog, name="Admin"):
         try:
             msg = ctx.message.content
             msg = msg.split(" ", 2)
-            guild = self.bot.get_guild(self.bot.config['guild'])
+            guild = self.bot.get_guild(self.bot.config["guild"])
             channel = guild.get_channel(int(msg[1]))
-            tts = gTTS(msg[2], lang='en')
-            tts.save('voice.mp3')
+            tts = gTTS(msg[2], lang="en")
+            tts.save("voice.mp3")
             voice = await channel.connect()
-            source = FFmpegPCMAudio('voice.mp3')
+            source = FFmpegPCMAudio("voice.mp3")
             voice.play(source)
             while voice.is_playing():
                 await asyncio.sleep(2)
@@ -239,22 +238,29 @@ class Admin(commands.Cog, name="Admin"):
             await ctx.send(f"Cog Reload completed")
         except Exception as e:
             logging.error(f"Cog Reload Error: {str(e)}")
-            await ctx.send(f"There was an issue reloading the cogs, check the logs for more info.")
+            await ctx.send(
+                f"There was an issue reloading the cogs, check the logs for more info."
+            )
 
-    @commands.command(name="config", aliases=["configreload", "reset", "configreset", "resetconfig", "reloadconfig"])
+    @commands.command(
+        name="config",
+        aliases=["configreload", "reset", "configreset", "resetconfig", "reloadconfig"],
+    )
     @permissions.creator_only()
     async def reload_config(self, ctx: commands.Context):
         """Owner Only: Reloads the config following an update"""
         try:
             logging.info(f"Loading new config")
-            with open("config.yaml", 'r') as stream:
+            with open("config.yaml", "r") as stream:
                 data_loaded = yaml.safe_load(stream)
             self.bot.config = data_loaded
             logging.info(f"New config loaded")
             await ctx.send(f"Config loaded")
         except Exception as e:
             logging.error(f"Config Reload Error: {str(e)}")
-            await ctx.send(f"There was an issue reloading the config, check the logs for more info.")
+            await ctx.send(
+                f"There was an issue reloading the config, check the logs for more info."
+            )
 
     @commands.command(name="sync", aliases=["resync", "synchronize", "rescynchronize"])
     @permissions.creator_only()
@@ -268,19 +274,48 @@ class Admin(commands.Cog, name="Admin"):
             logging.error(f"Sync Error: {str(e)}")
             await ctx.send(f"There was an issue syncing, check the logs for more info.")
 
-    @commands.command(name='trial',
-                      aliases=['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit', 'call',
-                               'modify',
-                               'fill', 'close', 'runcount', 'remove', 'add', 'rank', 'kowtow'],
-                      hidden=True)
+    @commands.command(
+        name="trial",
+        aliases=[
+            "date",
+            "datetime",
+            "time",
+            "leader",
+            "change",
+            "rolenum",
+            "memo",
+            "limit",
+            "call",
+            "modify",
+            "fill",
+            "close",
+            "runcount",
+            "remove",
+            "add",
+            "rank",
+            "kowtow",
+        ],
+        hidden=True,
+    )
     async def old_commands_alert(self, ctx: commands.Context):
         user_language = Utilities.get_language(ctx.author)
-        now_modify = ['date', 'datetime', 'time', 'leader', 'change', 'rolenum', 'memo', 'limit']
+        now_modify = [
+            "date",
+            "datetime",
+            "time",
+            "leader",
+            "change",
+            "rolenum",
+            "memo",
+            "limit",
+        ]
         if ctx.invoked_with in now_modify:
-            new_command = 'modify'
+            new_command = "modify"
         else:
             new_command = ctx.invoked_with
-        await ctx.reply(f"{self.bot.language[user_language]['replies']['MovedAnswer'] % new_command}")
+        await ctx.reply(
+            f"{self.bot.language[user_language]['replies']['MovedAnswer'] % new_command}"
+        )
 
     # EVENTS:
 
@@ -292,25 +327,33 @@ class Admin(commands.Cog, name="Admin"):
     async def on_member_join(self, member):
         try:
             guild = member.guild
-            if self.bot.config["roles"]['default'] != "none":
+            if self.bot.config["roles"]["default"] != "none":
                 await member.add_roles(default, ranks, poons, other)
                 logging.info(
-                    f"Added Roles: {str(default)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}")
+                    f"Added Roles: {str(default)}, {str(ranks)}, {str(poons)}, {str(other)} to: {member.display_name}"
+                )
             await guild.system_channel.send(
                 f"Welcome {member.mention} to Breath Of Kynareth! Winds of Kyne be with you!\n"
                 f"Please read the rules in <#847968244949844008> and follow the directions for "
                 f"access to the rest of the server.\n"
                 f"Once you do be sure to check out how to get ranked in <#933821777149329468>\n"
-                f"If something seems wrong just ping the Storm Bringers.")
+                f"If something seems wrong just ping the Storm Bringers."
+            )
         except Exception as e:
-            private_channel = guild.get_channel(self.bot.config['administration']['private'])
-            await private_channel.send("Unable to apply initial role and/or welcome the new user")
+            private_channel = guild.get_channel(
+                self.bot.config["administration"]["private"]
+            )
+            await private_channel.send(
+                "Unable to apply initial role and/or welcome the new user"
+            )
             logging.error(f"Member Join Error: {str(e)}")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: Member):
-        private_channel = member.guild.get_channel(self.bot.config['administration']['private'])
-        to_send = ''
+        private_channel = member.guild.get_channel(
+            self.bot.config["administration"]["private"]
+        )
+        to_send = ""
         rank_data = self.bot.librarian.get_rank(member.id)
         count_data = self.bot.librarian.get_count(member.id)
         try:
@@ -323,7 +366,9 @@ class Admin(commands.Cog, name="Admin"):
                     _, role, is_on = i.remove_member(user_id, True)
                     if is_on:
                         was_on = True
-                        logging.info(f"Updating Roster {channel_name} for member removal")
+                        logging.info(
+                            f"Updating Roster {channel_name} for member removal"
+                        )
                         self.bot.librarian.update_roster(i, self.bot.rosters[i])
                         to_send += f"Traitor was removed as a {role.capitalize()} from {channel_name}\n"
                 elif isinstance(i, EventRoster):
@@ -332,7 +377,9 @@ class Admin(commands.Cog, name="Admin"):
                         self.bot.rosters[i].remove_member(user_id)
                         to_send += f"Traitor was removed from {channel_name}\n"
                         was_on = True
-                        logging.info(f"Updating Roster {channel_name} for member removal")
+                        logging.info(
+                            f"Updating Roster {channel_name} for member removal"
+                        )
                         self.bot.librarian.update_roster(i, self.bot.rosters[i])
 
             if was_on:
@@ -341,15 +388,15 @@ class Admin(commands.Cog, name="Admin"):
                 to_send += f"The Traitor was not on any active rosters.\n"
             # Delete Default
             self.bot.librarian.delete_default(member.id)
-            to_send += 'Deleted Default\n'
+            to_send += "Deleted Default\n"
 
             # Default Ranks
             self.bot.librarian.delete_rank(member.id)
-            to_send += 'Deleted Ranks\n'
+            to_send += "Deleted Ranks\n"
 
             # Delete Count
             self.bot.librarian.delete_count(member.id)
-            to_send += 'Deleted Counts\n'
+            to_send += "Deleted Counts\n"
 
             to_send += f"{member.display_name} joined {calendar.month_name[member.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}\n"
             if count_data is not None:
@@ -357,7 +404,9 @@ class Admin(commands.Cog, name="Admin"):
             else:
                 to_send += f"{member.display_name} has no recorded runs\n"
             if rank_data is not None:
-                to_send += f"{member.display_name} last ranked on {rank_data.last_called}\n"
+                to_send += (
+                    f"{member.display_name} last ranked on {rank_data.last_called}\n"
+                )
             else:
                 to_send += f"{member.display_name} has no recorded rankings\n"
 
@@ -372,22 +421,29 @@ class Admin(commands.Cog, name="Admin"):
         try:
             if time.localtime().tm_isdst == 0:
                 await asyncio.sleep(3600)
-            guild = self.bot.get_guild(self.bot.config['guild'])
-            channel = guild.get_channel(self.bot.config['morning_channel'])
-            await channel.send(self.bot.config['morning'])
+            guild = self.bot.get_guild(self.bot.config["guild"])
+            channel = guild.get_channel(self.bot.config["morning_channel"])
+            await channel.send(self.bot.config["morning"])
             try:
                 today = datetime.datetime.today()
                 today_month = today.month
                 today_day = today.day
                 today_year = today.year
                 for member in guild.members:
-                    if any(self.bot.config["roles"]['default'] in role.name for role in member.roles):
+                    if any(
+                        self.bot.config["roles"]["default"] in role.name
+                        for role in member.roles
+                    ):
                         continue
                     joined = member.joined_at
                     joined_month = joined.month
                     joined_day = joined.day
                     joined_year = joined.year
-                    if today_month == joined_month and today_day == joined_day and today_year > joined_year:
+                    if (
+                        today_month == joined_month
+                        and today_day == joined_day
+                        and today_year > joined_year
+                    ):
                         await channel.send(f"{member.mention} Happy Anniversary!")
                 # TODO: Implement BOKiversary for May 4th each year and BOKBot Birthday in November checks
             except Exception as e:
