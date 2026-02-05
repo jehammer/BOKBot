@@ -11,7 +11,7 @@ def language():
         @wraps(original_function)
         async def wrapper_function(*args, **kwargs):
             ctx = args[1]
-            kwargs['language'] = Utilities.get_language(ctx.author)
+            kwargs["language"] = Utilities.get_language(ctx.author)
             return await original_function(*args, **kwargs)
 
         return wrapper_function
@@ -43,20 +43,21 @@ def private_channel_only():
         async def wrapper_function(*args, **kwargs):
             interaction = args[1]
             self = args[0]
-            if interaction.channel.id == self.bot.config['private']:
+            if interaction.channel.id == self.bot.config["private"]:
                 return await original_function(*args, **kwargs)
             else:
                 lang = Utilities.get_language(interaction.user)
-                raise NotPrivateError(self.bot.language[lang]['replies']['NotPrivate'])
+                raise NotPrivateError(self.bot.language[lang]["replies"]["NotPrivate"])
 
         return wrapper_function
 
     return decorator
 
+
 #
 # KWARGS DO NOT WORK WITH APPLICATION COMMANDS, will need to review.
 #
-#def app_language():
+# def app_language():
 #    """Decorator to get set language for an application command function"""
 #    def decorator(original_function):
 #        @wraps(original_function)

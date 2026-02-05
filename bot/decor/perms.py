@@ -8,6 +8,7 @@ from bot.services import Utilities
 
 # TODO: Change these to use Role Names rather than getting the Roles themselves
 
+
 def has_officer():
     """A decorator that validates if someone has the officer role"""
 
@@ -16,7 +17,9 @@ def has_officer():
         async def wrapper_function(*args, **kwargs):
             ctx = args[1]
             self = args[0]
-            officer_role = discord.utils.get(ctx.guild.roles, name=self.bot.config["roles"]["admin"])
+            officer_role = discord.utils.get(
+                ctx.guild.roles, name=self.bot.config["roles"]["admin"]
+            )
             if officer_role in ctx.author.roles:
                 return await original_function(*args, **kwargs)
             else:
@@ -36,7 +39,9 @@ def has_raid_lead():
         async def wrapper_function(*args, **kwargs):
             ctx = args[1]
             self = args[0]
-            raid_lead = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["lead"])
+            raid_lead = discord.utils.get(
+                ctx.guild.roles, name=self.bot.config["raids"]["lead"]
+            )
             if raid_lead in ctx.author.roles:
                 return await original_function(*args, **kwargs)
             else:
@@ -55,7 +60,9 @@ def application_has_raid_lead():
         async def wrapper_function(*args, **kwargs):
             interaction = args[1]
             self = args[0]
-            raid_lead = discord.utils.get(interaction.guild.roles, name=self.bot.config["raids"]["lead"])
+            raid_lead = discord.utils.get(
+                interaction.guild.roles, name=self.bot.config["raids"]["lead"]
+            )
             if raid_lead in interaction.user.roles:
                 return await original_function(*args, **kwargs)
             else:
@@ -93,8 +100,12 @@ def has_prog_lead():
         async def wrapper_function(*args, **kwargs):
             ctx = args[1]
             self = args[0]
-            raid_lead = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["lead"])
-            prog_lead = discord.utils.get(ctx.guild.roles, name=self.bot.config["raids"]["prog_lead"])
+            raid_lead = discord.utils.get(
+                ctx.guild.roles, name=self.bot.config["raids"]["lead"]
+            )
+            prog_lead = discord.utils.get(
+                ctx.guild.roles, name=self.bot.config["raids"]["prog_lead"]
+            )
             if raid_lead in ctx.author.roles or prog_lead in ctx.author.roles:
                 return await original_function(*args, **kwargs)
             else:
@@ -114,9 +125,16 @@ def application_has_prog_lead():
         async def wrapper_function(*args, **kwargs):
             interaction = args[1]
             self = args[0]
-            raid_lead = discord.utils.get(interaction.guild.roles, name=self.bot.config["raids"]["lead"])
-            prog_lead = discord.utils.get(interaction.guild.roles, name=self.bot.config["raids"]["prog_lead"])
-            if raid_lead in interaction.user.roles or prog_lead in interaction.user.roles:
+            raid_lead = discord.utils.get(
+                interaction.guild.roles, name=self.bot.config["raids"]["lead"]
+            )
+            prog_lead = discord.utils.get(
+                interaction.guild.roles, name=self.bot.config["raids"]["prog_lead"]
+            )
+            if (
+                raid_lead in interaction.user.roles
+                or prog_lead in interaction.user.roles
+            ):
                 return await original_function(*args, **kwargs)
             else:
                 raise app_commands.MissingRole(str(f"{raid_lead} or {prog_lead}"))

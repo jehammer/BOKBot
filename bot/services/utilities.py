@@ -1,14 +1,13 @@
 from discord import member
 import logging
 
-languages = ['English', 'Spanish', 'French']
+languages = ["English", "Spanish", "French"]
 
 logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s: %(message)s',
-    handlers=[
-        logging.FileHandler('log.log', mode='a'),
-        logging.StreamHandler()
-    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+    level=logging.INFO,
+    format="%(asctime)s: %(message)s",
+    handlers=[logging.FileHandler("log.log", mode="a"), logging.StreamHandler()],
+)  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class Utilities:
@@ -26,7 +25,9 @@ class Utilities:
     @staticmethod
     def suffix(d):
         try:
-            return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
+            return (
+                "th" if 11 <= d <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(d % 10, "th")
+            )
         except Exception as e:
             logging.error(f"Suffix Failure: {str(e)}")
             raise ValueError("Unable to set suffix value")
@@ -38,7 +39,7 @@ class Utilities:
 
     @staticmethod
     def get_language_from_number(num):
-        return languages[num-1].lower()
+        return languages[num - 1].lower()
 
     @staticmethod
     def get_default_from_language(default_map, default):

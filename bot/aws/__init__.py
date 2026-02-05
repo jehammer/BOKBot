@@ -1,3 +1,3 @@
 from .dynamo import Dynamo
 
-__all__ = ['Dynamo']
+__all__ = ["Dynamo"]

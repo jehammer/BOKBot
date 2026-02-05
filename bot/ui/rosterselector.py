@@ -9,8 +9,8 @@ class RosterSelect(ui.Select):
         self.channels = {}
         self.config = bot.config
         self.cmd_called = cmd_called
-        self.language = bot.language[user_language]['replies']
-        self.ui_language = bot.language[user_language]['ui']
+        self.language = bot.language[user_language]["replies"]
+        self.ui_language = bot.language[user_language]["ui"]
         self.user_language = user_language
         self.bot = bot
         self.rosters = bot.rosters
@@ -19,7 +19,7 @@ class RosterSelect(ui.Select):
 
         options = []
         if self.rosters is None or len(self.rosters) == 0:
-            options.append(SelectOption(label='N/A'))
+            options.append(SelectOption(label="N/A"))
         else:
             used = []
             for i in self.rosters:
@@ -40,8 +40,12 @@ class RosterSelect(ui.Select):
                 used.append(label)
 
         # discord.SelectOption(label="Option 1",emoji="👌",description="This is option 1!"),
-        super().__init__(placeholder=self.ui_language['SelectRoster']['Placeholder'], max_values=1, min_values=1,
-                         options=options)
+        super().__init__(
+            placeholder=self.ui_language["SelectRoster"]["Placeholder"],
+            max_values=1,
+            min_values=1,
+            options=options,
+        )
 
     def update_options_timeout(self):
         # Remove all options and set the placeholder to "Timed out"
@@ -51,9 +55,10 @@ class RosterSelect(ui.Select):
     async def callback(self, interaction: Interaction):
         selected = self.values[0]
 
-        if selected == 'N/A':
+        if selected == "N/A":
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoOptionsError'])}")
+                f"{Utilities.format_error(self.user_language, self.language['SelectRoster']['NoOptionsError'])}"
+            )
             return
 
         # Fetch Key from value for channel ID
@@ -64,40 +69,87 @@ class RosterSelect(ui.Select):
         if self.cmd_called == "modify":
             if isinstance(self.bot.rosters[channel_id], Roster):
                 await interaction.response.send_modal(
-                    TrialModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
+                    TrialModal(
+                        interaction=interaction,
+                        bot=self.bot,
+                        lang=self.user_language,
+                        channel_id=channel_id,
+                    )
+                )
             elif isinstance(self.bot.rosters[channel_id], EventRoster):
                 await interaction.response.send_modal(
-                    EventModal(interaction=interaction, bot=self.bot, lang=self.user_language, channel_id=channel_id))
+                    EventModal(
+                        interaction=interaction,
+                        bot=self.bot,
+                        lang=self.user_language,
+                        channel_id=channel_id,
+                    )
+                )
         elif self.cmd_called == "close":
-            await interaction.response.send_modal(CloseModal(interaction=interaction, bot=self.bot,
-                                                             lang=self.user_language,
-                                                             channel_id=channel_id))
+            await interaction.response.send_modal(
+                CloseModal(
+                    interaction=interaction,
+                    bot=self.bot,
+                    lang=self.user_language,
+                    channel_id=channel_id,
+                )
+            )
         elif self.cmd_called == "remove":
             await interaction.response.send_modal(
-                RemoveModal(interaction=interaction, bot=self.bot, user_lang=self.user_language, channel_id=channel_id))
+                RemoveModal(
+                    interaction=interaction,
+                    bot=self.bot,
+                    user_lang=self.user_language,
+                    channel_id=channel_id,
+                )
+            )
         elif self.cmd_called == "run_count":
             await interaction.response.send_modal(
-                RunCountModal(interaction=interaction, bot=self.bot, users_language=self.user_language, channel_id=channel_id))
+                RunCountModal(
+                    interaction=interaction,
+                    bot=self.bot,
+                    users_language=self.user_language,
+                    channel_id=channel_id,
+                )
+            )
         elif self.cmd_called == "fill":
             await interaction.response.send_modal(
-                FillModal(interaction=interaction, bot=self.bot, user_language=self.user_language, channel_id=channel_id))
+                FillModal(
+                    interaction=interaction,
+                    bot=self.bot,
+                    user_language=self.user_language,
+                    channel_id=channel_id,
+                )
+            )
 
 
 class RosterSelector(ui.View):
-    def __init__(self, interaction: Interaction, bot, caller, cmd_called, user_language, *,
-                 timeout=30):
+    def __init__(
+        self,
+        interaction: Interaction,
+        bot,
+        caller,
+        cmd_called,
+        user_language,
+        *,
+        timeout=30,
+    ):
         super().__init__(timeout=timeout)
         self.caller = caller
         self.bot = bot
         self.interaction = interaction
         self.language = bot.language[user_language]
         self.user_language = user_language
-        self.new_roster_select = RosterSelect(interaction, cmd_called, bot, user_language)
+        self.new_roster_select = RosterSelect(
+            interaction, cmd_called, bot, user_language
+        )
         self.add_item(self.new_roster_select)
 
     async def interaction_check(self, interaction: Interaction):
         if interaction.user.id != self.caller.id:
-            await interaction.response.send_message(f"{self.language['SelectRoster']['NotCaller']}", ephemeral=True)
+            await interaction.response.send_message(
+                f"{self.language['SelectRoster']['NotCaller']}", ephemeral=True
+            )
             return False
         return True
 

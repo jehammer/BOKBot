@@ -18,7 +18,7 @@ class EventRoster:
         }
         return all_data
 
-    def add_member(self, user_id, msg=''):
+    def add_member(self, user_id, msg=""):
         self.members[user_id] = msg
 
     def remove_member(self, user_id):
@@ -32,4 +32,3 @@ class EventRoster:
             self.members[user_id] = new_message
             return True
         return False
-

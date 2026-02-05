@@ -26,8 +26,9 @@ class EventsSys(commands.Cog, name="EventsSys"):
             logging.info(f"Found and Loaded Rosters")
         else:
             logging.info(f"No Rosters Found")
-        fetched = RosterExtended.get_limits(librarian=self.bot.librarian,
-                                            roles_config=self.bot.config['raids']['ranks'])
+        fetched = RosterExtended.get_limits(
+            librarian=self.bot.librarian, roles_config=self.bot.config["raids"]["ranks"]
+        )
         if fetched is not None:
             self.bot.limits = fetched
             logging.info(f"Found and Loaded Limits")
@@ -46,7 +47,8 @@ class EventsSys(commands.Cog, name="EventsSys"):
         except Exception as e:
             logging.error(f"Position Change Error: {str(e)}")
             await interaction.followup.send(
-                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['CantPosition'])}")
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['TrialModify']['CantPosition'])}"
+            )
             return
 
     # Creator-Only commands
@@ -75,7 +77,9 @@ class EventsSys(commands.Cog, name="EventsSys"):
     async def save_roster_info(self, ctx: commands.Context):
         """Force Save current Roster Map and Rosters"""
         try:
-            for i in self.bot.rosters: #TODO: make it save based on roster instance type
+            for (
+                i
+            ) in self.bot.rosters:  # TODO: make it save based on roster instance type
                 self.bot.librarian.put_roster(i, rosters[i].get_roster_data())
             await ctx.reply(f"Rosters saved.")
 

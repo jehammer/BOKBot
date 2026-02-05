@@ -4,12 +4,27 @@ import logging
 class Roster:
     """Class for handling roster and related information"""
 
-    def __init__(self, trial, date, leader,
-                 dps=None, healers=None, tanks=None,
-                 backup_dps=None, backup_healers=None, backup_tanks=None,
-                 overflow_dps=None, overflow_healers=None, overflow_tanks=None,
-                 dps_limit=0, healer_limit=0, tank_limit=0, role_limit=0,
-                 memo="delete", pingable="None"):
+    def __init__(
+        self,
+        trial,
+        date,
+        leader,
+        dps=None,
+        healers=None,
+        tanks=None,
+        backup_dps=None,
+        backup_healers=None,
+        backup_tanks=None,
+        overflow_dps=None,
+        overflow_healers=None,
+        overflow_tanks=None,
+        dps_limit=0,
+        healer_limit=0,
+        tank_limit=0,
+        role_limit=0,
+        memo="delete",
+        pingable="None",
+    ):
         self.trial = trial
         self.date = date
         self.leader = leader
@@ -43,9 +58,15 @@ class Roster:
         """Return (bucket_name, msg) for any user in the roster."""
         uid = str(user_id)
         for attr in [
-            "dps", "backup_dps", "overflow_dps",
-            "healers", "backup_healers", "overflow_healers",
-            "tanks", "backup_tanks", "overflow_tanks"
+            "dps",
+            "backup_dps",
+            "overflow_dps",
+            "healers",
+            "backup_healers",
+            "overflow_healers",
+            "tanks",
+            "backup_tanks",
+            "overflow_tanks",
         ]:
             bucket = getattr(self, attr)
             if uid in bucket:
@@ -199,7 +220,7 @@ class Roster:
         role_attrs = {
             "dps": ("dps", "overflow_dps"),
             "healer": ("healers", "overflow_healers"),
-            "tank": ("tanks", "overflow_tanks")
+            "tank": ("tanks", "overflow_tanks"),
         }
 
         moved_summary = {}
@@ -246,6 +267,6 @@ class Roster:
             "tank_limit": self.tank_limit,
             "role_limit": self.role_limit,
             "memo": self.memo,
-            "pingable": self.pingable
+            "pingable": self.pingable,
         }
         return data

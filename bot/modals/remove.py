@@ -11,8 +11,8 @@ class RemoveModal(Modal):
         self.channel = interaction.guild.get_channel(int(self.channel_id))
         self.roster = bot.rosters[channel_id]
         self.bot = bot
-        self.ui = bot.language[user_lang]['ui']['Remove']
-        self.language = bot.language[user_lang]['replies']
+        self.ui = bot.language[user_lang]["ui"]["Remove"]
+        self.language = bot.language[user_lang]["replies"]
         self.user_language = user_lang
         super().__init__(title=f"{self.ui['Title']}")
         self.initialize(interaction)
@@ -29,7 +29,9 @@ class RemoveModal(Modal):
                 if role not in self.roster.role_map:
                     continue
 
-                main_bucket_name, backup_bucket_name, overflow_bucket_name = self.roster.role_map[role]
+                main_bucket_name, backup_bucket_name, overflow_bucket_name = (
+                    self.roster.role_map[role]
+                )
                 buckets = [main_bucket_name, backup_bucket_name, overflow_bucket_name]
 
                 for index in bucket_order:
@@ -45,7 +47,7 @@ class RemoveModal(Modal):
                             SelectOption(
                                 label=guildie.display_name,
                                 value=user_id,
-                                description=["Main", "Backup", "Overflow"][index]
+                                description=["Main", "Backup", "Overflow"][index],
                             )
                         )
                         counter += 1
@@ -61,7 +63,7 @@ class RemoveModal(Modal):
             component=Select(
                 placeholder=f"{self.ui['Placeholder']}",
                 options=total,
-                max_values=counter
+                max_values=counter,
             ),
         )
 
@@ -72,12 +74,14 @@ class RemoveModal(Modal):
 
             assert isinstance(self.users.component, Select)
             removed = self.users.component.values
-            names = ''
+            names = ""
             for i in removed:
                 if isinstance(self.roster, Roster):
                     found = False
                     # Check main, backup, and overflow for each role
-                    for role, (main, backup, overflow) in self.bot.rosters[self.channel_id].role_map.items():
+                    for role, (main, backup, overflow) in self.bot.rosters[
+                        self.channel_id
+                    ].role_map.items():
                         for j in (main, backup, overflow):
                             bucket = getattr(self.bot.rosters[self.channel_id], j)
                             if i in bucket:
@@ -94,17 +98,23 @@ class RemoveModal(Modal):
                     self.bot.rosters[self.channel_id].remove_member(i)
                     names += f"{interaction.guild.get_member(int(i)).display_name}\n"
 
-            self.bot.librarian.put_roster(self.channel_id, self.bot.rosters[self.channel_id])
+            self.bot.librarian.put_roster(
+                self.channel_id, self.bot.rosters[self.channel_id]
+            )
 
-            await interaction.response.send_message(self.language["Remove"]["Removed"] % (self.channel.name, names))
+            await interaction.response.send_message(
+                self.language["Remove"]["Removed"] % (self.channel.name, names)
+            )
             return
         except ValueError:
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.language['Remove']['NumbersOnly'])}")
+                f"{Utilities.format_error(self.user_language, self.language['Remove']['NumbersOnly'])}"
+            )
             return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(
-            f"{Utilities.format_error(self.user_language, self.language['Unknown'])}")
+            f"{Utilities.format_error(self.user_language, self.language['Unknown'])}"
+        )
         logging.error(f"Remove From Roster Error: {str(error)}")
         return

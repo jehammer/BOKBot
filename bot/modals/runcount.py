@@ -7,8 +7,8 @@ from discord.ui import TextInput, Modal
 class RunCountModal(Modal):
     def __init__(self, interaction: Interaction, bot, users_language, channel_id):
         self.bot = bot
-        self.language = bot.language[users_language]['replies']
-        self.ui = bot.language[users_language]['ui']
+        self.language = bot.language[users_language]["replies"]
+        self.ui = bot.language[users_language]["ui"]
         self.channel = interaction.guild.get_channel(int(channel_id))
         self.channel_id = channel_id
         self.user_language = users_language
@@ -21,7 +21,7 @@ class RunCountModal(Modal):
             default="1",
             placeholder=f"{self.ui['RunCount']['Num']['Placeholder']}",
             style=TextStyle.short,
-            required=True
+            required=True,
         )
         self.add_item(self.num)
 
@@ -30,17 +30,22 @@ class RunCountModal(Modal):
             inc_val = int(self.num.value)
             if inc_val > 10:
                 raise ValueError
-            RosterExtended.increase_roster_count(self.bot.rosters[self.channel_id], inc_val, librarian=self.bot.librarian)
+            RosterExtended.increase_roster_count(
+                self.bot.rosters[self.channel_id], inc_val, librarian=self.bot.librarian
+            )
         except ValueError:
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.language['Close']['NotNumberError'])}")
+                f"{Utilities.format_error(self.user_language, self.language['Close']['NotNumberError'])}"
+            )
             return
         await interaction.response.send_message(
-            f"{self.language['RunCount']['Increase'] % (self.channel.name, inc_val)}")
+            f"{self.language['RunCount']['Increase'] % (self.channel.name, inc_val)}"
+        )
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(
-            f"{Utilities.format_error(self.user_language, self.bot.language['Unknown'])}")
+            f"{Utilities.format_error(self.user_language, self.bot.language['Unknown'])}"
+        )
         logging.error(f"Run Count Error: {str(error)}")
         return
