@@ -1,10 +1,8 @@
-from bot.models import EventRoster, Roster
 from discord.ui import Modal, Label, Select
 from discord import Interaction, SelectOption
 from bot.services import Utilities
 import logging
 
-from datetime import date
 import calendar
 
 
@@ -21,9 +19,8 @@ class BirthdayModal(Modal):
         total_months = []
         total_days_1 = []
         total_days_2 = []
-        # Load Day and Month options into selection
 
-        # Load days by first number then second number to get around 25 size limit. 0-3 then 1-9
+        # Load Day and Month options into selection
         for i in range(0, 4):
             total_days_1.append(SelectOption(label=str(i), value=i))
 
@@ -87,7 +84,7 @@ class BirthdayModal(Modal):
 
             max_days = 29 if month == 2 else calendar.mdays[month]
             if day > max_days:
-                raise ValueError("Invalid day for the selected month")
+                raise ValueError
 
             birthday = f"{month}/{day}"
 
@@ -109,5 +106,5 @@ class BirthdayModal(Modal):
         await interaction.response.send_message(
             f"{Utilities.format_error(self.user_language, self.language['Unknown'])}"
         )
-        logging.error(f"Remove From Roster Error: {str(error)}")
+        logging.error(f"Birthday Error: {str(error)}")
         return
