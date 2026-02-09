@@ -120,3 +120,18 @@ Count:
   Other: "Other"
   OtherRuns: "Other Runs"
   Event: "Event Runs:"
+
+Birthday:
+  Title: "Set Your Birthday"
+  Month:
+    Label: "Select Your Birth Month"
+    Description: "Month of Birth."
+    Placeholder: "Select month"
+  Day1:
+    Label: "Select The First Digit Of Your Birth Day"
+    Description: "Day of Birth Part 1."
+    Placeholder: "0 if before 10th"
+  Day2:
+    Label: "Select The Second Digit Of Your Birth Day"
+    Description: "Day of Birth Part 2."
+    Placeholder: "Second digit"

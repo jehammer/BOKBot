@@ -398,6 +398,10 @@ class Admin(commands.Cog, name="Admin"):
             self.bot.librarian.delete_count(member.id)
             to_send += "Deleted Counts\n"
 
+            # Delete Birthday
+            self.bot.librarian.delete_birthday(member.id)
+            to_send += "Deleted Birthday\n"
+
             to_send += f"{member.display_name} joined {calendar.month_name[member.joined_at.month]} {member.joined_at.day}{Utilities.suffix(member.joined_at.day)} {member.joined_at.year}\n"
             if count_data is not None:
                 to_send += f"{member.display_name} last ran {count_data.lastTrial} on {count_data.lastDate}\n"
@@ -446,6 +450,13 @@ class Admin(commands.Cog, name="Admin"):
                     ):
                         await channel.send(f"{member.mention} Happy Anniversary!")
                 # TODO: Implement BOKiversary for May 4th each year and BOKBot Birthday in November checks
+                birthday_str = f"{today_month}/{today_day}"
+                birthdays = self.bot.librarian.get_birthdays(birthday_str)
+                if birthdays:
+                    for b in birthdays:
+                        member = guild.get_member(int(b))
+                        if member:
+                            await channel.send(f"{member.mention} Happy Birthday!")
             except Exception as e:
                 await channel.send("Unable to get the Anniversaries.")
                 logging.error(f"Good Morning Task Anniversary Error: {str(e)}")

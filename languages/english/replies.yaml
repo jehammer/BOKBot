@@ -163,3 +163,7 @@ Events:
   WBC: "World Boss Crawl:"
   PDC: "Public Dungeon Crawl:"
   OL: "Overland:"
+
+Birthday:
+  Set: "Birthday set to %s"
+  Invalid: "0044: Invalid birthday date."
