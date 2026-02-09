@@ -55,6 +55,21 @@ class Admin(commands.Cog, name="Admin"):
         self.bot = bot
         self.scheduled_good_morning.start()
 
+    @commands.command(name="nobirthday")
+    async def remove_users_birthday(self, ctx: commands.Context):
+        """Removes a user's birthday from the database"""
+        user_language = Utilities.get_language(ctx.author)
+        try:
+            self.bot.librarian.delete_birthday(ctx.author.id)
+            await ctx.reply(
+                f"{self.bot.language[user_language]['replies']['Birthday']['Deleted']}"
+            )
+        except Exception as e:
+            await ctx.reply(
+                f"{Utilities.format_error(user_language, self.bot.language[user_language]['replies']['Unknown'])}"
+            )
+            logging.error(f"Remove Birthday Error: {str(e)}")
+
     @commands.command(name="servers", hidden=True)
     @permissions.creator_only()
     async def servers(self, ctx: commands.Context):
@@ -457,6 +472,17 @@ class Admin(commands.Cog, name="Admin"):
                         member = guild.get_member(int(b))
                         if member:
                             await channel.send(f"{member.mention} Happy Birthday!")
+                if birthday_str == "2/28":
+                    if calendar.isleap(today_year):
+                        return
+                    leap_birthdays = self.bot.librarian.get_birthdays("2/29")
+                    if leap_birthdays:
+                        for b in leap_birthdays:
+                            member = guild.get_member(int(b))
+                            if member:
+                                await channel.send(
+                                    f"{member.mention} Happy Leap Birthday!"
+                                )
             except Exception as e:
                 await channel.send("Unable to get the Anniversaries.")
                 logging.error(f"Good Morning Task Anniversary Error: {str(e)}")

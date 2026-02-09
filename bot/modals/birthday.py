@@ -91,14 +91,13 @@ class BirthdayModal(Modal):
             self.bot.librarian.put_birthday(interaction.user.id, birthday)
 
             await interaction.response.send_message(
-                self.language["Birthday"]["Set"] % birthday, ephemeral=True
+                self.language["Birthday"]["Set"] % birthday
             )
 
             return
         except (ValueError, IndexError):
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.language['Birthday']['Invalid'])}",
-                ephemeral=True,
+                f"{Utilities.format_error(self.user_language, self.language['Birthday']['Invalid'])}"
             )
             return
 
