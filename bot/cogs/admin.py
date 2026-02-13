@@ -463,7 +463,15 @@ class Admin(commands.Cog, name="Admin"):
                         and today_day == joined_day
                         and today_year > joined_year
                     ):
-                        await channel.send(f"{member.mention} Happy Anniversary!")
+                        if (
+                            member.global_name == "kuvxwb"
+                            or member.global_name == "muon.t"
+                        ):
+                            await channel.send(
+                                f"{member.mention} Happy Anniversary, we miss you buddy."
+                            )
+                        else:
+                            await channel.send(f"{member.mention} Happy Anniversary!")
                 # TODO: Implement BOKiversary for May 4th each year and BOKBot Birthday in November checks
                 birthday_str = f"{today_month}/{today_day}"
                 birthdays = self.bot.librarian.get_birthdays(birthday_str)
