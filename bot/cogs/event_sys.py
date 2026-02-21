@@ -1,15 +1,10 @@
 from discord.ext import commands
-from discord import app_commands, Interaction, utils, Member, Role
 import logging
 import time
 
 # My created imports
 from bot import decor as permissions
-from bot.errors import *
-from bot.modals import *
-from bot.models import Roster, Count
-from bot.services import Utilities, RosterExtended, EmbedFactory
-from bot.ui import RosterSelector
+from bot.services import RosterExtended
 
 
 class EventsSys(commands.Cog, name="EventsSys"):
