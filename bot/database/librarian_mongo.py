@@ -108,6 +108,71 @@ class Librarian:
         query = {"channelID": str(channel_id)}
         self._database.raids.delete_one(query)
 
+    def get_undo_data(self):
+        db_data = self._database.undo.find()
+        if db_data is None:
+            return None
+
+        all_rosters = {}
+        for i in db_data:
+            channel_name = i["channel_name"]
+            if i["type"] == "Trial":
+                data = i["data"]
+                all_rosters[channel_name] = Roster(
+                    trial=data["trial"],
+                    date=data["date"],
+                    leader=data["leader"],
+                    dps=data["dps"],
+                    healers=data["healers"],
+                    tanks=data["tanks"],
+                    backup_dps=data["backup_dps"],
+                    backup_healers=data["backup_healers"],
+                    backup_tanks=data["backup_tanks"],
+                    dps_limit=int(data["dps_limit"]),
+                    healer_limit=int(data["healer_limit"]),
+                    tank_limit=int(data["tank_limit"]),
+                    role_limit=int(data["role_limit"]),
+                    memo=data["memo"],
+                    pingable=None,
+                    overflow_dps=data["overflow_dps"],
+                    overflow_healers=data["overflow_healers"],
+                    overflow_tanks=data["overflow_tanks"],
+                )
+            elif i["type"] == "Event":
+                data = i["data"]
+                all_rosters[channel_name] = EventRoster(
+                    event=data["event"],
+                    date=data["date"],
+                    leader=data["leader"],
+                    memo=data["memo"],
+                    pingable=None,
+                    members=data["members"],
+                )
+        return all_rosters
+
+    def put_undo_data(self, channel_name, delete_date, data: Roster | EventRoster):
+        roster_type = ""
+        if isinstance(data, Roster):
+            roster_type = "Trial"
+        elif isinstance(data, EventRoster):
+            roster_type = "Event"
+
+        item = {
+            "channel_name": channel_name,
+            "type": roster_type,
+            "delete": delete_date,
+            "data": data.get_roster_data(),
+        }
+
+        logging.info(f"Saving {roster_type} Roster {channel_name} to Undo DB")
+        self._database.undo.replace_one(
+            {"channel_name": channel_name}, item, upsert=True
+        )
+
+    def delete_undo_data(self, channel_name):
+        query = {"channel_name": channel_name}
+        self._database.undo.delete_one(query)
+
     # Default settings
     def get_default(self, user_id):
         db_data = self._database.defaults.find_one({"userID": int(user_id)})

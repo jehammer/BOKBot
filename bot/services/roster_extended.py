@@ -1,32 +1,31 @@
 from bot.services import Utilities
 from re import sub
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 from bot.models import Roster, Count, EventRoster
 from discord import Member, Guild
 from discord.utils import get
 
 logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s: %(message)s',
-    handlers=[
-        logging.FileHandler('log.log', mode='a'),
-        logging.StreamHandler()
-    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+    level=logging.INFO,
+    format="%(asctime)s: %(message)s",
+    handlers=[logging.FileHandler("log.log", mode="a"), logging.StreamHandler()],
+)  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def generate_time_from_timestamp(timestamp, tz):
     """Generates the time according to the bots default timezone in config from a timestamp"""
-    return datetime.fromtimestamp(int(sub('[^0-9]', '', timestamp)), ZoneInfo(tz))
+    return datetime.fromtimestamp(int(sub("[^0-9]", "", timestamp)), ZoneInfo(tz))
 
 
 def create_pingable_role(trial, date, tz, guild: Guild):
     new_name = False
-    name = ''
+    name = ""
     inc = 0
     while not new_name:
-        second_part = ''
-        if date.upper() == 'ASAP':
+        second_part = ""
+        if date.upper() == "ASAP":
             second_part = f"{date} {inc if inc > 0 else ''}"
         else:
             timestamp = generate_time_from_timestamp(date, tz)
@@ -47,19 +46,41 @@ class RosterExtended:
     """Class of static methods for trial operations."""
 
     @staticmethod
-    def factory(fact_leader, fact_raid, fact_date, fact_dps_limit, fact_healer_limit, fact_tank_limit,
-                fact_role_limit, fact_memo, config):
-        if fact_dps_limit is None and fact_healer_limit is None and fact_tank_limit is None:
+    def factory(
+        fact_leader,
+        fact_raid,
+        fact_date,
+        fact_dps_limit,
+        fact_healer_limit,
+        fact_tank_limit,
+        fact_role_limit,
+        fact_memo,
+        config,
+    ):
+        if (
+            fact_dps_limit is None
+            and fact_healer_limit is None
+            and fact_tank_limit is None
+        ):
             fact_dps_limit = config["raids"]["roster_defaults"]["dps"]
             fact_healer_limit = config["raids"]["roster_defaults"]["healers"]
             fact_tank_limit = config["raids"]["roster_defaults"]["tanks"]
-        return Roster(trial=fact_raid, date=fact_date, leader=fact_leader, dps_limit=fact_dps_limit,
-                      healer_limit=fact_healer_limit, tank_limit=fact_tank_limit, role_limit=fact_role_limit,
-                      memo=fact_memo)
+        return Roster(
+            trial=fact_raid,
+            date=fact_date,
+            leader=fact_leader,
+            dps_limit=fact_dps_limit,
+            healer_limit=fact_healer_limit,
+            tank_limit=fact_tank_limit,
+            role_limit=fact_role_limit,
+            memo=fact_memo,
+        )
 
     @staticmethod
     def event_factory(leader, event, date, memo, pingable):
-        return EventRoster(leader=leader,event=event,date=date,memo=memo, pingable=pingable)
+        return EventRoster(
+            leader=leader, event=event, date=date, memo=memo, pingable=pingable
+        )
 
     @staticmethod
     def get_channel_position(roster: Roster, tz):
@@ -83,10 +104,10 @@ class RosterExtended:
         ordering = []
         date_to_roster = {}
         for i in rosters:
-            if rosters[i].date == 'ASAP':
+            if rosters[i].date == "ASAP":
                 sorted_rosters[i] = 1
             else:
-                cleaned_timestamp = int(sub('[^0-9]', '', rosters[i].date))
+                cleaned_timestamp = int(sub("[^0-9]", "", rosters[i].date))
                 ordering.append(cleaned_timestamp)
                 date_to_roster[cleaned_timestamp] = i
 
@@ -122,7 +143,7 @@ class RosterExtended:
     def format_date(date):
         """Formats the timestamp date to the correct version"""
         date = date.strip()
-        if date.upper() == 'ASAP':
+        if date.upper() == "ASAP":
             return date.upper()
 
         formatted_date = f"<t:{sub('[^0-9]', '', date)}:f>"
@@ -133,7 +154,7 @@ class RosterExtended:
         """Returns Boolean Value if a passed in Timestamp has changed from the Day it was set at, but not the hour"""
 
         # Check the ASAP dates
-        if original_date == 'ASAP' or new_date == 'ASAP':
+        if original_date == "ASAP" or new_date == "ASAP":
             if original_date == new_date:
                 return False
             return True
@@ -141,9 +162,11 @@ class RosterExtended:
         og_timestamp = generate_time_from_timestamp(original_date.strip(), tz)
         new_timestamp = generate_time_from_timestamp(new_date.strip(), tz)
 
-        if (og_timestamp.day != new_timestamp.day or
-                og_timestamp.month != new_timestamp.month or
-                og_timestamp.year != new_timestamp.year):
+        if (
+            og_timestamp.day != new_timestamp.day
+            or og_timestamp.month != new_timestamp.month
+            or og_timestamp.year != new_timestamp.year
+        ):
             return True
         return False
 
@@ -157,16 +180,22 @@ class RosterExtended:
         """Create list of roles with nested lists for 1-3 indexes"""
 
         list_roles = [
-            roles_config['base'],
+            roles_config["base"],
             [
-                roles_config['first']['dps'], roles_config['first']['tank'], roles_config['first']['healer']
+                roles_config["first"]["dps"],
+                roles_config["first"]["tank"],
+                roles_config["first"]["healer"],
             ],
             [
-                roles_config['second']['dps'], roles_config['second']['tank'], roles_config['second']['healer']
+                roles_config["second"]["dps"],
+                roles_config["second"]["tank"],
+                roles_config["second"]["healer"],
             ],
             [
-                roles_config['third']['dps'], roles_config['third']['tank'], roles_config['third']['healer']
-            ]
+                roles_config["third"]["dps"],
+                roles_config["third"]["tank"],
+                roles_config["third"]["healer"],
+            ],
         ]
 
         prog_roles = librarian.get_progs()
@@ -189,7 +218,9 @@ class RosterExtended:
             elif role == "healer":
                 count.increase_data(runs=runs, trial=trial, date=date, dps=runs)
             else:
-                raise Exception(f"Increase Individual Count Error: Unknown Role Input: {role}")
+                raise Exception(
+                    f"Increase Individual Count Error: Unknown Role Input: {role}"
+                )
 
             librarian.put_count(user_id=user_id, count=count)
 
@@ -202,42 +233,74 @@ class RosterExtended:
         """Increase run count of all users in a roster."""
         try:
             if isinstance(roster, Roster):
-                if roster.date == 'ASAP':
-                    roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
+                if roster.date == "ASAP":
+                    roster.date = RosterExtended.format_date(
+                        f"{int(datetime.now(timezone.utc).timestamp())}"
+                    )
                     roster.trial = f"{roster.trial} ASAP"
                 for i in roster.dps:
                     db_count = librarian.get_count(i)
                     if db_count is None:
-                        db_count = Count(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                        db_count = Count(
+                            runs=count, dps=count, trial=roster.trial, date=roster.date
+                        )
                     else:
-                        db_count.increase_data(runs=count, dps=count, trial=roster.trial, date=roster.date)
+                        db_count.increase_data(
+                            runs=count, dps=count, trial=roster.trial, date=roster.date
+                        )
                     librarian.put_count(i, db_count)
 
                 for i in roster.tanks:
                     db_count = librarian.get_count(i)
                     if db_count is None:
-                        db_count = Count(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                        db_count = Count(
+                            runs=count, tank=count, trial=roster.trial, date=roster.date
+                        )
                     else:
-                        db_count.increase_data(runs=count, tank=count, trial=roster.trial, date=roster.date)
+                        db_count.increase_data(
+                            runs=count, tank=count, trial=roster.trial, date=roster.date
+                        )
                     librarian.put_count(i, db_count)
 
                 for i in roster.healers:
                     db_count = librarian.get_count(i)
                     if db_count is None:
-                        db_count = Count(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                        db_count = Count(
+                            runs=count,
+                            healer=count,
+                            trial=roster.trial,
+                            date=roster.date,
+                        )
                     else:
-                        db_count.increase_data(runs=count, healer=count, trial=roster.trial, date=roster.date)
+                        db_count.increase_data(
+                            runs=count,
+                            healer=count,
+                            trial=roster.trial,
+                            date=roster.date,
+                        )
                     librarian.put_count(i, db_count)
             elif isinstance(roster, EventRoster):
-                if roster.date == 'ASAP':
-                    roster.date = RosterExtended.format_date(f"{int(datetime.now(timezone.utc).timestamp())}")
+                if roster.date == "ASAP":
+                    roster.date = RosterExtended.format_date(
+                        f"{int(datetime.now(timezone.utc).timestamp())}"
+                    )
                     roster.event = f"{roster.event} ASAP"
                 for i in roster.members:
                     db_count = librarian.get_count(i)
                     if db_count is None:
-                        db_count = Count(runs=count, event=count, trial=roster.event, date=roster.date)
+                        db_count = Count(
+                            runs=count,
+                            event=count,
+                            trial=roster.event,
+                            date=roster.date,
+                        )
                     else:
-                        db_count.increase_data(runs=count, event=count, trial=roster.event, date=roster.date)
+                        db_count.increase_data(
+                            runs=count,
+                            event=count,
+                            trial=roster.event,
+                            date=roster.date,
+                        )
                     librarian.put_count(i, db_count)
 
         except Exception as e:
@@ -247,11 +310,7 @@ class RosterExtended:
     @staticmethod
     def validate_join_roster(roster_req, limits, user: Member, roster_role):
         try:
-            role_to_limit_num = {
-                'dps': 0,
-                'tank': 1,
-                'healer': 2
-            }
+            role_to_limit_num = {"dps": 0, "tank": 1, "healer": 2}
             limit = limits[roster_req]
 
             # If someone has the Raid Leads role, they can bypass requirements.
@@ -259,7 +318,7 @@ class RosterExtended:
                 limit = limit[role_to_limit_num[roster_role]]
             if any(limit == role.name for role in user.roles):
                 return True
-            elif any('Raid Leads' == role.name for role in user.roles):
+            elif any("Raid Leads" == role.name for role in user.roles):
                 return True
             return False
         except Exception as e:
@@ -269,3 +328,11 @@ class RosterExtended:
     def create_pingable_role_name(trial, date, tz, guild: Guild):
         name = create_pingable_role(trial=trial, date=date, tz=tz, guild=guild)
         return name
+
+    @staticmethod
+    def create_undo_delete_date(date, tz):
+        if date.upper() == "ASAP":
+            date = f"{int(datetime.now(timezone.utc).timestamp())}"
+        date = generate_time_from_timestamp(date, tz)
+        delete_date = date + timedelta(days=7)
+        return delete_date

@@ -168,3 +168,6 @@ Birthday:
   Set: "Birthday set to %s"
   Invalid: "0044: Invalid birthday date."
   Deleted: "Your birthday has been removed."
+
+Undo:
+  BadConfirmError: "0022: You must enter a `y` or an `n` in the Confirmation fields."

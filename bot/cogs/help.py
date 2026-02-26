@@ -96,11 +96,24 @@ class Helpers(commands.Cog):
             logging.error(f"Translate Error: {str(e)}")
             await ctx.reply(Utilities.format_error(lang, self.bot.language[lang]['replies']['Help']['NotReply']))
 
+
     @commands.command(name="help")
     async def help(self, ctx, *input):
         """Help system of BOKBot"""
 
+        # TODO: Replace with new help yaml file.
+
+        user_language = Utilities.get_language(ctx.author)
+
+        # Temporarily use English as no other language is available yet
+
         try:
+            # TODO:
+            #   First: Check if it is a Cog
+            #       Post all commands with their short name
+            #   Second: Check if it is a command
+            #       Use the long unless None then use the short
+
             # checks if cog parameter was given
             # if not: sending all modules and commands not associated with a cog
             pages = None

@@ -6,11 +6,10 @@ from bot.database import Librarian
 import logging
 
 logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s: %(message)s',
-    handlers=[
-        logging.FileHandler('log.log', mode='a'),
-        logging.StreamHandler()
-    ])  # , datefmt="%Y-%m-%d %H:%M:%S")
+    level=logging.INFO,
+    format="%(asctime)s: %(message)s",
+    handlers=[logging.FileHandler("log.log", mode="a"), logging.StreamHandler()],
+)  # , datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class CloseModal(Modal):
@@ -35,20 +34,20 @@ class CloseModal(Modal):
             label=f"{self.ui_language['Close']['Confirm']['Label'] % self.name}",
             placeholder=f"{self.ui_language['Close']['Confirm']['Placeholder']}",
             style=TextStyle.short,
-            required=True
+            required=True,
         )
         self.runs = TextInput(
             label=f"{self.ui_language['Close']['Runs']['Label']}",
             placeholder=f"{self.ui_language['Close']['Runs']['Placeholder']}",
             style=TextStyle.short,
-            required=True
+            required=True,
         )
         self.runscount = TextInput(
             label=f"{self.ui_language['Close']['RunsCount']['Label']}",
             placeholder=f"{self.ui_language['Close']['RunsCount']['Placeholder']}",
             default="1",
             style=TextStyle.short,
-            required=True
+            required=True,
         )
         self.add_item(self.confirm)
         self.add_item(self.runs)
@@ -57,13 +56,20 @@ class CloseModal(Modal):
     async def on_submit(self, interaction: Interaction):
         confirm_value = self.confirm.value.strip().lower()
         runs_inc = self.runs.value.strip().lower()
-        if confirm_value != "n" and confirm_value != "y" and runs_inc != "n" and runs_inc != "y":
+        if (
+            confirm_value != "n"
+            and confirm_value != "y"
+            and runs_inc != "n"
+            and runs_inc != "y"
+        ):
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.localization['Close']['BadConfirmError'])}")
+                f"{Utilities.format_error(self.user_language, self.localization['Close']['BadConfirmError'])}"
+            )
             return
         if confirm_value != "y":
             await interaction.response.send_message(
-                f"{Utilities.format_error(self.user_language, self.localization['Close']['CloseWithoutClose'])}")
+                f"{Utilities.format_error(self.user_language, self.localization['Close']['CloseWithoutClose'])}"
+            )
             return
         runs_increased = False
         inc_val = 0
@@ -74,15 +80,30 @@ class CloseModal(Modal):
                     inc_val = 1
                 elif inc_val > 10:
                     raise ValueError
-                RosterExtended.increase_roster_count(self.bot.rosters[self.channel_id], inc_val, librarian=self.bot.librarian)
+                RosterExtended.increase_roster_count(
+                    self.bot.rosters[self.channel_id],
+                    inc_val,
+                    librarian=self.bot.librarian,
+                )
                 runs_increased = True
             except ValueError:
                 await interaction.response.send_message(
-                    f"{Utilities.format_error(self.user_language, self.localization['Close']['NotNumberError'])}")
+                    f"{Utilities.format_error(self.user_language, self.localization['Close']['NotNumberError'])}"
+                )
                 return
 
         logging.info(f"Deleting Roster {self.name}")
-        await interaction.guild.get_role(self.bot.rosters[self.channel_id].pingable).delete()
+        delete_date = RosterExtended.create_undo_delete_date(
+            self.bot.rosters[self.channel_id].date, self.bot.config["raids"]["timezone"]
+        )
+        self.bot.librarian.put_undo_data(
+            channel_name=self.name,
+            delete_date=delete_date,
+            data=self.bot.rosters[self.channel_id],
+        )
+        await interaction.guild.get_role(
+            self.bot.rosters[self.channel_id].pingable
+        ).delete()
         self.bot.librarian.delete_roster(self.channel_id)
         del self.bot.rosters[self.channel_id]
         logging.info(f"Roster Deleted")
@@ -91,14 +112,18 @@ class CloseModal(Modal):
             await self.channel.delete()
         if runs_increased:
             await interaction.response.send_message(
-                f"{self.localization['Close']['Increase'] % (self.name, inc_val)}")
+                f"{self.localization['Close']['Increase'] % (self.name, inc_val)}"
+            )
         else:
-            await interaction.response.send_message(f"{self.localization['Close']['NoIncrease'] % self.name}")
+            await interaction.response.send_message(
+                f"{self.localization['Close']['NoIncrease'] % self.name}"
+            )
 
         return
 
     async def on_error(self, interaction: Interaction, error: Exception) -> None:
         await interaction.response.send_message(
-            f"{Utilities.format_error(self.user_language, self.localization['Incomplete'])}")
+            f"{Utilities.format_error(self.user_language, self.localization['Incomplete'])}"
+        )
         logging.error(f"Roster Close Error: {str(error)}")
         return

@@ -135,3 +135,9 @@ Birthday:
     Label: "Select The Second Digit Of Your Birth Day"
     Description: "Day of Birth Part 2."
     Placeholder: "Second digit"
+
+Undo:
+  Title: "Undo Close"
+  Confirm:
+    Label: "Confirm Undo"
+    Placeholder: "Y or N? Click cancel to close this"
